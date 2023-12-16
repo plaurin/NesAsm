@@ -99,7 +99,7 @@ public class NESEmulatorTests
     }
 
     [Fact]
-    public void TestZeroPageLoadInstructions()
+    public void TestZeroPageLoadAndStoreInstructions()
     {
         var zpa = _01;
         Assert.Equal(1, zpa.Value);
@@ -124,5 +124,30 @@ public class NESEmulatorTests
 
         _emulator.LDY(_02);
         Assert.Equal(35, _emulator.Y);
+    }
+
+    [Fact]
+    public void TestAbsoluteModeLoadAndStoreInstructions()
+    {
+        _emulator.LDA(76);
+        _emulator.STA(0x1000);
+        Assert.Equal(76, _emulator.Memory[0x1000]);
+
+        _emulator.LDX(25);
+        _emulator.STX(0x2000);
+        Assert.Equal(25, _emulator.Memory[0x2000]);
+
+        _emulator.LDY(94);
+        _emulator.STY(0x3000);
+        Assert.Equal(94, _emulator.Memory[0x3000]);
+
+        _emulator.LDA(0x3000);
+        Assert.Equal(94, _emulator.A);
+
+        _emulator.LDX(0x1000);
+        Assert.Equal(76, _emulator.X);
+
+        _emulator.LDY(0x2000);
+        Assert.Equal(25, _emulator.Y);
     }
 }

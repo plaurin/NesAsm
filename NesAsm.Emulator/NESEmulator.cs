@@ -40,4 +40,14 @@ public class NESEmulator
     public void LDA(ZeroPageAddress address) => _a = _memory[address.Value];
     public void LDX(ZeroPageAddress address) => _x = _memory[address.Value];
     public void LDY(ZeroPageAddress address) => _y = _memory[address.Value];
+
+    // Absolute Mode Store instructions
+    public void STA(ushort address) => _memory[address] = _a;
+    public void STX(ushort address) => _memory[address] = _x;
+    public void STY(ushort address) => _memory[address] = _y;
+
+    // Absolute Mode Load instructions
+    public void LDA(ushort address) => _a = _memory[address];
+    public void LDX(ushort address) => _x = _memory[address];
+    public void LDY(ushort address) => _y = _memory[address];
 }
