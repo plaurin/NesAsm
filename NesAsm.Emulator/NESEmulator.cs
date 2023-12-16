@@ -13,10 +13,13 @@ public class NESEmulator
     public byte X => _x;
     public byte Y => _y;
 
+    public void LDA(byte value) => _a = value;
     public void LDX(byte value) => _x = value;
     public void LDY(byte value) => _y = value;
+    public void INC() => _a++;
     public void INX() => _x++;
     public void INY() => _y++;
+    public void DEC() => _a--;
     public void DEX() => _x--;
     public void DEY() => _y--;
 }
