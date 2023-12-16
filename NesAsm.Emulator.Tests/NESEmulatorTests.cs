@@ -1,3 +1,5 @@
+using static NesAsm.Emulator.ZeroPageAddress;
+
 namespace NesAsm.Emulator.Tests;
 
 public class NESEmulatorTests
@@ -94,5 +96,33 @@ public class NESEmulatorTests
         Assert.Equal(10, _emulator.A);
         Assert.Equal(10, _emulator.X);
         Assert.Equal(10, _emulator.Y);
+    }
+
+    [Fact]
+    public void TestZeroPageLoadInstructions()
+    {
+        var zpa = _01;
+        Assert.Equal(1, zpa.Value);
+
+        _emulator.LDA(42);
+        _emulator.STA(_01);
+        Assert.Equal(42, _emulator.Memory[1]);
+
+        _emulator.LDX(35);
+        _emulator.STX(_02);
+        Assert.Equal(35, _emulator.Memory[2]);
+
+        _emulator.LDY(68);
+        _emulator.STY(_03);
+        Assert.Equal(68, _emulator.Memory[3]);
+
+        _emulator.LDA(_03);
+        Assert.Equal(68, _emulator.A);
+
+        _emulator.LDX(_01);
+        Assert.Equal(42, _emulator.X);
+
+        _emulator.LDY(_02);
+        Assert.Equal(35, _emulator.Y);
     }
 }

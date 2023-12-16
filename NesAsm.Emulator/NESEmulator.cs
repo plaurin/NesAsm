@@ -13,6 +13,7 @@ public class NESEmulator
     public byte X => _x;
     public byte Y => _y;
 
+    // Immediate Load instructions
     public void LDA(byte value) => _a = value;
     public void LDX(byte value) => _x = value;
     public void LDY(byte value) => _y = value;
@@ -29,4 +30,14 @@ public class NESEmulator
     public void TYA() => _a = _y;
     public void TAX() => _x = _a;
     public void TXA() => _a = _x;
+
+    // Zero Page Store instructions
+    public void STA(ZeroPageAddress address) => _memory[address.Value] = _a;
+    public void STX(ZeroPageAddress address) => _memory[address.Value] = _x;
+    public void STY(ZeroPageAddress address) => _memory[address.Value] = _y;
+
+    // Zero Page Load instructions
+    public void LDA(ZeroPageAddress address) => _a = _memory[address.Value];
+    public void LDX(ZeroPageAddress address) => _x = _memory[address.Value];
+    public void LDY(ZeroPageAddress address) => _y = _memory[address.Value];
 }
