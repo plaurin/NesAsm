@@ -50,10 +50,10 @@ namespace NesAsm.Analyzers
 
             foreach (var type in classDeclarationSyntax.BaseList.Types)
             {
-                if (type.Type.ToString() != "ScriptBase")
-                {
-                    continue;
-                }
+                //if (type.Type.ToString() != "ScriptBase")
+                //{
+                //    continue;
+                //}
 
                 if (context.SemanticModel.GetSymbolInfo(type.Type).Symbol is not ITypeSymbol typeSymbol)
                 {

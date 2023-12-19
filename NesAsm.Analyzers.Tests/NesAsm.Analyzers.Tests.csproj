@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NesAsm.Analyzers\NesAsm.Analyzers.csproj" />
+    <ProjectReference Include="..\NesAsm.Emulator\NesAsm.Emulator.csproj" />
   </ItemGroup>
 
 </Project>
