@@ -9,6 +9,14 @@
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.SimpleScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.SimpleScript.s
+.segment "CODE"
 
-                    // [99..113)
-                    
+.proc Main
+  ; Start by loading the value 25 into the Accumulator register
+  lda #25
+
+  ; Increment the value of the Accumulator registrer
+  inc
+
+*/

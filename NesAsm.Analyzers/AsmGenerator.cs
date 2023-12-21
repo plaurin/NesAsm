@@ -17,9 +17,21 @@ namespace NesAsm.Analyzers
 
             initContext.RegisterSourceOutput(classDeclarations, (spc, cds) =>
             {
-                spc.AddSource($"Asm.{cds.Identifier}.cs", $@"
-                    // {cds.BaseList.FullSpan}
-                    ");
+                var source = $@".segment ""CODE""
+
+.proc Main
+  ; Start by loading the value 25 into the Accumulator register
+  lda #25
+
+  ; Increment the value of the Accumulator registrer
+  inc
+";
+
+                spc.AddSource($"Asm.{cds.Identifier}.cs", $@"/* Generator Asm code in file Asm.{cds.Identifier}.s
+{source}
+*/");
+
+                // TODO output .s file too
             });
         }
 
@@ -27,7 +39,7 @@ namespace NesAsm.Analyzers
             node is ClassDeclarationSyntax m
             && m.BaseList != null;
 
-        static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
+        private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
         {
             var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
 
