@@ -1,25 +1,10 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.IO;
 
 namespace NesAsm.Analyzers
 {
     [Generator]
-    public class TestGenerator : ISourceGenerator
-    {
-        public void Execute(GeneratorExecutionContext context)
-        {
-            context.AddSource($"test.g.cs", "using System;");
-        }
-
-        public void Initialize(GeneratorInitializationContext context)
-        {
-        }
-    }
-
-    [Generator]
-    public class Generator : IIncrementalGenerator
+    public class AsmGenerator : IIncrementalGenerator
     {
         public void Initialize(IncrementalGeneratorInitializationContext initContext)
         {
@@ -32,8 +17,8 @@ namespace NesAsm.Analyzers
 
             initContext.RegisterSourceOutput(classDeclarations, (spc, cds) =>
             {
-                spc.AddSource($"TestInc.{cds.Identifier}.cs", $@"
-                    // {cds.BaseList.FullSpan.ToString()}
+                spc.AddSource($"Asm.{cds.Identifier}.cs", $@"
+                    // {cds.BaseList.FullSpan}
                     ");
             });
         }
@@ -48,11 +33,6 @@ namespace NesAsm.Analyzers
 
             foreach (var type in classDeclarationSyntax.BaseList.Types)
             {
-                //if (type.Type.ToString() != "ScriptBase")
-                //{
-                //    continue;
-                //}
-
                 if (context.SemanticModel.GetSymbolInfo(type.Type).Symbol is not ITypeSymbol typeSymbol)
                 {
                     // weird, we couldn't get the symbol, ignore it
@@ -60,7 +40,6 @@ namespace NesAsm.Analyzers
                 }
 
                 var fullName = typeSymbol.ToDisplayString();
-
                 if (fullName == "NesAsm.Emulator.ScriptBase")
                 {
                     return classDeclarationSyntax;

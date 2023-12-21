@@ -7,8 +7,8 @@
 - RunResult[0] diagnostics:
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
-- RunResult[0].GeneratedSources[0].HintName: TestInc.Program.cs
+- RunResult[0].GeneratedSources[0].HintName: Asm.SimpleScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 
-                    // [66..96)
+                    // [99..113)
                     
