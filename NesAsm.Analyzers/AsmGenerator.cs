@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.IO;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NesAsm.Analyzers
@@ -20,16 +21,24 @@ namespace NesAsm.Analyzers
                 var source = $@".segment ""CODE""
 
 .proc Main
-  ; Start by loading the value 25 into the Accumulator register
-  lda #25
+  ; Start by loading the value 25 into the X register
+  ldx #25
 
-  ; Increment the value of the Accumulator registrer
-  inc
+  ; Increment the value of the X registrer
+  inx
+
+  rts
+.endproc
+
+.include ""wrapper.s""
 ";
 
                 spc.AddSource($"Asm.{cds.Identifier}.cs", $@"/* Generator Asm code in file Asm.{cds.Identifier}.s
 {source}
 */");
+#pragma warning disable RS1035 // Do not use APIs banned for analyzers
+                File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{cds.Identifier}.s", source);
+#pragma warning restore RS1035 // Do not use APIs banned for analyzers
 
                 // TODO output .s file too
             });
