@@ -11,4 +11,8 @@
     <ProjectReference Include="..\NesAsm.Emulator\NesAsm.Emulator.csproj" />
 </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="call run.bat" />
+  </Target>
+
 </Project>
