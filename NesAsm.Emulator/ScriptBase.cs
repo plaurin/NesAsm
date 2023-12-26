@@ -9,9 +9,9 @@ public class ScriptBase
         _emulator = emulator;
     }
 
-    public void LDA(byte value) => _emulator.LDA(value);
-    public void LDX(byte value) => _emulator.LDX(value);
-    public void LDY(byte value) => _emulator.LDY(value);
+    public void LDAi(byte value) => _emulator.LDAi(value);
+    public void LDXi(byte value) => _emulator.LDXi(value);
+    public void LDYi(byte value) => _emulator.LDYi(value);
     public void INC() => _emulator.INC();
     public void INX() => _emulator.INX();
     public void INY() => _emulator.INY();

@@ -19,11 +19,11 @@ public class ScriptBaseTests
     {
         public void Main()
         {
-            LDA(123);
+            LDAi(123);
             INC();
-            LDX(133);
+            LDXi(133);
             DEX();
-            LDY(143);
+            LDYi(143);
             INY();
         }
     }

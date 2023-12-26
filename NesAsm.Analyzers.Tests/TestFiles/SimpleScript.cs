@@ -10,7 +10,7 @@ internal class SimpleScript : ScriptBase
     public void Main()
     {
         // Start by loading the value 25 into the Accumulator register
-        LDA(25);
+        LDAi(25);
 
         // Increment the value of the Accumulator registrer
         INC();

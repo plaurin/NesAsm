@@ -1,5 +1,3 @@
-using static NesAsm.Emulator.ZeroPageAddress;
-
 namespace NesAsm.Emulator.Tests;
 
 public class NESEmulatorTests
@@ -14,16 +12,15 @@ public class NESEmulatorTests
     [Fact]
     public void TestARegister()
     {
-
         Assert.Equal(0, _emulator.A);
 
-        _emulator.LDA(28);
+        _emulator.LDAi(28);
         Assert.Equal(28, _emulator.A);
 
         _emulator.INC();
         Assert.Equal(29, _emulator.A);
 
-        _emulator.LDA(255);
+        _emulator.LDAi(255);
         Assert.Equal(255, _emulator.A);
 
         _emulator.DEC();
@@ -35,13 +32,13 @@ public class NESEmulatorTests
     {
         Assert.Equal(0, _emulator.X);
 
-        _emulator.LDX(5);
+        _emulator.LDXi(5);
         Assert.Equal(5, _emulator.X);
 
         _emulator.INX();
         Assert.Equal(6, _emulator.X);
 
-        _emulator.LDX(20);
+        _emulator.LDXi(20);
         Assert.Equal(20, _emulator.X);
 
         _emulator.DEX();
@@ -53,13 +50,13 @@ public class NESEmulatorTests
     {
         Assert.Equal(0, _emulator.Y);
 
-        _emulator.LDY(12);
+        _emulator.LDYi(12);
         Assert.Equal(12, _emulator.Y);
 
         _emulator.INY();
         Assert.Equal(13, _emulator.Y);
 
-        _emulator.LDY(41);
+        _emulator.LDYi(41);
         Assert.Equal(41, _emulator.Y);
 
         _emulator.DEY();
@@ -69,9 +66,9 @@ public class NESEmulatorTests
     [Fact]
     public void TestTransfertOpCodes()
     {
-        _emulator.LDA(10);
-        _emulator.LDX(20);
-        _emulator.LDY(30);
+        _emulator.LDAi(10);
+        _emulator.LDXi(20);
+        _emulator.LDYi(30);
 
         Assert.Equal(10, _emulator.A);
         Assert.Equal(20, _emulator.X);
@@ -101,43 +98,40 @@ public class NESEmulatorTests
     [Fact]
     public void TestZeroPageLoadAndStoreInstructions()
     {
-        var zpa = _01;
-        Assert.Equal(1, zpa.Value);
-
-        _emulator.LDA(42);
-        _emulator.STA(_01);
+        _emulator.LDAi(42);
+        _emulator.STA(01);
         Assert.Equal(42, _emulator.Memory[1]);
 
-        _emulator.LDX(35);
-        _emulator.STX(_02);
+        _emulator.LDXi(35);
+        _emulator.STX(02);
         Assert.Equal(35, _emulator.Memory[2]);
 
-        _emulator.LDY(68);
-        _emulator.STY(_03);
+        _emulator.LDYi(68);
+        _emulator.STY(03);
         Assert.Equal(68, _emulator.Memory[3]);
 
-        _emulator.LDA(_03);
+        _emulator.LDA(03);
         Assert.Equal(68, _emulator.A);
 
-        _emulator.LDX(_01);
+        _emulator.LDX(01);
         Assert.Equal(42, _emulator.X);
 
-        _emulator.LDY(_02);
+        _emulator.LDY(02);
         Assert.Equal(35, _emulator.Y);
     }
 
     [Fact]
     public void TestAbsoluteModeLoadAndStoreInstructions()
     {
-        _emulator.LDA(76);
+        _emulator.LDAi(76);
         _emulator.STA(0x1000);
         Assert.Equal(76, _emulator.Memory[0x1000]);
 
-        _emulator.LDX(25);
+        _emulator.LDXi(25);
         _emulator.STX(0x2000);
         Assert.Equal(25, _emulator.Memory[0x2000]);
 
-        _emulator.LDY(94);
+        _emulator.LDYi(94);
         _emulator.STY(0x3000);
         Assert.Equal(94, _emulator.Memory[0x3000]);
 

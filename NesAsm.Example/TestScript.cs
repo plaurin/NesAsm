@@ -10,6 +10,6 @@ public class TestScript : ScriptBase
 
     public void Start()
     {
-        LDA(10);
+        LDAi(10);
     }
 }

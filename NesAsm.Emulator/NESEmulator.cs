@@ -14,9 +14,9 @@ public class NESEmulator
     public byte Y => _y;
 
     // Immediate Load instructions
-    public void LDA(byte value) => _a = value;
-    public void LDX(byte value) => _x = value;
-    public void LDY(byte value) => _y = value;
+    public void LDAi(byte value) => _a = value;
+    public void LDXi(byte value) => _x = value;
+    public void LDYi(byte value) => _y = value;
 
     public void INC() => _a++;
     public void INX() => _x++;
@@ -32,14 +32,14 @@ public class NESEmulator
     public void TXA() => _a = _x;
 
     // Zero Page Store instructions
-    public void STA(ZeroPageAddress address) => _memory[address.Value] = _a;
-    public void STX(ZeroPageAddress address) => _memory[address.Value] = _x;
-    public void STY(ZeroPageAddress address) => _memory[address.Value] = _y;
+    public void STA(byte address) => _memory[address] = _a;
+    public void STX(byte address) => _memory[address] = _x;
+    public void STY(byte address) => _memory[address] = _y;
 
     // Zero Page Load instructions
-    public void LDA(ZeroPageAddress address) => _a = _memory[address.Value];
-    public void LDX(ZeroPageAddress address) => _x = _memory[address.Value];
-    public void LDY(ZeroPageAddress address) => _y = _memory[address.Value];
+    public void LDA(byte address) => _a = _memory[address];
+    public void LDX(byte address) => _x = _memory[address];
+    public void LDY(byte address) => _y = _memory[address];
 
     // Absolute Mode Store instructions
     public void STA(ushort address) => _memory[address] = _a;
