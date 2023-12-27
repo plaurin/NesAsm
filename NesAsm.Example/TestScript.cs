@@ -11,5 +11,6 @@ public class TestScript : ScriptBase
     public void Start()
     {
         LDAi(10);
+        LDXi(0xFF);
     }
 }

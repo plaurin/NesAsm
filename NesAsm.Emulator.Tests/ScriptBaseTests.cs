@@ -10,7 +10,7 @@ public class ScriptBaseTests
 
         script.Main();
 
-        Assert.Equal(124, emulator.A);
+        Assert.Equal(123, emulator.A);
         Assert.Equal(132, emulator.X);
         Assert.Equal(144, emulator.Y);
     }
@@ -20,7 +20,6 @@ public class ScriptBaseTests
         public void Main()
         {
             LDAi(123);
-            INC();
             LDXi(133);
             DEX();
             LDYi(143);

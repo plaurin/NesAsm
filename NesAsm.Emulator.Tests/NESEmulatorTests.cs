@@ -17,14 +17,8 @@ public class NESEmulatorTests
         _emulator.LDAi(28);
         Assert.Equal(28, _emulator.A);
 
-        _emulator.INC();
-        Assert.Equal(29, _emulator.A);
-
         _emulator.LDAi(255);
         Assert.Equal(255, _emulator.A);
-
-        _emulator.DEC();
-        Assert.Equal(254, _emulator.A);
     }
 
     [Fact]

@@ -1,6 +1,8 @@
 ﻿using NesAsm.Emulator;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
+
+[PostFileInclude("wrapper.s")]
 internal class SimpleScript : ScriptBase
 {
     public SimpleScript(NESEmulator emulator) : base(emulator)
@@ -9,10 +11,10 @@ internal class SimpleScript : ScriptBase
 
     public void Main()
     {
-        // Start by loading the value 25 into the Accumulator register
-        LDAi(25);
+        // Start by loading the value 25 into the X register
+        LDXi(25);
 
-        // Increment the value of the Accumulator registrer
-        INC();
+        // Increment the value of the X registrer
+        INX();
     }
 }

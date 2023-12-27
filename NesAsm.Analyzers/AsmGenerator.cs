@@ -1,47 +1,25 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using NesAsm.Analyzers.Visitors;
 
 namespace NesAsm.Analyzers
 {
     [Generator]
     public class AsmGenerator : IIncrementalGenerator
     {
-        public void Initialize(IncrementalGeneratorInitializationContext initContext)
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            // Do a simple filter for enums
-            IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = initContext.SyntaxProvider
+            var classProviders = context.SyntaxProvider
                 .CreateSyntaxProvider(
-                    predicate: static (s, _) => IsSyntaxTargetForGeneration(s), // select enums with attributes
-                    transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx)) // sect the enum with the [EnumExtensions] attribute
-                .Where(static m => m is not null)!; // filter out attributed enums that we don't care about
+                    predicate: static (s, _) => IsSyntaxTargetForGeneration(s), 
+                    transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx)) 
+                .Combine(context.CompilationProvider);
 
-            initContext.RegisterSourceOutput(classDeclarations, (spc, cds) =>
-            {
-                var source = $@".segment ""CODE""
-
-.proc Main
-  ; Start by loading the value 25 into the X register
-  ldx #25
-
-  ; Increment the value of the X registrer
-  inx
-
-  rts
-.endproc
-
-.include ""wrapper.s""
-";
-
-                spc.AddSource($"Asm.{cds.Identifier}.cs", $@"/* Generator Asm code in file Asm.{cds.Identifier}.s
-{source}
-*/");
-#pragma warning disable RS1035 // Do not use APIs banned for analyzers
-                File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{cds.Identifier}.s", source);
-#pragma warning restore RS1035 // Do not use APIs banned for analyzers
-
-                // TODO output .s file too
-            });
+            context.RegisterSourceOutput(classProviders, Generate);
         }
 
         private static bool IsSyntaxTargetForGeneration(SyntaxNode node) =>
@@ -69,6 +47,17 @@ namespace NesAsm.Analyzers
 
             // we didn't find the attribute we were looking for
             return null;
+        }
+
+        [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
+        private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
+        {
+            var (node, compilation) = tuple;
+            var source = ClassVisitor.Visit(node, compilation);
+            context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
+{source}
+*/");
+            File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
         }
     }
 }

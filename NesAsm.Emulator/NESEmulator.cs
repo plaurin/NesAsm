@@ -18,7 +18,6 @@ public class NESEmulator
     public void LDXi(byte value) => _x = value;
     public void LDYi(byte value) => _y = value;
 
-    public void INC() => _a++;
     public void INX() => _x++;
     public void INY() => _y++;
 
