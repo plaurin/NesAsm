@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
@@ -15,9 +17,11 @@ internal static class ClassVisitor
         sb.AppendLine(".segment \"CODE\"");
         sb.AppendLine("");
 
+        var allMethods = GetAllClassMethods(classDeclarationSyntax);
+
         foreach (var member in classDeclarationSyntax.Members)
         {
-            sb.Append(MemberVisitor.Visit(member, compilation));
+            sb.Append(MemberVisitor.Visit(member, compilation, allMethods));
         }
 
         foreach (var att in classDeclarationSyntax.AttributeLists)
@@ -33,19 +37,35 @@ internal static class ClassVisitor
         }
         return sb.ToString();
     }
+
+    private static string[] GetAllClassMethods(ClassDeclarationSyntax classDeclarationSyntax)
+    {
+        var result = new List<string>();
+
+        foreach (var member in classDeclarationSyntax.Members)
+        {
+            if (member is MethodDeclarationSyntax method)
+            {
+                result.Add(method.Identifier.ValueText);
+            }
+
+        }
+
+        return result.ToArray();
+    }
 }
 
 internal class MemberVisitor
 {
-    internal static string Visit(MemberDeclarationSyntax member, Compilation compilation)
+    internal static string Visit(MemberDeclarationSyntax member, Compilation compilation, string[] allMethods)
     {
         var sb = new StringBuilder();
 
         if (member is MethodDeclarationSyntax method)
         {
-            sb.AppendLine($".proc {char.ToLowerInvariant(method.Identifier.ValueText[0])}{method.Identifier.ValueText.Substring(1)}");
+            sb.AppendLine($".proc {MethodVisitor.GetProcName(method)}");
 
-            sb.Append(MethodVisitor.Visit(method, compilation));
+            sb.Append(MethodVisitor.Visit(method, compilation, allMethods));
 
             sb.AppendLine("");
             sb.AppendLine("  rts");
@@ -63,7 +83,7 @@ internal class MethodVisitor
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
-    internal static string Visit(MethodDeclarationSyntax method, Compilation compilation)
+    internal static string Visit(MethodDeclarationSyntax method, Compilation compilation, string[] allMethods)
     {
         var sb = new StringBuilder();
 
@@ -91,6 +111,12 @@ internal class MethodVisitor
                 {
                     sb.AppendLine($"  inx");
                 }
+
+                var callingProc = allMethods.SingleOrDefault(m => match.Groups["Operation"].Value == m);
+                if (callingProc != null)
+                {
+                    sb.AppendLine($"  jsr {GetProcName(callingProc)}");
+                }
             }
 
             if (string.IsNullOrWhiteSpace(line)) sb.AppendLine("");
@@ -105,4 +131,7 @@ internal class MethodVisitor
 
         return sb.ToString();
     }
+
+    internal static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
+    internal static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
 }

@@ -17,6 +17,12 @@ public class AsmGeneratorTests
         TestScript("MultiProcScript.cs");
     }
 
+    [Fact]
+    public void TestJumpSubroutineScript()
+    {
+        TestScript("JumpSubroutineScript.cs");
+    }
+
     private static void TestScript(string filename)
     {
         var generator = new AsmGenerator();
