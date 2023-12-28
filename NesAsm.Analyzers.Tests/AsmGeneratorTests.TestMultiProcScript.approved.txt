@@ -1,0 +1,34 @@
+﻿- Main diagnostics:
+- SyntaxTrees Count: 2
+- Output diagnostics:
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.MultiProcScript.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.MultiProcScript.s
+.segment "CODE"
+
+.proc procA
+  lda #10
+
+  rts
+.endproc
+
+.proc procB
+  lda #20
+
+  rts
+.endproc
+
+.proc procC
+  lda #30
+
+  rts
+.endproc
+
+
+*/

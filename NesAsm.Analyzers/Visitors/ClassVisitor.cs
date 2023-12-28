@@ -27,7 +27,6 @@ internal static class ClassVisitor
                 if (attribute.Name.ToString() == "PostFileInclude")
                 {
                     var filepath = attribute.ArgumentList.Arguments.ToString();
-                    sb.AppendLine("");
                     sb.AppendLine($".include {filepath}");
                 }
             }
@@ -44,13 +43,14 @@ internal class MemberVisitor
 
         if (member is MethodDeclarationSyntax method)
         {
-            sb.AppendLine($".proc {method.Identifier.ValueText.ToLowerInvariant()}");
+            sb.AppendLine($".proc {char.ToLowerInvariant(method.Identifier.ValueText[0])}{method.Identifier.ValueText.Substring(1)}");
 
             sb.Append(MethodVisitor.Visit(method, compilation));
 
             sb.AppendLine("");
             sb.AppendLine("  rts");
             sb.AppendLine(".endproc");
+            sb.AppendLine("");
         }
 
         return sb.ToString();
@@ -79,6 +79,10 @@ internal class MethodVisitor
             match = opPattern.Match(line);
             if (match.Success)
             {
+                if (match.Groups["Operation"].Value == "LDAi")
+                {
+                    sb.AppendLine($"  lda #{match.Groups["Operand"].Value}");
+                }
                 if (match.Groups["Operation"].Value == "LDXi")
                 {
                     sb.AppendLine($"  ldx #{match.Groups["Operand"].Value}");
