@@ -1,0 +1,41 @@
+﻿- Main diagnostics:
+- SyntaxTrees Count: 2
+- Output diagnostics:
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.CharScript.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.CharScript.s
+.segment "CODE"
+
+.proc main
+
+  rts
+.endproc
+
+.segment "CHARS"
+
+  .byte %01000001
+  .byte %11000010
+  .byte %01000100
+  .byte %01001000
+  .byte %00010000
+  .byte %00100000
+  .byte %01000000
+  .byte %10000000
+
+  .byte %00000001
+  .byte %00000010
+  .byte %00000100
+  .byte %00001000
+  .byte %00010110
+  .byte %00100001
+  .byte %01000010
+  .byte %10000111
+
+
+*/

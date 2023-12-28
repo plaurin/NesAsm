@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NesAsm.Analyzers.Visitors;
@@ -71,6 +72,33 @@ internal class MemberVisitor
             sb.AppendLine("  rts");
             sb.AppendLine(".endproc");
             sb.AppendLine("");
+        }
+
+
+        var charBytes = new List<int>();
+        if (member is FieldDeclarationSyntax field)
+        {
+            if (field.Declaration.Type.ToString() == "byte[]")
+            {
+                foreach (var element in (field.Declaration.Variables[0].Initializer.Value as CollectionExpressionSyntax).Elements)
+                {
+                    charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
+                }
+            }
+        }
+
+        if (charBytes.Any())
+        {
+            sb.AppendLine(".segment \"CHARS\"");
+            sb.AppendLine("");
+
+            int i = 0;
+            foreach (var charByte in charBytes)
+            {
+                sb.AppendLine($"  .byte %{charByte:B8}");
+                
+                if (++i % 8 == 0) sb.AppendLine("");
+            }
         }
 
         return sb.ToString();

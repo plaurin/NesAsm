@@ -14,7 +14,6 @@ public class ScriptBase
     public void LDYi(byte value) => _emulator.LDYi(value);
     public void INX() => _emulator.INX();
     public void INY() => _emulator.INY();
-    public void DEC() => _emulator.DEC();
     public void DEX() => _emulator.DEX();
     public void DEY() => _emulator.DEY();
 }

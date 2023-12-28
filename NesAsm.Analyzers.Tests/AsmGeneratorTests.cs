@@ -23,6 +23,12 @@ public class AsmGeneratorTests
         TestScript("JumpSubroutineScript.cs");
     }
 
+    [Fact]
+    public void TestCharsScript()
+    {
+        TestScript("CharsScript.cs");
+    }
+
     private static void TestScript(string filename)
     {
         var generator = new AsmGenerator();
