@@ -138,4 +138,70 @@ public class NESEmulatorTests
         _emulator.LDY(0x2000);
         Assert.Equal(25, _emulator.Y);
     }
+
+    [Theory]
+    [InlineData("A", 10, 5, true, false, false)]
+    [InlineData("A", 10, 15, false, false, true)]
+    [InlineData("A", 10, 10, true, true, false)]
+    [InlineData("X", 20, 5, true, false, false)]
+    [InlineData("X", 20, 50, false, false, true)]
+    [InlineData("X", 20, 20, true, true, false)]
+    [InlineData("Y", 30, 29, true, false, false)]
+    [InlineData("Y", 30, 31, false, false, true)]
+    [InlineData("Y", 30, 30, true, true, false)]
+    public void TestImmediateCompareInstructions(string register, byte registerValue, byte compareValue, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        switch (register)
+        {
+            case "A": _emulator.LDAi(registerValue); break;
+            case "X": _emulator.LDXi(registerValue); break;
+            case "Y": _emulator.LDYi(registerValue); break;
+        };
+
+        switch (register)
+        {
+            case "A": _emulator.CMPi(compareValue); break;
+            case "X": _emulator.CPXi(compareValue); break;
+            case "Y": _emulator.CPYi(compareValue); break;
+        };
+        
+        Assert.Equal(expectedCarry, _emulator.Carry);
+        Assert.Equal(expectedZero, _emulator.Zero);
+        Assert.Equal(expectedNegative, _emulator.Negative);
+    }
+
+    [Theory]
+    [InlineData("A", 10, 5, true, false, false)]
+    [InlineData("A", 10, 15, false, false, true)]
+    [InlineData("A", 10, 10, true, true, false)]
+    [InlineData("X", 20, 5, true, false, false)]
+    [InlineData("X", 20, 50, false, false, true)]
+    [InlineData("X", 20, 20, true, true, false)]
+    [InlineData("Y", 30, 29, true, false, false)]
+    [InlineData("Y", 30, 31, false, false, true)]
+    [InlineData("Y", 30, 30, true, true, false)]
+    public void TestMemoryCompareInstructions(string register, byte registerValue, byte compareValue, bool expectedCarry, bool expectedZero, bool expectedNegative)
+    {
+        _emulator.LDAi(compareValue);
+        _emulator.STA(28);
+        _emulator.LDAi(0);
+
+        switch (register)
+        {
+            case "A": _emulator.LDAi(registerValue); break;
+            case "X": _emulator.LDXi(registerValue); break;
+            case "Y": _emulator.LDYi(registerValue); break;
+        };
+
+        switch (register)
+        {
+            case "A": _emulator.CMP(28); break;
+            case "X": _emulator.CPX(28); break;
+            case "Y": _emulator.CPY(28); break;
+        };
+        
+        Assert.Equal(expectedCarry, _emulator.Carry);
+        Assert.Equal(expectedZero, _emulator.Zero);
+        Assert.Equal(expectedNegative, _emulator.Negative);
+    }
 }
