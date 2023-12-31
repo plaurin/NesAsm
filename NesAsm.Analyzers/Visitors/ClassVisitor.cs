@@ -109,6 +109,8 @@ internal class MethodVisitor
 {
     private static Regex opPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operand'\\d*)[))];", RegexOptions.Compiled);
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
+    private static Regex labelPattern = new Regex("(?'Label'.+):", RegexOptions.Compiled);
+    private static Regex branchPattern = new Regex("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
     internal static string Visit(MethodDeclarationSyntax method, Compilation compilation, string[] allMethods)
@@ -122,6 +124,12 @@ internal class MethodVisitor
             if (match.Success)
             {
                 sb.AppendLine($"  ;{match.Groups["Comment"].Value}");
+            }
+
+            match = labelPattern.Match(line);
+            if (match.Success)
+            {
+                sb.AppendLine($"@{match.Groups["Label"].Value.Trim()}:");
             }
 
             match = opPattern.Match(line);
@@ -139,12 +147,30 @@ internal class MethodVisitor
                 {
                     sb.AppendLine($"  inx");
                 }
+                if (match.Groups["Operation"].Value == "STX")
+                {
+                    sb.AppendLine($"  stx ${match.Groups["Operand"].Value}");
+                }
+                if (match.Groups["Operation"].Value == "CPXi")
+                {
+                    sb.AppendLine($"  cpx #{match.Groups["Operand"].Value}");
+                }
 
                 var callingProc = allMethods.SingleOrDefault(m => match.Groups["Operation"].Value == m);
                 if (callingProc != null)
                 {
                     sb.AppendLine($"  jsr {GetProcName(callingProc)}");
                 }
+            }
+
+            match = branchPattern.Match(line);
+            if (match.Success)
+            {
+                if (match.Groups["Operation"].Value == "BNE")
+                {
+                    sb.AppendLine($"  bne @{match.Groups["Label"].Value}");
+                }
+
             }
 
             if (string.IsNullOrWhiteSpace(line)) sb.AppendLine("");

@@ -204,4 +204,27 @@ public class NESEmulatorTests
         Assert.Equal(expectedZero, _emulator.Zero);
         Assert.Equal(expectedNegative, _emulator.Negative);
     }
+
+    [Fact]
+    public void TestZeroFlagBranchInstructions()
+    {
+        _emulator.LDAi(10);
+        _emulator.CMPi(10);
+
+        if (_emulator.BEQ()) goto skip;
+
+        _emulator.LDAi(99);
+
+        skip:
+        Assert.Equal(10, _emulator.A);
+
+        _emulator.CMPi(15);
+
+        if (_emulator.BNE()) goto skip2;
+
+        _emulator.LDAi(98);
+
+        skip2:
+        Assert.Equal(10, _emulator.A);
+    }
 }

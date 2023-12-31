@@ -29,6 +29,12 @@ public class AsmGeneratorTests
         TestScript("CharsScript.cs");
     }
 
+    [Fact]
+    public void TestBranchScript()
+    {
+        TestScript("BranchScript.cs");
+    }
+
     private static void TestScript(string filename)
     {
         var generator = new AsmGenerator();

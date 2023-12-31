@@ -84,10 +84,58 @@ public class NESEmulator
         _zero = result == 0;
     }
 
+    // Branching instructions
+
+    /// <summary>
+    /// Branch on result Minus
+    /// </summary>
+    /// <remarks>Only branches if the Negative flag is set.</remarks>
+    public bool BMI() => _negative;
+
+    /// <summary>
+    /// Branch on result Plus
+    /// </summary>
+    /// <remarks>Only branches if the Negative flag is not set.</remarks>
+    public bool BPL() => !_negative;
+
+    /// <summary>
+    /// Branch on Overflow set
+    /// </summary>
+    /// <remarks>Only branches if the Overflow flag is set.</remarks>
+    public void BVS(/* Goto Label */) { throw new NotImplementedException(); }
+
+    /// <summary>
+    /// Branch on Overflow clear
+    /// </summary>
+    /// <remarks>Only branches if the Overflow flag is not set.</remarks>
+    public void BVC(/* Goto Label */) { throw new NotImplementedException(); }
+
+    /// <summary>
+    /// Branch on Carry set
+    /// </summary>
+    /// <remarks>Only branches if the Carry flag is set.</remarks>
+    public bool BCS() => _carry;
+
+    /// <summary>
+    /// Branch on Carry clear
+    /// </summary>
+    /// <remarks>Only branches if the Carry flag is not set.</remarks>
+    public bool BCC() => !_carry;
+
+    /// <summary>
+    /// Branch on result Zero
+    /// </summary>
+    /// <remarks>Only branches if the Zero flag is set. Usage: if(nesEmulator.BEQ()) goto label;</remarks>
+    public bool BEQ() => _zero;
+
+    /// <summary>
+    /// Branch on result not Zero
+    /// </summary>
+    /// <remarks>Only branches if the Zero flag is not set.</remarks>
+    public bool BNE() => !_zero;
+
     public void LSR(ushort address) { throw new NotImplementedException(); } // ??? operand?
 
-    public void BNE(/* Goto Label */) { throw new NotImplementedException(); }
-    public void BPL(/* Goto Label */) { throw new NotImplementedException(); }
     public void JMP(/* Goto Label */) { throw new NotImplementedException(); }
 
     public void BIT(ushort address) { throw new NotImplementedException(); }
