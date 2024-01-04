@@ -26,7 +26,7 @@ internal static class ClassVisitor
         }
 
         foreach (var att in classDeclarationSyntax.AttributeLists)
-        { 
+        {
             foreach (var attribute in att.Attributes)
             {
                 if (attribute.Name.ToString() == "PostFileInclude")
@@ -96,7 +96,7 @@ internal class MemberVisitor
             foreach (var charByte in charBytes)
             {
                 sb.AppendLine($"  .byte %{charByte:B8}");
-                
+
                 if (++i % 8 == 0) sb.AppendLine("");
             }
         }
@@ -107,7 +107,8 @@ internal class MemberVisitor
 
 internal class MethodVisitor
 {
-    private static Regex opPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operand'\\d*)[))];", RegexOptions.Compiled);
+    private static Regex opPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
+    private static Regex opXPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
     private static Regex labelPattern = new Regex("(?'Label'.+):", RegexOptions.Compiled);
     private static Regex branchPattern = new Regex("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
@@ -117,6 +118,13 @@ internal class MethodVisitor
     {
         var sb = new StringBuilder();
 
+        var parameters = new List<(int index, string identifier, string type)>();
+        var paramIndex = 0;
+        foreach (var parameter in method.ParameterList.Parameters)
+        {
+            parameters.Add((paramIndex++, parameter.Identifier.ToString(), parameter.Type.ToString()));
+        }
+
         var lines = method.Body.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         foreach (var line in lines)
         {
@@ -124,43 +132,88 @@ internal class MethodVisitor
             if (match.Success)
             {
                 sb.AppendLine($"  ;{match.Groups["Comment"].Value}");
+                continue;
             }
 
             match = labelPattern.Match(line);
             if (match.Success)
             {
                 sb.AppendLine($"@{match.Groups["Label"].Value.Trim()}:");
+                continue;
             }
 
             match = opPattern.Match(line);
             if (match.Success)
             {
-                if (match.Groups["Operation"].Value == "LDAi")
+                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, sb, allMethods, line))
                 {
-                    sb.AppendLine($"  lda #{match.Groups["Operand"].Value}");
-                }
-                if (match.Groups["Operation"].Value == "LDXi")
-                {
-                    sb.AppendLine($"  ldx #{match.Groups["Operand"].Value}");
-                }
-                if (match.Groups["Operation"].Value == "INX")
-                {
-                    sb.AppendLine($"  inx");
-                }
-                if (match.Groups["Operation"].Value == "STX")
-                {
-                    sb.AppendLine($"  stx ${match.Groups["Operand"].Value}");
-                }
-                if (match.Groups["Operation"].Value == "CPXi")
-                {
-                    sb.AppendLine($"  cpx #{match.Groups["Operand"].Value}");
+                    throw new InvalidOperationException($"OpCode detected but not supported in {line}");
                 }
 
-                var callingProc = allMethods.SingleOrDefault(m => match.Groups["Operation"].Value == m);
-                if (callingProc != null)
+                continue;
+            }
+
+            match = opXPattern.Match(line);
+            if (match.Success)
+            {
+                var operation = match.Groups["Operation"].Value;
+                var operands = match.Groups["Operands"].Value.Split(',').Select(o => o.Trim());
+
+                if (operands.Count() == 1 && (operation == "LDAa" || operation == "LDXa" || operation == "LDYa"))
                 {
-                    sb.AppendLine($"  jsr {GetProcName(callingProc)}");
+                    var parameter = parameters.SingleOrDefault(p => p.identifier == operands.Single());
+                    if (parameter.identifier != null)
+                    {
+                        var opCode = operation switch
+                        {
+                            "LDAa" => "lda",
+                            "LDXa" => "ldx",
+                            "LDYa" => "ldy",
+                            _ => throw new InvalidOperationException($"OpCode {operation} not supported to use arguments (should be LDAa, LDXa or LDYa) in {line}")
+                        };
+
+                        switch (parameter.type)
+                        {
+                            case "bool": sb.AppendLine($"  {opCode} ${parameter.index}"); break;
+                            case "byte": sb.AppendLine($"  {opCode} ${parameter.index}"); break;
+                            case "ushort": throw new NotImplementedException("ushort arguments not implemented yet");
+                            default: throw new InvalidOperationException($"Argument type {parameter.type} not supported (should be byte, ushort or bool) in {line}");
+                        }
+
+                        continue;
+                    }
+
+                    throw new InvalidOperationException($"Operand {operands.Single()} not supported, should be a method argument in {line}");
                 }
+
+                var index = 0;
+                foreach (var operand in operands)
+                {
+                    if (bool.TryParse(operand, out var boolOperand))
+                    {
+                        sb.AppendLine($"  lda #{(boolOperand ? 1 : 0)}");
+                        sb.AppendLine($"  sta ${index++}");
+                    }
+                    else if (byte.TryParse(operand, out var byteOperand))
+                    {
+                        sb.AppendLine($"  lda #{byteOperand}");
+                        sb.AppendLine($"  sta ${index++}");
+                    }
+                    else if (ushort.TryParse(operand, out var ushortOperand))
+                    {
+                        sb.AppendLine($"  lda #{ushortOperand % 256}");
+                        sb.AppendLine($"  sta ${index++}");
+                        sb.AppendLine($"  lda #{ushortOperand / 256}");
+                        sb.AppendLine($"  sta ${index++}");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Operand {operand} not supported for parameter (should be byte, ushort or bool) in {line}");
+                    }
+                }
+
+                sb.AppendLine($"  jsr {GetProcName(operation)}");
+                continue;
             }
 
             match = branchPattern.Match(line);
@@ -169,11 +222,22 @@ internal class MethodVisitor
                 if (match.Groups["Operation"].Value == "BNE")
                 {
                     sb.AppendLine($"  bne @{match.Groups["Label"].Value}");
+                    continue;
                 }
 
+                throw new InvalidOperationException($"Branching OpCode detected but not supported in {line}");
             }
 
-            if (string.IsNullOrWhiteSpace(line)) sb.AppendLine("");
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                sb.AppendLine("");
+                continue;
+            }
+
+            // Ignore
+            if (line.Trim() == "{" || line.Trim() == "}") continue;
+
+            throw new InvalidOperationException($"Not supported {line}");
         }
 
         foreach (var statement in method.Body.Statements)
@@ -184,6 +248,34 @@ internal class MethodVisitor
         }
 
         return sb.ToString();
+    }
+
+    private static bool ParseOp(string operation, string operand, StringBuilder sb, string[] allMethods, string line)
+    {
+        var numericOperand = Utilities.ConvertOperandToNumericText(operand);
+
+        switch (operation)
+        {
+            case "LDAi": sb.AppendLine($"  lda #{numericOperand}"); break;
+            case "LDXi": sb.AppendLine($"  ldx #{numericOperand}"); break;
+            case "INX": sb.AppendLine($"  inx");break;
+            case "STA": sb.AppendLine($"  sta {numericOperand}"); break;
+            case "STX": sb.AppendLine($"  stx {numericOperand}"); break;
+            case "CPXi": sb.AppendLine($"  cpx #{numericOperand}"); break;
+            default:
+                {
+                    var callingProc = allMethods.SingleOrDefault(m => operation == m);
+                    if (callingProc != null)
+                    {
+                        sb.AppendLine($"  jsr {GetProcName(operation)}");
+                        return true;
+                    }
+
+                    return false;
+                }
+        }
+
+        return true;
     }
 
     internal static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);

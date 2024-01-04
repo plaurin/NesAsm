@@ -71,7 +71,7 @@
   jsr ResetPalettes
 
 main:
-  jsr Main
+  jsr main
   lda #%00011000  ; Enable Sprites & Background
   sta $2001
 

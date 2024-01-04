@@ -12,6 +12,15 @@ public class ScriptBase
     public void LDAi(byte value) => _emulator.LDAi(value);
     public void LDXi(byte value) => _emulator.LDXi(value);
     public void LDYi(byte value) => _emulator.LDYi(value);
+
+    public void LDAa(byte argumentValue) => _emulator.LDAi(argumentValue);
+    public void LDXa(byte argumentValue) => _emulator.LDXi(argumentValue);
+    public void LDYa(byte argumentValue) => _emulator.LDYi(argumentValue);
+
+    public void LDAa(bool argumentValue) => _emulator.LDAi((byte)(argumentValue ? 1 : 0));
+    public void LDXa(bool argumentValue) => _emulator.LDXi((byte)(argumentValue ? 1 : 0));
+    public void LDYa(bool argumentValue) => _emulator.LDYi((byte)(argumentValue ? 1 : 0));
+
     public void INX() => _emulator.INX();
     public void INY() => _emulator.INY();
     public void DEX() => _emulator.DEX();

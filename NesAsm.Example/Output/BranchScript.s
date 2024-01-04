@@ -5,7 +5,7 @@
 
 @loop:
 
-  stx $1
+  stx 1
   inx
 
   cpx #4

@@ -35,6 +35,12 @@ public class AsmGeneratorTests
         TestScript("BranchScript.cs");
     }
 
+    [Fact]
+    public void TestParametersScript()
+    {
+        TestScript("ParametersScript.cs");
+    }
+
     private static void TestScript(string filename)
     {
         var generator = new AsmGenerator();

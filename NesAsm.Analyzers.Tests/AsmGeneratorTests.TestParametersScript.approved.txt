@@ -7,24 +7,34 @@
 - RunResult[0] diagnostics:
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
-- RunResult[0].GeneratedSources[0].HintName: Asm.BranchScript.cs
+- RunResult[0].GeneratedSources[0].HintName: Asm.ParametersScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
-/* Generator Asm code in file Asm.BranchScript.s
+/* Generator Asm code in file Asm.ParametersScript.s
 .segment "CODE"
 
 .proc main
-  ldx #0
+  lda #25
+  sta $0
+  lda #232
+  sta $1
+  lda #3
+  sta $2
+  lda #1
+  sta $3
+  jsr procB
 
-@loop:
+  rts
+.endproc
 
-  stx 1
-  inx
+.proc procB
+  lda $0
+  sta $40
 
-  cpx #4
+  ;LDXa(b);
+  ;STA(0x41);
 
-  bne @loop
-
-  ; Memory location 0x01 should be equals to 3
+  ldy $2
+  sta $42
 
   rts
 .endproc
