@@ -1,0 +1,45 @@
+﻿- Main diagnostics:
+- SyntaxTrees Count: 2
+- Output diagnostics:
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.SubroutineResultsScript.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.SubroutineResultsScript.s
+.segment "CODE"
+
+.proc main
+  ; Argument of the method could not be used after calling a subroutine with return values
+  jsr procB
+
+  lda $0
+  sta $40
+
+  ;LDAa(b);
+  ;STA(0x41);
+
+  lda $2
+  sta $42
+
+  rts
+.endproc
+
+.proc procB
+  lda #250
+  sta $0
+  lda #56
+  sta $1
+  lda #4
+  sta $2
+  lda #1
+  sta $3
+
+  rts
+.endproc
+
+
+*/

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NesAsm.Analyzers.Visitors;
@@ -107,8 +106,10 @@ internal class MemberVisitor
 
 internal class MethodVisitor
 {
-    private static Regex opPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
-    private static Regex opXPattern = new Regex("\\s*(?'Operation'.+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static Regex opPattern = new Regex("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
+    private static Regex opXPattern = new Regex("\\s*(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static Regex opReturnPattern = new Regex("\\s*var [((](?'ReturnValues'.*)[))]\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+   
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
     private static Regex labelPattern = new Regex("(?'Label'.+):", RegexOptions.Compiled);
     private static Regex branchPattern = new Regex("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
@@ -139,6 +140,25 @@ internal class MethodVisitor
             if (match.Success)
             {
                 sb.AppendLine($"@{match.Groups["Label"].Value.Trim()}:");
+                continue;
+            }
+
+            match = opReturnPattern.Match(line);
+            if (match.Success)
+            {
+                parameters.Clear();
+                paramIndex = 0;
+                foreach (var parameter in match.Groups["ReturnValues"].Value.Split(',').Select(p => p.Trim()))
+                {
+                    parameters.Add((paramIndex++, parameter, "byte"));
+                }
+
+
+                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, sb, allMethods, line))
+                {
+                    throw new InvalidOperationException($"OpCode with return values detected but not supported in {line}");
+                }
+
                 continue;
             }
 
@@ -212,7 +232,7 @@ internal class MethodVisitor
                     }
                 }
 
-                sb.AppendLine($"  jsr {GetProcName(operation)}");
+                if (operation != "return") sb.AppendLine($"  jsr {GetProcName(operation)}");
                 continue;
             }
 
@@ -248,6 +268,12 @@ internal class MethodVisitor
         }
 
         return sb.ToString();
+    }
+
+    private static bool ParseOpWithReturnValues(string operation, string operand, StringBuilder sb, string[] allMethods, string line)
+    {
+
+        return true;
     }
 
     private static bool ParseOp(string operation, string operand, StringBuilder sb, string[] allMethods, string line)
