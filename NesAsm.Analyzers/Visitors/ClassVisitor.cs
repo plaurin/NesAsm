@@ -108,7 +108,7 @@ internal class MethodVisitor
 {
     private static Regex opPattern = new Regex("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
     private static Regex opXPattern = new Regex("\\s*(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
-    private static Regex opReturnPattern = new Regex("\\s*var [((](?'ReturnValues'.*)[))]\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static Regex opReturnPattern = new Regex("\\s*var ((?'ReturnValue'\\w+)|([((](?'ReturnValues'.+)[))]))\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
    
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
     private static Regex labelPattern = new Regex("(?'Label'.+):", RegexOptions.Compiled);
@@ -148,11 +148,15 @@ internal class MethodVisitor
             {
                 parameters.Clear();
                 paramIndex = 0;
-                foreach (var parameter in match.Groups["ReturnValues"].Value.Split(',').Select(p => p.Trim()))
+                foreach (var parameter in match.Groups["ReturnValues"].Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()))
                 {
                     parameters.Add((paramIndex++, parameter, "byte"));
                 }
 
+                if (match.Groups["ReturnValue"].Success)
+                {
+                    parameters.Add((paramIndex++, match.Groups["ReturnValue"].Value, "byte"));
+                }
 
                 if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, sb, allMethods, line))
                 {
@@ -206,6 +210,7 @@ internal class MethodVisitor
                     throw new InvalidOperationException($"Operand {operands.Single()} not supported, should be a method argument in {line}");
                 }
 
+                // TODO Use StoreData method instead
                 var index = 0;
                 foreach (var operand in operands)
                 {
@@ -248,6 +253,13 @@ internal class MethodVisitor
                 throw new InvalidOperationException($"Branching OpCode detected but not supported in {line}");
             }
 
+            if (line.Trim().StartsWith("return"))
+            {
+                var operand = line.Trim().Substring(7).TrimEnd(';').Trim();
+                StoreData(new[] { operand }, sb, line);
+                continue;
+            }
+
             if (string.IsNullOrWhiteSpace(line))
             {
                 sb.AppendLine("");
@@ -268,6 +280,25 @@ internal class MethodVisitor
         }
 
         return sb.ToString();
+    }
+
+    private static bool StoreData(string[] dataItems, StringBuilder sb, string line)
+    {
+        var index = 0;
+        foreach (var data in dataItems)
+        {
+            if (byte.TryParse(data, out var byteData))
+            {
+                sb.AppendLine($"  lda #{byteData}");
+                sb.AppendLine($"  sta ${index++}");
+            }
+            else
+            {
+                throw new InvalidOperationException($"Operand {data} not supported for parameter (should be byte, ushort or bool) in {line}");
+            }
+        }
+
+        return true;
     }
 
     private static bool ParseOpWithReturnValues(string operation, string operand, StringBuilder sb, string[] allMethods, string line)

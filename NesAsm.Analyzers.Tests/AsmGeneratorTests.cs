@@ -42,6 +42,12 @@ public class AsmGeneratorTests
     }
 
     [Fact]
+    public void TestSubroutineResultScript()
+    {
+        TestScript("SubroutineResultScript.cs");
+    }
+
+    [Fact]
     public void TestSubroutineResultsScript()
     {
         TestScript("SubroutineResultsScript.cs");
