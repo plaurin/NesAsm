@@ -9,6 +9,13 @@ public class ScriptBase
         _emulator = emulator;
     }
 
+    protected void Call<T>(Action<T> action) where T : ScriptBase
+    {
+        var ctor = typeof(T).GetConstructors().First();
+        var instance = (T)ctor.Invoke(new[] { _emulator });
+        action.Invoke(instance);
+    }
+
     public void LDAi(byte value) => _emulator.LDAi(value);
     public void LDXi(byte value) => _emulator.LDXi(value);
     public void LDYi(byte value) => _emulator.LDYi(value);

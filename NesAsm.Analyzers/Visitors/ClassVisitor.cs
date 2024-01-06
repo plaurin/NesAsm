@@ -107,7 +107,7 @@ internal class MemberVisitor
 internal class MethodVisitor
 {
     private static Regex opPattern = new Regex("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
-    private static Regex opXPattern = new Regex("\\s*(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static Regex opXPattern = new Regex("\\s*(Call<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
     private static Regex opReturnPattern = new Regex("\\s*var ((?'ReturnValue'\\w+)|([((](?'ReturnValues'.+)[))]))\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
    
     private static Regex commentPattern = new Regex("//(?'Comment'.+)", RegexOptions.Compiled);
@@ -180,6 +180,7 @@ internal class MethodVisitor
             match = opXPattern.Match(line);
             if (match.Success)
             {
+                var script = match.Groups["Script"].Value;
                 var operation = match.Groups["Operation"].Value;
                 var operands = match.Groups["Operands"].Value.Split(',').Select(o => o.Trim());
 
@@ -208,6 +209,12 @@ internal class MethodVisitor
                     }
 
                     throw new InvalidOperationException($"Operand {operands.Single()} not supported, should be a method argument in {line}");
+                }
+
+                if (!string.IsNullOrEmpty(script))
+                {
+                    sb.AppendLine($"  jsr {GetProcName(operation)}");
+                    continue;
                 }
 
                 // TODO Use StoreData method instead

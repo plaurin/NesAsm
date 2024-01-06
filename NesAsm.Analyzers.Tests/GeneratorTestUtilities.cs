@@ -46,7 +46,7 @@ internal class GeneratorTestUtilities
         {
             MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location),
             MetadataReference.CreateFromFile(typeof(Binder).GetTypeInfo().Assembly.Location),
-            MetadataReference.CreateFromFile(typeof(ScriptBase).GetTypeInfo().Assembly.Location),
+            MetadataReference.CreateFromFile(typeof(NESEmulator).GetTypeInfo().Assembly.Location),
         };
 
         Assembly.GetEntryAssembly().GetReferencedAssemblies()
