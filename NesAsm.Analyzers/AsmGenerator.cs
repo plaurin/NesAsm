@@ -53,7 +53,12 @@ namespace NesAsm.Analyzers
         private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
         {
             var (node, compilation) = tuple;
-            var source = ClassVisitor.Visit(node, compilation);
+            var writer = new AsmWriter();
+
+            ClassVisitor.Visit(node, new VisitorContext(compilation, writer));
+
+            var source = writer.ToString();
+
             context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
 {source}
 */");
