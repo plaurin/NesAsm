@@ -1,10 +1,13 @@
 ﻿- Main diagnostics:
+(28,34): error NA0001: Type long is not supported for method parameters
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
+(28,34): error NA0001: Type long is not supported for method parameters
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
+(28,34): error NA0001: Type long is not supported for method parameters
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.ParametersScript.cs
@@ -35,6 +38,11 @@
 
   ldy 2
   sta $42
+
+  rts
+.endproc
+
+.proc invalidParamType
 
   rts
 .endproc

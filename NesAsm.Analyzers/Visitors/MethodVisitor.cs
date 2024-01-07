@@ -26,7 +26,17 @@ internal class MethodVisitor
         byte paramIndex = 0;
         foreach (var parameter in method.ParameterList.Parameters)
         {
-            parameters.Add((paramIndex++, parameter.Identifier.ToString(), parameter.Type.ToString()));
+            if (new[] { "byte", "ushort", "bool" }.Any(t => t == parameter.Type.ToString()))
+            {
+                parameters.Add((paramIndex++, parameter.Identifier.ToString(), parameter.Type.ToString()));
+            }
+            else
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor("NA0001", "Unsupported parameter type", "Type {0} is not supported for method parameters", "Todo", DiagnosticSeverity.Error, true),
+                    parameter.GetLocation(),
+                    parameter.Type.ToString()));
+            }
         }
 
         var lines = method.Body.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -61,7 +71,7 @@ internal class MethodVisitor
                     parameters.Add((paramIndex++, match.Groups["ReturnValue"].Value, "byte"));
                 }
 
-                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, line, writer))
+                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, writer))
                 {
                     throw new InvalidOperationException($"OpCode with return values detected but not supported in {line}");
                 }
@@ -72,7 +82,7 @@ internal class MethodVisitor
             match = opPattern.Match(line);
             if (match.Success)
             {
-                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, line, writer))
+                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, writer))
                 {
                     throw new InvalidOperationException($"OpCode detected but not supported in {line}");
                 }
@@ -209,13 +219,7 @@ internal class MethodVisitor
         return true;
     }
 
-    private static bool ParseOpWithReturnValues(string operation, string operand, string[] allMethods, string line)
-    {
-
-        return true;
-    }
-
-    private static bool ParseOp(string operation, string operand, string[] allMethods, string line, AsmWriter writer)
+    private static bool ParseOp(string operation, string operand, string[] allMethods, AsmWriter writer)
     {
         var numericOperand = Utilities.ConvertOperandToNumericText(operand);
 

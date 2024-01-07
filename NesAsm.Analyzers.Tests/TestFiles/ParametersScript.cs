@@ -24,4 +24,8 @@ internal class ParametersScript : ScriptBase
         LDYa(c);
         STA(0x42);
     }
+
+    public void InvalidParamType(long l)
+    {
+    }
 }

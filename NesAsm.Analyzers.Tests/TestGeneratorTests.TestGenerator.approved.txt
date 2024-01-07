@@ -1,7 +1,7 @@
 ﻿- Main diagnostics:
 - SyntaxTrees Count: 2
 - Output diagnostics:
-Unnecessary using directive.
+NesAsm.Analyzers\NesAsm.Analyzers.TestGenerator\test.g.cs(1,1): hidden CS8019: Unnecessary using directive.
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
 - RunResult[0].Generator: NesAsm.Analyzers.TestGenerator

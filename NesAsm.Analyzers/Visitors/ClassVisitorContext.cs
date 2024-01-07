@@ -1,19 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
+﻿namespace NesAsm.Analyzers.Visitors;
 
-namespace NesAsm.Analyzers.Visitors;
-
-internal class ClassVisitorContext
+internal class ClassVisitorContext : VisitorContext
 {
-    private readonly VisitorContext _classContext;
-
-    public ClassVisitorContext(VisitorContext classContext, string[] allMethods)
+    public ClassVisitorContext(VisitorContext visitorContext, string[] allMethods) : base(visitorContext)
     {
-        _classContext = classContext;
         AllMethods = allMethods;
     }
-
-    public Compilation Compilation => _classContext.Compilation;
-    public AsmWriter Writer => _classContext.Writer;
 
     public string[] AllMethods { get; }
 }

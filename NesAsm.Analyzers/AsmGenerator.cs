@@ -55,7 +55,7 @@ namespace NesAsm.Analyzers
             var (node, compilation) = tuple;
             var writer = new AsmWriter();
 
-            ClassVisitor.Visit(node, new VisitorContext(compilation, writer));
+            ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
 
             var source = writer.ToString();
 

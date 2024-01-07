@@ -27,3 +27,8 @@
   rts
 .endproc
 
+.proc invalidParamType
+
+  rts
+.endproc
+

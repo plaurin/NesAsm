@@ -66,7 +66,7 @@ internal class GeneratorTestUtilities
         sb.AppendLine("- Main diagnostics:");
         foreach (var diagnostic in diagnostics)
         {
-            sb.AppendLine(diagnostic.GetMessage());
+            sb.AppendLine(diagnostic.ToString());
         }
 
         sb.AppendLine($"- SyntaxTrees Count: {outputCompilation.SyntaxTrees.Count()}");
@@ -80,7 +80,7 @@ internal class GeneratorTestUtilities
         sb.AppendLine("- Output diagnostics:");
         foreach (var diag in diags)
         {
-            sb.AppendLine(diag.GetMessage());
+            sb.AppendLine(diag.ToString());
         }
 
         // Or we can look at the results directly:
@@ -93,7 +93,7 @@ internal class GeneratorTestUtilities
         sb.AppendLine("- RunResults diagnostics:");
         foreach (var diag in runResult.Diagnostics)
         {
-            sb.AppendLine(diag.GetMessage());
+            sb.AppendLine(diag.ToString());
         }
 
         // Or you can access the individual results on a by-generator basis
@@ -108,7 +108,7 @@ internal class GeneratorTestUtilities
             sb.AppendLine($"- RunResult[{i}] diagnostics:");
             foreach (var diag in generatorResult.Diagnostics)
             {
-                sb.AppendLine(diag.GetMessage());
+                sb.AppendLine(diag.ToString());
             }
 
             //Debug.Assert(generatorResult.GeneratedSources.Length == 1);

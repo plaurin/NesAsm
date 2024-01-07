@@ -4,12 +4,26 @@ namespace NesAsm.Analyzers.Visitors;
 
 internal class VisitorContext
 {
-    public VisitorContext(Compilation compilation, AsmWriter writer)
+    public VisitorContext(SourceProductionContext context, Compilation compilation, AsmWriter writer)
     {
+        Context = context;
         Compilation = compilation;
         Writer = writer;
     }
 
+    protected VisitorContext(VisitorContext context)
+    {
+        Context = context.Context;
+        Compilation = context.Compilation;
+        Writer = context.Writer;
+    }
+
+    protected SourceProductionContext Context { get; }
     public Compilation Compilation { get; }
     public AsmWriter Writer { get; }
+
+    public void ReportDiagnostic(Diagnostic diagnostic)
+    {
+        Context.ReportDiagnostic(diagnostic);
+    }
 }
