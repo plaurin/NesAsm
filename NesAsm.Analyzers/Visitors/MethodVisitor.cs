@@ -26,22 +26,20 @@ internal class MethodVisitor
         byte paramIndex = 0;
         foreach (var parameter in method.ParameterList.Parameters)
         {
-            if (new[] { "byte", "ushort", "bool" }.Any(t => t == parameter.Type.ToString()))
+            parameters.Add((paramIndex++, parameter.Identifier.ToString(), parameter.Type.ToString()));
+
+            if (!new[] { "byte", "ushort", "bool" }.Any(t => t == parameter.Type.ToString()))
             {
-                parameters.Add((paramIndex++, parameter.Identifier.ToString(), parameter.Type.ToString()));
-            }
-            else
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    new DiagnosticDescriptor("NA0001", "Unsupported parameter type", "Type {0} is not supported for method parameters", "Todo", DiagnosticSeverity.Error, true),
-                    parameter.GetLocation(),
-                    parameter.Type.ToString()));
+                context.ReportDiagnostic(Diagnostics.UnsupportedParameterType, parameter.GetLocation(), parameter.Type.ToString());
             }
         }
 
         var lines = method.Body.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
         foreach (var line in lines)
         {
+            var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim() == line.Trim());
+            var location = statement != null ? statement.GetLocation() : Location.None;
+
             var match = commentPattern.Match(line);
             if (match.Success)
             {
@@ -97,7 +95,7 @@ internal class MethodVisitor
                 var operation = match.Groups["Operation"].Value;
                 var operands = match.Groups["Operands"].Value.Split(',').Select(o => o.Trim());
 
-                if (operands.Count() == 1 && (operation == "LDAa" || operation == "LDXa" || operation == "LDYa"))
+                if (operands.Count() == 1)
                 {
                     var parameter = parameters.SingleOrDefault(p => p.identifier == operands.Single());
                     if (parameter.identifier != null)
@@ -107,21 +105,33 @@ internal class MethodVisitor
                             "LDAa" => "lda",
                             "LDXa" => "ldx",
                             "LDYa" => "ldy",
-                            _ => throw new InvalidOperationException($"OpCode {operation} not supported to use arguments (should be LDAa, LDXa or LDYa) in {line}")
+                            _ => null
                         };
+
+                        if (opCode == null)
+                        {
+                            context.ReportDiagnostic(Diagnostics.InvalidOpCodeUsingParameters, location, operation);
+                            continue;
+                        }
 
                         switch (parameter.type)
                         {
                             case "bool": writer.WriteOpCode(opCode, parameter.index); break;
                             case "byte": writer.WriteOpCode(opCode, parameter.index); break;
-                            case "ushort": throw new NotImplementedException("ushort arguments not implemented yet");
-                            default: throw new InvalidOperationException($"Argument type {parameter.type} not supported (should be byte, ushort or bool) in {line}");
+                            default:
+                                context.ReportDiagnostic(Diagnostics.UnsupportedUsingParameterType, location, operation);
+                                continue;
                         }
 
                         continue;
                     }
 
-                    throw new InvalidOperationException($"Operand {operands.Single()} not supported, should be a method argument in {line}");
+                    // Hack to be removed after proper support of other script call with parameters
+                    if (operands.Single() != ")")
+                    {
+                        context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, location, $"Operand {operands.Single()} not supported, should be a method argument in {line}");
+                        continue;
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(script))

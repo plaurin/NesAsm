@@ -22,8 +22,8 @@ internal class VisitorContext
     public Compilation Compilation { get; }
     public AsmWriter Writer { get; }
 
-    public void ReportDiagnostic(Diagnostic diagnostic)
+    public void ReportDiagnostic(DiagnosticDescriptor descriptor, Location? location, params object?[]? messageArgs)
     {
-        Context.ReportDiagnostic(diagnostic);
+        Context.ReportDiagnostic(Diagnostic.Create(descriptor, location, messageArgs));
     }
 }

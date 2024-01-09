@@ -32,3 +32,13 @@
   rts
 .endproc
 
+.proc invalidOpCodeUsingParameter
+
+  rts
+.endproc
+
+.proc lDAa
+
+  rts
+.endproc
+

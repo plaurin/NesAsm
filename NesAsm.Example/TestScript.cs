@@ -13,4 +13,8 @@ public class TestScript : ScriptBase
         LDAi(10);
         LDXi(0xFF);
     }
+
+    public void Stop(byte l)
+    {
+    }
 }

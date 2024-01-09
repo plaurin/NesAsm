@@ -27,5 +27,16 @@ internal class ParametersScript : ScriptBase
 
     public void InvalidParamType(long l)
     {
+        LDAa(l);
+    }
+
+    public void InvalidOpCodeUsingParameter(byte a)
+    {
+        STA(a);
+    }
+
+    // Only to force NA0004 in InvalidParamType
+    private void LDAa(long l)
+    {
     }
 }
