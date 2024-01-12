@@ -65,6 +65,12 @@ public class AsmGeneratorTests
         TestScript("DataScript.cs");
     }
 
+    [Fact]
+    public void TestAllInstructionsScript()
+    {
+        TestScript("AllInstructionsScript.cs");
+    }
+
     private static void TestScript(string filename)
     {
         var generator = new AsmGenerator();

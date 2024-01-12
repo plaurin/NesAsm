@@ -69,7 +69,7 @@ internal class MethodVisitor
                     parameters.Add((paramIndex++, match.Groups["ReturnValue"].Value, "byte"));
                 }
 
-                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context /*context.AllMethods, writer*/);
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, location, context);
 
                 continue;
             }
@@ -77,7 +77,7 @@ internal class MethodVisitor
             match = opPattern.Match(line);
             if (match.Success)
             {
-                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context /*context.AllMethods, writer*/);
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, location, context);
 
                 continue;
             }
@@ -223,7 +223,7 @@ internal class MethodVisitor
         return true;
     }
 
-    private static void ParseOp(string operation, string operand, ClassVisitorContext context/*, string[] allMethods, AsmWriter writer*/)
+    private static void ParseOp(string operation, string operand, Location location, ClassVisitorContext context)
     {
         try
         {
@@ -233,6 +233,7 @@ internal class MethodVisitor
                 case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
                 case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
                 case "INX": context.Writer.WriteOpCode("inx"); break;
+                case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
                 case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
                 case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
                 case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
@@ -242,9 +243,10 @@ internal class MethodVisitor
                         if (callingProc != null)
                         {
                             context.Writer.WriteJSROpCode(GetProcName(operation));
+                            break;
                         }
 
-                        // $"OpCode with return values detected but not supported in {line}"
+                        context.ReportDiagnostic(Diagnostics.InstructionNotSupported, location, operation);
                     }
                     break;
             }
@@ -252,11 +254,11 @@ internal class MethodVisitor
         catch (InvalidOperationException ex)
         {
             if (ex.Message.Contains("binary format"))
-                context.ReportDiagnostic(Diagnostics.InvalidFormat, Location.None, operand, "byte with binary format");
+                context.ReportDiagnostic(Diagnostics.InvalidFormat, location, operand, "byte with binary format");
             else if (ex.Message.Contains("byte or ushort"))
-                context.ReportDiagnostic(Diagnostics.InvalidFormat, Location.None, operand, "byte or ushort");
+                context.ReportDiagnostic(Diagnostics.InvalidFormat, location, operand, "byte or ushort");
             else
-                context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, Location.None, "ParseOp exception handling failed to match proper message");
+                context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, location, "ParseOp exception handling failed to match proper message");
         }
     }
 

@@ -91,4 +91,15 @@ internal static class Diagnostics
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// "NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+    /// </summary>
+    internal static DiagnosticDescriptor InstructionNotSupported = new DiagnosticDescriptor(
+        "NA0008",
+        "Instruction not supported",
+        "Instruction is not currently supported: {0}",
+        "Todo",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }

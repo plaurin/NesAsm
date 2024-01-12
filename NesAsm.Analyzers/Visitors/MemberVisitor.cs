@@ -73,7 +73,6 @@ internal class MemberVisitor
             if (dataType.Any(dt => dt == "RomData"))
             {
                 context.Writer.StartCodeSegment();
-                context.Writer.WriteEmptyLine();
                 context.Writer.WriteLabel(field.Declaration.Variables.First().Identifier.ToString().ToLower());
             }
 

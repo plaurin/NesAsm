@@ -20,6 +20,14 @@ public abstract class ScriptBase
     protected void LDXi(byte value) => _emulator.LDXi(value);
     protected void LDYi(byte value) => _emulator.LDYi(value);
 
+    protected void LDA(byte address) => _emulator.LDA(address);
+    protected void LDX(byte address) => _emulator.LDX(address);
+    protected void LDY(byte address) => _emulator.LDY(address);
+
+    protected void LDA(ushort address) => _emulator.LDA(address);
+    protected void LDX(ushort address) => _emulator.LDX(address);
+    protected void LDY(ushort address) => _emulator.LDY(address);
+
     protected void LDAa(byte argumentValue) => _emulator.LDAi(argumentValue);
     protected void LDXa(byte argumentValue) => _emulator.LDXi(argumentValue);
     protected void LDYa(byte argumentValue) => _emulator.LDYi(argumentValue);
@@ -36,6 +44,10 @@ public abstract class ScriptBase
     protected void STA(byte address) => _emulator.STA(address);
     protected void STX(byte address) => _emulator.STX(address);
     protected void STY(byte address) => _emulator.STY(address);
+
+    protected void STA(ushort address) => _emulator.STA(address);
+    protected void STX(ushort address) => _emulator.STX(address);
+    protected void STY(ushort address) => _emulator.STY(address);
 
     protected void CMPi(byte value) => _emulator.CMPi(value);
     protected void CPXi(byte value) => _emulator.CPXi(value);

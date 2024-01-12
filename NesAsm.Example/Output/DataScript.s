@@ -7,7 +7,6 @@
 
 .segment "CODE"
 
-
 @palettes:
   .byte %00001111
   .byte %00100000
