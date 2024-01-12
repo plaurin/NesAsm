@@ -1,0 +1,67 @@
+﻿- Main diagnostics:
+(30,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(34,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+- SyntaxTrees Count: 2
+- Output diagnostics:
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+(30,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(34,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+(30,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(34,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.DataScript.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.DataScript.s
+.segment "CODE"
+
+.proc main
+
+  rts
+.endproc
+
+.segment "CODE"
+
+
+@palettes:
+  .byte %00001111
+  .byte %00100000
+  .byte %00100001
+  .byte %00100010
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
+  .byte %00001111
+  .byte %00100000
+  .byte %00100111
+  .byte %00110001
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00001111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
+
+*/

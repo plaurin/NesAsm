@@ -59,8 +59,6 @@ internal static class Diagnostics
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 
-    //$"Expected parameter of type byte for binary format but found {operand}"
-    //$"Expected parameter of type byte or ushort but found {operand}"
     /// <summary>
     /// "NA0005: Invalid format {0} for type {1}
     /// </summary>
@@ -68,6 +66,28 @@ internal static class Diagnostics
         "NA0005",
         "Invalid format while parsing",
         "Invalid format {0} for type {1}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// "NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+    /// </summary>
+    internal static DiagnosticDescriptor MissingFieldDataType = new DiagnosticDescriptor(
+        "NA0006",
+        "RomDataAttribute and CharDataAttribute required",
+        "Missing RomDataAttribute or CharDataAttribute on byte[] field",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// "NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+    /// </summary>
+    internal static DiagnosticDescriptor ManyFieldDataType = new DiagnosticDescriptor(
+        "NA0007",
+        "RomDataAttribute and CharDataAttribute used",
+        "Only one of RomDataAttribute or CharDataAttribute can be used at the same time",
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

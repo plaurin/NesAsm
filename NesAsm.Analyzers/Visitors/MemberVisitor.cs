@@ -20,23 +20,64 @@ internal class MemberVisitor
             writer.EndProc();
         }
 
-        var charBytes = new List<int>();
         if (memberDeclarationSyntax is FieldDeclarationSyntax field)
         {
-            if (field.Declaration.Type.ToString() == "byte[]")
+            VisitField(field, context);
+        }
+
+    }
+
+    private static void VisitField(FieldDeclarationSyntax field, ClassVisitorContext context)
+    {
+        var charBytes = new List<int>();
+        if (field.Declaration.Type.ToString() == "byte[]")
+        {
+            foreach (var element in (field.Declaration.Variables[0].Initializer.Value as CollectionExpressionSyntax).Elements)
             {
-                foreach (var element in (field.Declaration.Variables[0].Initializer.Value as CollectionExpressionSyntax).Elements)
-                {
-                    charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
-                }
+                charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
             }
         }
 
         if (charBytes.Any())
         {
-            writer.StartCharsSegment();
+            var dataType = new List<string>();
+            foreach (var att in field.AttributeLists)
+            {
+                foreach (var attribute in att.Attributes)
+                {
+                    if (attribute.Name.ToString() == "CharData")
+                        dataType.Add("CharData");
 
-            writer.WriteChars(charBytes.ToArray());
+                    if (attribute.Name.ToString() == "RomData")
+                        dataType.Add("RomData");
+                }
+            }
+
+            if (!dataType.Any())
+            {
+                context.ReportDiagnostic(Diagnostics.MissingFieldDataType, field.GetLocation());
+                return;
+            }
+
+            if (dataType.Any(dt => dt == "RomData") && dataType.Any(dt => dt == "CharData"))
+            {
+                context.ReportDiagnostic(Diagnostics.ManyFieldDataType, field.GetLocation());
+                return;
+            }
+
+            if (dataType.Any(dt => dt == "CharData"))
+            {
+                context.Writer.StartCharsSegment();
+            }
+
+            if (dataType.Any(dt => dt == "RomData"))
+            {
+                context.Writer.StartCodeSegment();
+                context.Writer.WriteEmptyLine();
+                context.Writer.WriteLabel(field.Declaration.Variables.First().Identifier.ToString().ToLower());
+            }
+
+            context.Writer.WriteChars(charBytes.ToArray());
         }
     }
 }
