@@ -10,4 +10,16 @@
   rts
 .endproc
 
+.proc invalidParsing
+
+  jsr lDAa
+
+  rts
+.endproc
+
+.proc lDAa
+
+  rts
+.endproc
+
 .include "wrapper.s"

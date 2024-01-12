@@ -1,0 +1,30 @@
+﻿- Main diagnostics:
+- SyntaxTrees Count: 2
+- Output diagnostics:
+(13,14): error CS0246: The type or namespace name 'MultiProcScript' could not be found (are you missing a using directive or an assembly reference?)
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.CallingOtherScript.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.CallingOtherScript.s
+.segment "CODE"
+
+.proc main
+  jsr procB
+  jsr myProcC
+
+  rts
+.endproc
+
+.proc myProcC
+  lda #30
+
+  rts
+.endproc
+
+
+*/

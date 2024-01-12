@@ -54,7 +54,7 @@ public class AsmGeneratorTests
     }
 
     [Fact]
-    public void CallingOtherScript()
+    public void TestCallingOtherScript()
     {
         TestScript("CallingOtherScript.cs");
     }

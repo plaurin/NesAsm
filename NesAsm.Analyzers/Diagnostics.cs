@@ -27,7 +27,7 @@ internal static class Diagnostics
         isEnabledByDefault: true);
 
     /// <summary>
-    /// NA0002: "Operand {0} not supported for parameter (should be byte, ushort or bool)"
+    /// NA0002: "Operand {0} not supported for parameter (should be byte, ushort or bool)
     /// </summary>
     internal static DiagnosticDescriptor UnsupportedParameterType2 = new DiagnosticDescriptor(
         "NA0002",
@@ -49,12 +49,25 @@ internal static class Diagnostics
         isEnabledByDefault: true);
 
     /// <summary>
-    /// "NA0004: Parameter type {0} not supported (should be byte or bool)"
+    /// "NA0004: Parameter type {0} not supported (should be byte or bool)
     /// </summary>
     internal static DiagnosticDescriptor UnsupportedUsingParameterType = new DiagnosticDescriptor(
         "NA0004",
         "Unsupported using parameter type",
         "Parameter type {0} not supported (should be byte or bool)",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    //$"Expected parameter of type byte for binary format but found {operand}"
+    //$"Expected parameter of type byte or ushort but found {operand}"
+    /// <summary>
+    /// "NA0005: Invalid format {0} for type {1}
+    /// </summary>
+    internal static DiagnosticDescriptor InvalidFormat = new DiagnosticDescriptor(
+        "NA0005",
+        "Invalid format while parsing",
+        "Invalid format {0} for type {1}",
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

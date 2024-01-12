@@ -10,10 +10,10 @@ namespace NesAsm.Analyzers.Visitors;
 
 internal class MethodVisitor
 {
-    private static readonly Regex opPattern = new("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
+    private static readonly Regex opPattern = new("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9__]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
     private static readonly Regex opXPattern = new("\\s*(Call<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
     private static readonly Regex opReturnPattern = new("\\s*var ((?'ReturnValue'\\w+)|([((](?'ReturnValues'.+)[))]))\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
-   
+
     private static readonly Regex commentPattern = new("//(?'Comment'.+)", RegexOptions.Compiled);
     private static readonly Regex labelPattern = new("(?'Label'.+):", RegexOptions.Compiled);
     private static readonly Regex branchPattern = new("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
@@ -69,10 +69,7 @@ internal class MethodVisitor
                     parameters.Add((paramIndex++, match.Groups["ReturnValue"].Value, "byte"));
                 }
 
-                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, writer))
-                {
-                    throw new InvalidOperationException($"OpCode with return values detected but not supported in {line}");
-                }
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context /*context.AllMethods, writer*/);
 
                 continue;
             }
@@ -80,10 +77,7 @@ internal class MethodVisitor
             match = opPattern.Match(line);
             if (match.Success)
             {
-                if (!ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context.AllMethods, writer))
-                {
-                    throw new InvalidOperationException($"OpCode detected but not supported in {line}");
-                }
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, context /*context.AllMethods, writer*/);
 
                 continue;
             }
@@ -229,32 +223,41 @@ internal class MethodVisitor
         return true;
     }
 
-    private static bool ParseOp(string operation, string operand, string[] allMethods, AsmWriter writer)
+    private static void ParseOp(string operation, string operand, ClassVisitorContext context/*, string[] allMethods, AsmWriter writer*/)
     {
-        var numericOperand = Utilities.ConvertOperandToNumericText(operand);
-
-        switch (operation)
+        try
         {
-            case "LDAi": writer.WriteOpCodeImmediate("lda", numericOperand); break;
-            case "LDXi": writer.WriteOpCodeImmediate("ldx", numericOperand); break;
-            case "INX": writer.WriteOpCode("inx"); break;
-            case "STA": writer.WriteOpCode("sta", numericOperand); break;
-            case "STX": writer.WriteOpCode("stx", numericOperand); break; 
-            case "CPXi": writer.WriteOpCodeImmediate("cpx", numericOperand); break; 
-            default:
-                {
-                    var callingProc = allMethods.SingleOrDefault(m => operation == m);
-                    if (callingProc != null)
+            var numericOperand = Utilities.ConvertOperandToNumericText(operand);
+            switch (operation)
+            {
+                case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
+                case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
+                case "INX": context.Writer.WriteOpCode("inx"); break;
+                case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
+                case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
+                case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
+                default:
                     {
-                        writer.WriteJSROpCode(GetProcName(operation));
-                        return true;
+                        var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
+                        if (callingProc != null)
+                        {
+                            context.Writer.WriteJSROpCode(GetProcName(operation));
+                        }
+
+                        // $"OpCode with return values detected but not supported in {line}"
                     }
-
-                    return false;
-                }
+                    break;
+            }
         }
-
-        return true;
+        catch (InvalidOperationException ex)
+        {
+            if (ex.Message.Contains("binary format"))
+                context.ReportDiagnostic(Diagnostics.InvalidFormat, Location.None, operand, "byte with binary format");
+            else if (ex.Message.Contains("byte or ushort"))
+                context.ReportDiagnostic(Diagnostics.InvalidFormat, Location.None, operand, "byte or ushort");
+            else
+                context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, Location.None, "ParseOp exception handling failed to match proper message");
+        }
     }
 
     internal static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
