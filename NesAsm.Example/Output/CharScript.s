@@ -7,21 +7,21 @@
 
 .segment "CHARS"
 
-  .byte %01000001
-  .byte %11000010
-  .byte %01000100
-  .byte %01001000
-  .byte %00010000
-  .byte %00100000
-  .byte %01000000
-  .byte %10000000
+  .byte 65
+  .byte 194
+  .byte 68
+  .byte 72
+  .byte 16
+  .byte 32
+  .byte 64
+  .byte 128
 
-  .byte %00000001
-  .byte %00000010
-  .byte %00000100
-  .byte %00001000
-  .byte %00010110
-  .byte %00100001
-  .byte %01000010
-  .byte %10000111
+  .byte 1
+  .byte 2
+  .byte 4
+  .byte 8
+  .byte 22
+  .byte 33
+  .byte 66
+  .byte 135
 

@@ -18,9 +18,9 @@
 
 .segment "CODE"
 
-@data:
-  .byte %00000000
-  .byte %00000001
-  .byte %00000010
-  .byte %00000011
-  .byte %00000100
+data:
+  .byte 0
+  .byte 1
+  .byte 2
+  .byte 3
+  .byte 4

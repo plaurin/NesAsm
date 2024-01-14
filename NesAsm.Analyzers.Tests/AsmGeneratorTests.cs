@@ -6,6 +6,15 @@ namespace NesAsm.Analyzers.Tests;
 public class AsmGeneratorTests
 {
     [Fact]
+    public void TestExampleScript()
+    {
+        var generator = new AsmGenerator();
+        var content = File.ReadAllText($@"..\..\..\..\NesAsm.Example\HiloWorld.cs");
+
+        GeneratorTestUtilities.TestGenerator(generator, content);
+    }
+
+    [Fact]
     public void TestSimpleScript()
     {
         TestScript("SimpleScript.cs");

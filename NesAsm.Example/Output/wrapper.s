@@ -70,7 +70,7 @@
   bpl @vblankWait2
   jsr ResetPalettes
 
-main:
+@start:
   jsr main
   lda #%00011000  ; Enable Sprites & Background
   sta $2001

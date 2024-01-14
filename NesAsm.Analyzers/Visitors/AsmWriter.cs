@@ -44,7 +44,7 @@ internal class AsmWriter
         int i = 0;
         foreach (var charByte in charBytes)
         {
-            _sb.AppendLine($"  .byte %{charByte:B8}");
+            _sb.AppendLine($"  .byte {charByte}");
 
             if (++i % 8 == 0) _sb.AppendLine("");
         }
@@ -53,6 +53,7 @@ internal class AsmWriter
     public void WriteComment(string comment) => _sb.AppendLine($"  ;{comment}");
     
     public void WriteLabel(string label) => _sb.AppendLine($"@{label}:");
+    public void WriteVariableLabel(string variableLabel) => _sb.AppendLine($"{variableLabel}:");
 
     public void WriteOpCode(string opCode) => _sb.AppendLine($"  {opCode}");
     public void WriteOpCode(string opCode, byte address) => _sb.AppendLine($"  {opCode} {address}");

@@ -25,42 +25,42 @@
 
 .segment "CODE"
 
-@palettes:
-  .byte %00001111
-  .byte %00100000
-  .byte %00100001
-  .byte %00100010
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
+palettes:
+  .byte 15
+  .byte 32
+  .byte 33
+  .byte 34
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
 
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
 
-  .byte %00001111
-  .byte %00100000
-  .byte %00100111
-  .byte %00110001
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
+  .byte 15
+  .byte 32
+  .byte 39
+  .byte 49
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
 
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
-  .byte %00001111
-  .byte %00000000
-  .byte %00000000
-  .byte %00000000
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 15
+  .byte 0
+  .byte 0
+  .byte 0
 
 
 */

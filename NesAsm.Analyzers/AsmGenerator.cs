@@ -52,17 +52,24 @@ namespace NesAsm.Analyzers
         [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
         private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
         {
-            var (node, compilation) = tuple;
-            var writer = new AsmWriter();
+            try
+            {
+                var (node, compilation) = tuple;
+                var writer = new AsmWriter();
 
-            ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
+                ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
 
-            var source = writer.ToString();
+                var source = writer.ToString();
 
-            context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
+                context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
 {source}
 */");
-            File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
+                File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
+            }
+            catch (Exception ex)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InternalAnalyzerFailure, Location.None, ex.ToString()));
+            }
         }
     }
 }
