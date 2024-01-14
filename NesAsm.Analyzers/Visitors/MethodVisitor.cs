@@ -128,6 +128,32 @@ internal class MethodVisitor
                     }
                 }
 
+                if (operands.Count() == 2 && (operands.ElementAt(1) == "X" || operands.ElementAt(1) == "Y"))
+                {
+                    var indexorRegister = operands.ElementAt(1) switch
+                    {
+                        "X" => "x",
+                        "Y" => "y",
+                        _ => null
+                    };
+
+                    if (indexorRegister == null)
+                    {
+                        context.ReportDiagnostic(Diagnostics.AbsoluteIndexedRegisterNotSupported, location, indexorRegister);
+                        continue;
+                    }
+
+                    switch (operation)
+                    {
+                        case "LDA": writer.WriteOpCode("lda", GetLabelName(operands.ElementAt(0)), indexorRegister); break;
+                        default:
+                            context.ReportDiagnostic(Diagnostics.AbsoluteIndexedOpCodeNotSupported, location, operation);
+                            continue;
+                    }
+
+                    continue;
+                }
+
                 if (!string.IsNullOrEmpty(script))
                 {
                     writer.WriteJSROpCode(GetProcName(operation));
@@ -157,7 +183,8 @@ internal class MethodVisitor
                     }
                     else
                     {
-                        throw new InvalidOperationException($"Operand {operand} not supported for parameter (should be byte, ushort or bool) in {line}");
+                        context.ReportDiagnostic(Diagnostics.UnsupportedParameterType2, location, operand);
+                        continue;
                     }
                 }
 
@@ -232,6 +259,7 @@ internal class MethodVisitor
             {
                 case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
                 case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
+                case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
                 case "INX": context.Writer.WriteOpCode("inx"); break;
                 case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
                 case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
@@ -264,4 +292,5 @@ internal class MethodVisitor
 
     internal static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
     internal static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
+    internal static string GetLabelName(string fieldName) => fieldName.ToLowerInvariant();
 }

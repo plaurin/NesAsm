@@ -227,4 +227,25 @@ public class NESEmulatorTests
         skip2:
         Assert.Equal(10, _emulator.A);
     }
+
+    private readonly byte[] _absoluteIndexedData = [0, 1, 2, 3, 4, 5];
+    [Fact]
+    public void TestAbsoluteIndexedLoadInstructions()
+    {
+        _emulator.LDXi(3);
+        _emulator.LDA(_absoluteIndexedData, AddressingRegister.X);
+        Assert.Equal(3, _emulator.A);
+
+        _emulator.LDYi(1);
+        _emulator.LDA(_absoluteIndexedData, AddressingRegister.Y);
+        Assert.Equal(1, _emulator.A);
+
+        _emulator.LDXi(0);
+        _emulator.LDA(_absoluteIndexedData, AddressingRegister.X);
+        Assert.Equal(0, _emulator.A);
+
+        _emulator.LDYi(5);
+        _emulator.LDA(_absoluteIndexedData, AddressingRegister.Y);
+        Assert.Equal(5, _emulator.A);
+    }
 }

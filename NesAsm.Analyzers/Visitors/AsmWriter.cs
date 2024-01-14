@@ -57,6 +57,7 @@ internal class AsmWriter
     public void WriteOpCode(string opCode) => _sb.AppendLine($"  {opCode}");
     public void WriteOpCode(string opCode, byte address) => _sb.AppendLine($"  {opCode} {address}");
     public void WriteOpCode(string opCode, string address) => _sb.AppendLine($"  {opCode} {address}");
+    public void WriteOpCode(string opCode, string baseAddress, string indexorRegister) => _sb.AppendLine($"  {opCode} {baseAddress}, {indexorRegister}");
 
     public void WriteOpCodeImmediate(string opCode, byte value) => _sb.AppendLine($"  {opCode} #{value}");
     public void WriteOpCodeImmediate(string opCode, string value) => _sb.AppendLine($"  {opCode} #{value}");

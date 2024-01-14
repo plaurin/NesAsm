@@ -16,6 +16,9 @@ public abstract class ScriptBase
         action.Invoke(instance);
     }
 
+    protected AddressingRegister X = AddressingRegister.X;
+    protected AddressingRegister Y = AddressingRegister.Y;
+
     protected void LDAi(byte value) => _emulator.LDAi(value);
     protected void LDXi(byte value) => _emulator.LDXi(value);
     protected void LDYi(byte value) => _emulator.LDYi(value);
@@ -35,6 +38,8 @@ public abstract class ScriptBase
     protected void LDAa(bool argumentValue) => _emulator.LDAi((byte)(argumentValue ? 1 : 0));
     protected void LDXa(bool argumentValue) => _emulator.LDXi((byte)(argumentValue ? 1 : 0));
     protected void LDYa(bool argumentValue) => _emulator.LDYi((byte)(argumentValue ? 1 : 0));
+
+    protected void LDA(byte[] baseAddress, AddressingRegister register) => _emulator.LDA(baseAddress, register);
 
     protected void INX() => _emulator.INX();
     protected void INY() => _emulator.INY();

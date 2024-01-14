@@ -93,7 +93,7 @@ internal static class Diagnostics
         isEnabledByDefault: true);
 
     /// <summary>
-    /// "NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+    /// "NA0008: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
     /// </summary>
     internal static DiagnosticDescriptor InstructionNotSupported = new DiagnosticDescriptor(
         "NA0008",
@@ -101,5 +101,27 @@ internal static class Diagnostics
         "Instruction is not currently supported: {0}",
         "Todo",
         DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// "NA0009: OpCode {0} not supported for Absolute Indexed addressing mode
+    /// </summary>
+    internal static DiagnosticDescriptor AbsoluteIndexedOpCodeNotSupported = new DiagnosticDescriptor(
+        "NA0009",
+        "Absolute Indexed OpCode not supported",
+        "OpCode {0} not supported for Absolute Indexed addressing mode",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// "NA0010: Absolute Indexed register {0} not supported
+    /// </summary>
+    internal static DiagnosticDescriptor AbsoluteIndexedRegisterNotSupported = new DiagnosticDescriptor(
+        "NA0010",
+        "Absolute Indexed Register not supported",
+        "Absolute Indexed register {0} not supported",
+        "Todo",
+        DiagnosticSeverity.Error,
         isEnabledByDefault: true);
 }
