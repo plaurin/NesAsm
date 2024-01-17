@@ -10,6 +10,7 @@
 - RunResult[0].GeneratedSources[0].HintName: Asm.MultiProcScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.MultiProcScript.s
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc procA

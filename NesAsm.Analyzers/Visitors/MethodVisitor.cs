@@ -145,7 +145,7 @@ internal class MethodVisitor
 
                     switch (operation)
                     {
-                        case "LDA": writer.WriteOpCode("lda", GetLabelName(operands.ElementAt(0)), indexorRegister); break;
+                        case "LDA": writer.WriteOpCode("lda", Utilities.GetLabelName(operands.ElementAt(0)), indexorRegister); break;
                         default:
                             context.ReportDiagnostic(Diagnostics.AbsoluteIndexedOpCodeNotSupported, location, operation);
                             continue;
@@ -156,7 +156,7 @@ internal class MethodVisitor
 
                 if (!string.IsNullOrEmpty(script))
                 {
-                    writer.WriteJSROpCode(GetProcName(operation));
+                    writer.WriteJSROpCode(Utilities.GetProcName(operation));
                     continue;
                 }
 
@@ -188,7 +188,7 @@ internal class MethodVisitor
                     }
                 }
 
-                if (operation != "return") writer.WriteJSROpCode(GetProcName(operation));
+                if (operation != "return") writer.WriteJSROpCode(Utilities.GetProcName(operation));
                 continue;
             }
 
@@ -270,7 +270,7 @@ internal class MethodVisitor
                         var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
                         if (callingProc != null)
                         {
-                            context.Writer.WriteJSROpCode(GetProcName(operation));
+                            context.Writer.WriteJSROpCode(Utilities.GetProcName(operation));
                             break;
                         }
 
@@ -289,8 +289,4 @@ internal class MethodVisitor
                 context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, location, "ParseOp exception handling failed to match proper message");
         }
     }
-
-    internal static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
-    internal static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
-    internal static string GetLabelName(string fieldName) => fieldName.ToLowerInvariant();
 }

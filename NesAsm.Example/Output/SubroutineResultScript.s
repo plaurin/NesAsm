@@ -1,3 +1,4 @@
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc main

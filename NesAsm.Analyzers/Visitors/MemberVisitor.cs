@@ -13,11 +13,19 @@ internal class MemberVisitor
 
         if (memberDeclarationSyntax is MethodDeclarationSyntax method)
         {
-            writer.StartProc(MethodVisitor.GetProcName(method));
+            var isNmi = method.Identifier.ValueText.ToLowerInvariant() == "nmi";
+
+            if (isNmi)
+                writer.StartNmi();
+            else
+                writer.StartProc(Utilities.GetProcName(method));
 
             MethodVisitor.Visit(method, context);
 
-            writer.EndProc();
+            if (isNmi)
+                writer.EndNmi();
+            else
+                writer.EndProc();
         }
 
         if (memberDeclarationSyntax is FieldDeclarationSyntax field)
@@ -73,7 +81,7 @@ internal class MemberVisitor
             if (dataType.Any(dt => dt == "RomData"))
             {
                 context.Writer.StartCodeSegment();
-                context.Writer.WriteVariableLabel(field.Declaration.Variables.First().Identifier.ToString().ToLower());
+                context.Writer.WriteVariableLabel(Utilities.GetLabelName(field.Declaration.Variables.First().Identifier.ToString()));
             }
 
             context.Writer.WriteChars(charBytes.ToArray());

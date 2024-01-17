@@ -9,6 +9,7 @@ internal class AsmWriter
     public AsmWriter()
     {
         _sb = new StringBuilder();
+        _sb.AppendLine("; Auto generated code using the NesAsm project");
     }
 
     public void StartCodeSegment()
@@ -29,7 +30,7 @@ internal class AsmWriter
 
     public void IncludeFile(string filepath) => _sb.AppendLine($".include {filepath}");
 
-    public void StartProc(string procName) => _sb.AppendLine($".proc {MethodVisitor.GetProcName(procName)}");
+    public void StartProc(string procName) => _sb.AppendLine($".proc {Utilities.GetProcName(procName)}");
     
     public void EndProc()
     {
@@ -37,6 +38,14 @@ internal class AsmWriter
         _sb.AppendLine("  rts");
         _sb.AppendLine(".endproc");
         _sb.AppendLine("");
+    }
+
+    public void StartNmi() => _sb.AppendLine($"nmi:");
+
+    public void EndNmi()
+    {
+        _sb.AppendLine($"  rti");
+        _sb.AppendLine($"");
     }
 
     public void WriteChars(int[] charBytes)

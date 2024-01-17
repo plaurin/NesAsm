@@ -1,10 +1,15 @@
 ﻿using System.Globalization;
 using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NesAsm.Analyzers;
 
 public static class Utilities
 {
+    public static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
+    public static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
+    public static string GetLabelName(string fieldName) => $"{char.ToLowerInvariant(fieldName[0])}{fieldName.Substring(1)}";
+
     public static string ConvertOperandToNumericText(string operand)
     {
         if (string.IsNullOrWhiteSpace(operand)) return operand;

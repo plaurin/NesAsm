@@ -1,3 +1,4 @@
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc main
@@ -12,7 +13,6 @@
 
 @loop:
 
-  ; TODO lda palettes, x
   lda palettes, x
 
   ; Write palette data to PPUDATA $2007
@@ -26,6 +26,72 @@
   rts
 .endproc
 
+nmi:
+  ldx #$00
+  stx $2003
+
+@spriteLoop:
+
+  lda hiloWorldSprites, x
+  sta $2004
+  inx
+
+  cpx #44
+  bne @spriteLoop
+  rti
+
+.segment "CODE"
+
+hiloWorldSprites:
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 30
+  .byte 1
+  .byte 0
+  .byte 30
+  .byte 30
+  .byte 2
+  .byte 0
+  .byte 39
+
+  .byte 30
+  .byte 3
+  .byte 0
+  .byte 48
+  .byte 30
+  .byte 4
+  .byte 0
+  .byte 57
+
+  .byte 40
+  .byte 5
+  .byte 0
+  .byte 75
+  .byte 40
+  .byte 4
+  .byte 0
+  .byte 84
+
+  .byte 40
+  .byte 6
+  .byte 0
+  .byte 93
+  .byte 40
+  .byte 3
+  .byte 0
+  .byte 102
+
+  .byte 40
+  .byte 7
+  .byte 0
+  .byte 111
 .segment "CODE"
 
 palettes:
@@ -66,6 +132,24 @@ palettes:
   .byte 0
 
 .segment "CHARS"
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
 
   .byte 195
   .byte 195
@@ -193,4 +277,4 @@ palettes:
   .byte 0
   .byte 0
 
-.include "wrapper.s"
+.include "wrapper-no-nmi.s"

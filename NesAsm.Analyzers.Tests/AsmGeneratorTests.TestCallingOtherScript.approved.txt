@@ -11,6 +11,7 @@
 - RunResult[0].GeneratedSources[0].HintName: Asm.CallingOtherScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.CallingOtherScript.s
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc main

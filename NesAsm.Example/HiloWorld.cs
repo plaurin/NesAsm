@@ -2,7 +2,7 @@
 
 namespace NesAsm.Example;
 
-[PostFileInclude("wrapper.s")]
+[PostFileInclude("wrapper-no-nmi.s")]
 public class HiloWorld : ScriptBase
 {
     public HiloWorld(NESEmulator emulator) : base(emulator)
@@ -22,7 +22,6 @@ public class HiloWorld : ScriptBase
 
         loop:
 
-        // TODO lda palettes, x
         LDA(Palettes, X);
 
         // Write palette data to PPUDATA $2007
@@ -33,6 +32,82 @@ public class HiloWorld : ScriptBase
 
         if (BNE()) goto loop;
     }
+
+    public void Nmi()
+    {
+        LDXi(0x00);
+        STX(0x2003);
+
+        spriteLoop:
+
+        LDA(HiloWorldSprites, X);
+        STA(0x2004);
+        INX();
+
+        CPXi(44);
+        if (BNE()) goto spriteLoop;
+    }
+
+    [RomData]
+    private byte[] HiloWorldSprites = [
+        // Empty sprites
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+
+        // H
+        30,  // Y position - Top
+        1,   // Tile 1
+        0,   // Palette 4
+        30,  // X position - Left
+
+        // I
+        30,  // Y position - Top
+        2,   // Tile 2
+        0,   // Palette 4
+        39,  // X position - Left
+
+        // L
+        30,  // Y position - Top
+        3,   // Tile 3
+        0,   // Palette 4
+        48,  // X position - Left
+
+        // O
+        30,  // Y position - Top
+        4,   // Tile 4
+        0,   // Palette 4
+        57,  // X position - Left
+
+        // W
+        40,  // Y position - Top
+        5,   // Tile 5
+        0,   // Palette 4
+        75,  // X position - Left
+
+        // O
+        40,  // Y position - Top
+        4,   // Tile 4
+        0,   // Palette 4
+        84,  // X position - Left
+
+        // R
+        40,  // Y position - Top
+        6,   // Tile 6
+        0,   // Palette 4
+        93,  // X position - Left
+
+        // L
+        40,  // Y position - Top
+        3,   // Tile 3
+        0,   // Palette 4
+        102,  // X position - Left
+
+        // D
+        40,  // Y position - Top
+        7,   // Tile 7
+        0,   // Palette 4
+        111,  // X position - Left
+    ];
 
     [RomData]
     private byte[] Palettes = [
@@ -75,6 +150,10 @@ public class HiloWorld : ScriptBase
 
     [CharData]
     private byte[] Characters = [
+        // First tile is empty
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+
         // H
         0b_11000011,
         0b_11000011,

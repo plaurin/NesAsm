@@ -22,6 +22,7 @@
 - RunResult[0].GeneratedSources[0].HintName: Asm.ParametersScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.ParametersScript.s
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc main

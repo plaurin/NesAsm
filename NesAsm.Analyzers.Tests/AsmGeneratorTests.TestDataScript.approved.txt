@@ -16,6 +16,7 @@
 - RunResult[0].GeneratedSources[0].HintName: Asm.DataScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.DataScript.s
+; Auto generated code using the NesAsm project
 .segment "CODE"
 
 .proc main
