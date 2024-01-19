@@ -10,13 +10,14 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B064C6F5-BC24-4A62-8C05-31484C7607F3}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Analyzers", "NesAsm.Analyzers\NesAsm.Analyzers.csproj", "{F85DF064-F8C9-4348-9F13-A4FEB9BEEBA2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Example", "NesAsm.Example\NesAsm.Example.csproj", "{01546A9C-F633-4DE0-A8A0-58061DAB3DB7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesAsm.Analyzers.Tests", "NesAsm.Analyzers.Tests\NesAsm.Analyzers.Tests.csproj", "{112D3A20-E897-4356-9814-B1C605063B04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Analyzers.Tests", "NesAsm.Analyzers.Tests\NesAsm.Analyzers.Tests.csproj", "{112D3A20-E897-4356-9814-B1C605063B04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
