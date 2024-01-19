@@ -16,11 +16,14 @@ internal class AllInstructionsScript : ScriptBase
 
         LDA(0x3F);
         LDA(0x2002);
+        LDA(PPUSTATUS);
 
         LDA(Data, X);
         LDA(Data, Y);
 
         STA(0x2006);
+        STA(PPUADDR);
+        STA(PPUDATA);
     }
 
     [RomData]

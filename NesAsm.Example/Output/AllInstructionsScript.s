@@ -8,11 +8,14 @@
 
   lda $3F
   lda $2002
+  lda $2002
 
   lda data, x
   lda data, y
 
   sta $2006
+  sta $2006
+  sta $2007
 
   rts
 .endproc

@@ -12,20 +12,20 @@ public class HiloWorld : ScriptBase
     public void Main()
     {
         // Read the PPUSTATUS register $2002
-        LDA(0x2002);
+        LDA(PPUSTATUS);
 
         // Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
         LDAi(0x3F);
-        STA(0x2006);
+        STA(PPUADDR);
         LDAi(0x00);
-        STA(0x2006);
+        STA(PPUADDR);
 
         loop:
 
         LDA(Palettes, X);
 
         // Write palette data to PPUDATA $2007
-        STA(0x2007);
+        STA(PPUDATA);
         INX();
 
         CPXi(0x20);

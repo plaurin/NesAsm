@@ -123,7 +123,8 @@ internal class MethodVisitor
                     // Hack to be removed after proper support of other script call with parameters
                     if (operands.Single() != ")")
                     {
-                        context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, location, $"Operand {operands.Single()} not supported, should be a method argument in {line}");
+                        ParseOp(operation, operands.Single(), location, context);
+
                         continue;
                     }
                 }

@@ -14,6 +14,10 @@ public static class Utilities
     {
         if (string.IsNullOrWhiteSpace(operand)) return operand;
 
+        operand = operand.Replace("PPUSTATUS", "0x2002");
+        operand = operand.Replace("PPUADDR", "0x2006");
+        operand = operand.Replace("PPUDATA", "0x2007");
+
         if (operand.Length >= 2)
         {
             if (operand.Substring(0, 2) == "0x" && byte.TryParse(operand.Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var _)) return $"${operand.Substring(2)}";
