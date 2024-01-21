@@ -78,3 +78,10 @@ NesAsm use [Source Generator](https://learn.microsoft.com/en-us/dotnet/csharp/ro
 To compile ASM code to .nes rom file NesAsm rely on https://cc65.github.io/
 
 ![HelloWorld](doc/HiloWorld.png)
+
+# References
+
+https://www.youtube.com/@NesHacker
+https://github.com/NesHacker
+https://github.com/Xyene/Emulator.NES/tree/master
+https://www.middle-engine.com/blog/posts/2020/06/23/programming-the-nes-the-6502-in-detail

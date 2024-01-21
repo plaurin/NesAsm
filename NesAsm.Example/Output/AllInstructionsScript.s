@@ -17,6 +17,13 @@
   sta $2006
   sta $2007
 
+  lsr a
+  rol $20
+
+@label:
+  bne @label
+  bcc @label
+
   rts
 .endproc
 

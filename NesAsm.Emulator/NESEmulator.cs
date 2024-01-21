@@ -137,7 +137,25 @@ public class NESEmulator
     /// <remarks>Only branches if the Zero flag is not set.</remarks>
     public bool BNE() => !_zero;
 
+    /// <summary>
+    /// Logical Shift Right. Shift one bit right in the Accumulator
+    /// </summary>
+    /// <remarks>Shifts the bits of the specified byte one bit to the right. The new value of bit #7 is zero. The old value of bit #0 is stored in the Carry flag.</remarks>
+    public void LSR() { _carry = _a % 2 == 1; _negative = false; _a >>= 1; _zero = _a == 0; }
+
     public void LSR(ushort address) { throw new NotImplementedException(); } // ??? operand?
+
+    /// <summary>
+    /// Rotate one bit left in the Accumulator
+    /// </summary>
+    /// <remarks>Rotates the bits of the specified byte by one bit to the left. The new value of bit #0 comes from the Carry flag, and then the old value of bit #7 is used to update the Carry flag.</remarks>
+    public void ROL() { var c = _carry; _carry = (_a & 0x80) > 0; _a <<= 1; if (c) _a += 1; }
+
+    /// <summary>
+    /// Rotate one bit left in Memory
+    /// </summary>
+    /// <remarks>Rotates the bits of the specified byte by one bit to the left. The new value of bit #0 comes from the Carry flag, and then the old value of bit #7 is used to update the Carry flag.</remarks>
+    public void ROL(ushort address) { var c = _carry; _carry = (_memory[address] & 0x80) > 0; _memory[address] <<= 1; if (c) _memory[address] += 1; }
 
     public void JMP(/* Goto Label */) { throw new NotImplementedException(); }
 

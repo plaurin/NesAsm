@@ -11,11 +11,11 @@ internal static class ClassVisitor
 
         writer.StartCodeSegment();
 
-        var allMethods = GetAllClassMethods(classDeclarationSyntax);
+        var classVisitorContext = new ClassVisitorContext(context, GetAllClassMethods(classDeclarationSyntax));
 
         foreach (var member in classDeclarationSyntax.Members)
         {
-            MemberVisitor.Visit(member, new ClassVisitorContext(context, allMethods));
+            MemberVisitor.Visit(member, classVisitorContext);
         }
 
         foreach (var att in classDeclarationSyntax.AttributeLists)
@@ -28,6 +28,11 @@ internal static class ClassVisitor
                     writer.IncludeFile(filepath);
                 }
             }
+        }
+
+        foreach (var scriptReference in classVisitorContext.ScriptReferences)
+        {
+            writer.IncludeFile($"\"{scriptReference}.s\"");
         }
     }
 

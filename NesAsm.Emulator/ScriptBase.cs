@@ -70,4 +70,8 @@ public abstract partial class ScriptBase
     protected bool BCC() => _emulator.BCC();
     protected bool BEQ() => _emulator.BEQ();
     protected bool BNE() => _emulator.BNE();
+
+    protected void LSR() => _emulator.LSR();
+    protected void ROL() => _emulator.ROL();
+    protected void ROL(ushort address) => _emulator.ROL(address);
 }

@@ -14,3 +14,4 @@
   rts
 .endproc
 
+.include "MultiProcScript.s"

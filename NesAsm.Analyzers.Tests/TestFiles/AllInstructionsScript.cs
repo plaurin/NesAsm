@@ -24,6 +24,13 @@ internal class AllInstructionsScript : ScriptBase
         STA(0x2006);
         STA(PPUADDR);
         STA(PPUDATA);
+
+        LSR();
+        ROL(0x20);
+
+        label:
+        if (BNE()) goto label;
+        if (BCC()) goto label;
     }
 
     [RomData]

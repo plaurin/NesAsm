@@ -65,7 +65,7 @@ public class AsmGeneratorTests
     [Fact]
     public void TestCallingOtherScript()
     {
-        TestScript("CallingOtherScript.cs");
+        TestScript("CallingOtherScript.cs", "MultiProcScript.cs");
     }
 
     [Fact]
@@ -80,11 +80,12 @@ public class AsmGeneratorTests
         TestScript("AllInstructionsScript.cs");
     }
 
-    private static void TestScript(string filename)
+    private static void TestScript(params string[] filenames)
     {
         var generator = new AsmGenerator();
-        var content = File.ReadAllText($@"..\..\..\TestFiles\{filename}");
 
-        GeneratorTestUtilities.TestGenerator(generator, content);
+        var contents = filenames.Select(filename => File.ReadAllText($@"..\..\..\TestFiles\{filename}"));
+
+        GeneratorTestUtilities.TestGenerator(generator, contents.ToArray());
     }
 }

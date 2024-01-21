@@ -10,25 +10,29 @@ namespace NesAsm.Analyzers.Tests;
 
 internal class GeneratorTestUtilities
 {
-    public static void TestGenerator(ISourceGenerator generator, string source)
+    public static void TestGenerator(ISourceGenerator generator, string source) => TestGenerator(generator, new[] { source });
+
+    public static void TestGenerator(ISourceGenerator generator, string[] sources)
     {
         // Create the driver that will control the generation, passing in our generator
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        TestGenerator(driver, source);
+        TestGenerator(driver, sources);
     }
 
-    public static void TestGenerator(IIncrementalGenerator generator, string source)
+    public static void TestGenerator(IIncrementalGenerator generator, string source) => TestGenerator(generator, new[] { source });
+
+    public static void TestGenerator(IIncrementalGenerator generator, string[] sources)
     {
         // Create the driver that will control the generation, passing in our generator
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        TestGenerator(driver, source);
+        TestGenerator(driver, sources);
     }
 
-    private static void TestGenerator(GeneratorDriver driver, string source)
+    private static void TestGenerator(GeneratorDriver driver, string[] sources)
     {
-        Compilation inputCompilation = CreateCompilation(source);
+        Compilation inputCompilation = CreateCompilation(sources);
 
         // Run the generation pass
         // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
@@ -40,7 +44,7 @@ internal class GeneratorTestUtilities
         Approvals.Verify(summary);
     }
 
-    private static Compilation CreateCompilation(string source)
+    private static Compilation CreateCompilation(string[] sources)
     {
         var references = new List<MetadataReference>
         {
@@ -54,7 +58,7 @@ internal class GeneratorTestUtilities
             .ForEach(a => references.Add(MetadataReference.CreateFromFile(Assembly.Load(a).Location)));
 
         return CSharpCompilation.Create("compilation",
-                    new[] { CSharpSyntaxTree.ParseText(source) },
+                    sources.Select(source => CSharpSyntaxTree.ParseText(source)),
                     references,
                     new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }

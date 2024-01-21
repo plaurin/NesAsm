@@ -157,6 +157,7 @@ internal class MethodVisitor
 
                 if (!string.IsNullOrEmpty(script))
                 {
+                    context.AddScriptReference(script);
                     writer.WriteJSROpCode(Utilities.GetProcName(operation));
                     continue;
                 }
@@ -196,13 +197,17 @@ internal class MethodVisitor
             match = branchPattern.Match(line);
             if (match.Success)
             {
-                if (match.Groups["Operation"].Value == "BNE")
+                var branchingOpCode = match.Groups["Operation"].Value;
+                var label = match.Groups["Label"].Value;
+
+                switch (branchingOpCode)
                 {
-                    writer.WriteBranchOpCode("bne", match.Groups["Label"].Value);
-                    continue;
+                    case "BNE": writer.WriteBranchOpCode("bne", label); continue;
+                    case "BCC": writer.WriteBranchOpCode("bcc", label); continue;
                 }
 
-                throw new InvalidOperationException($"Branching OpCode detected but not supported in {line}");
+                context.ReportDiagnostic(Diagnostics.BranchingOpCodeNotSupported, location, branchingOpCode);
+                continue;
             }
 
             if (line.Trim().StartsWith("return"))
@@ -266,6 +271,8 @@ internal class MethodVisitor
                 case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
                 case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
                 case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
+                case "LSR": context.Writer.WriteOpCode("lsr a"); break;
+                case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
                 default:
                     {
                         var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
