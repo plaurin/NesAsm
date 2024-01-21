@@ -13,26 +13,16 @@ internal static class ClassVisitor
 
         var classVisitorContext = new ClassVisitorContext(context, GetAllClassMethods(classDeclarationSyntax));
 
+        ProcessClassAttributes(classDeclarationSyntax, classVisitorContext);
+
         foreach (var member in classDeclarationSyntax.Members)
         {
             MemberVisitor.Visit(member, classVisitorContext);
         }
 
-        foreach (var att in classDeclarationSyntax.AttributeLists)
-        {
-            foreach (var attribute in att.Attributes)
-            {
-                if (attribute.Name.ToString() == "PostFileInclude")
-                {
-                    var filepath = attribute.ArgumentList.Arguments.ToString();
-                    writer.IncludeFile(filepath);
-                }
-            }
-        }
-
         foreach (var scriptReference in classVisitorContext.ScriptReferences)
         {
-            writer.IncludeFile($"\"{scriptReference}.s\"");
+            writer.IncludeFile($"{scriptReference}.s");
         }
     }
 
@@ -50,5 +40,66 @@ internal static class ClassVisitor
         }
 
         return result.ToArray();
+    }
+
+    private static void ProcessClassAttributes(ClassDeclarationSyntax classDeclarationSyntax, ClassVisitorContext context)
+    {
+        foreach (var att in classDeclarationSyntax.AttributeLists)
+        {
+            foreach (var attribute in att.Attributes)
+            {
+                if (attribute.Name.ToString() == "PostFileInclude")
+                {
+                    var filepath = attribute.ArgumentList.Arguments.ToString();
+                    context.AddScriptReference(filepath);
+                }
+
+                if (attribute.Name.ToString() == "HeaderSegment")
+                {
+                    byte prgRomBanks = 2;
+                    byte chrRomBanks = 1;
+                    byte mapper = 1;
+                    bool verticalMirroring = true;
+                    var paramIndex = 0;
+
+                    foreach (var argument in attribute.ArgumentList.Arguments)
+                    {
+                        var namedParameter = argument.NameColon?.Expression.ToString();
+                        var argumentValue = argument.Expression.ToString();
+
+                        if (namedParameter == nameof(prgRomBanks))
+                            prgRomBanks = byte.Parse(argumentValue);
+                        else if (namedParameter == nameof(chrRomBanks))
+                            chrRomBanks = byte.Parse(argumentValue);
+                        else if (namedParameter == nameof(mapper))
+                            mapper = byte.Parse(argumentValue);
+                        else if (namedParameter == nameof(verticalMirroring))
+                            verticalMirroring = bool.Parse(argumentValue);
+                        else if (paramIndex == 0)
+                            prgRomBanks = byte.Parse(argumentValue);
+                        else if (paramIndex == 1)
+                            chrRomBanks = byte.Parse(argumentValue);
+                        else if (paramIndex == 2)
+                            mapper = byte.Parse(argumentValue);
+                        else if (paramIndex == 3)
+                            verticalMirroring = bool.Parse(argumentValue);
+
+                        paramIndex++;
+                    }
+
+                    context.Writer.StartHeaderSegment(prgRomBanks, chrRomBanks, mapper, verticalMirroring);
+                }
+
+                if (attribute.Name.ToString() == "VectorsSegment")
+                {
+                    context.Writer.StartVectorsSegment();
+                }
+
+                if (attribute.Name.ToString() == "StartupSegment")
+                {
+                    context.Writer.StartStartupSegment();
+                }
+            }
+        }
     }
 }

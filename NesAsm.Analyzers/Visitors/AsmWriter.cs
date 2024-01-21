@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace NesAsm.Analyzers.Visitors;
 
@@ -10,6 +11,32 @@ internal class AsmWriter
     {
         _sb = new StringBuilder();
         _sb.AppendLine("; Auto generated code using the NesAsm project");
+    }
+
+    public void StartHeaderSegment(byte prgRomBanks, byte chrRomBanks, byte mapper, bool verticalMirroring)
+    {
+        _sb.AppendLine(".segment \"HEADER\"");
+        _sb.AppendLine("  .byte $4E, $45, $53, $1A  ; iNES header identifier");
+        _sb.AppendLine($"  .byte {prgRomBanks}                   ; {prgRomBanks}x 16KB PRG-ROM Banks");
+        _sb.AppendLine($"  .byte {chrRomBanks}                   ; {chrRomBanks}x  8KB CHR-ROM");
+        _sb.AppendLine($"  .byte ${mapper:X2}                 ; mapper 0 - $01");
+        _sb.AppendLine($"  .byte {(verticalMirroring ? "$00" : "$01")}                 ; $00 - vertical mirroring");
+        _sb.AppendLine("");
+    }
+
+    public void StartVectorsSegment()
+    {
+        _sb.AppendLine(".segment \"VECTORS\"");
+        _sb.AppendLine("  .addr nmi");
+        _sb.AppendLine("  .addr reset");
+        _sb.AppendLine("  .addr 0");
+        _sb.AppendLine("");
+    }
+
+    public void StartStartupSegment()
+    {
+        _sb.AppendLine(".segment \"STARTUP\"");
+        _sb.AppendLine("");
     }
 
     public void StartCodeSegment()
@@ -28,7 +55,7 @@ internal class AsmWriter
 
     public void WriteEmptyLine() => _sb.AppendLine("");
 
-    public void IncludeFile(string filepath) => _sb.AppendLine($".include {filepath}");
+    public void IncludeFile(string filepath) => _sb.AppendLine($".include \"{filepath}\"");
 
     public void StartProc(string procName) => _sb.AppendLine($".proc {Utilities.GetProcName(procName)}");
     
@@ -77,5 +104,4 @@ internal class AsmWriter
     public void WriteBranchOpCode(string opCode, string label) => _sb.AppendLine($"  {opCode} @{label}");
 
     public override string ToString() => _sb.ToString();
-
 }

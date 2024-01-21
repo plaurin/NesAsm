@@ -80,6 +80,12 @@ public class AsmGeneratorTests
         TestScript("AllInstructionsScript.cs");
     }
 
+    [Fact]
+    public void TestStartupScript()
+    {
+        TestScript("StartupScript.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new AsmGenerator();
