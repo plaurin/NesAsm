@@ -14,6 +14,8 @@ public static class Utilities
     {
         if (string.IsNullOrWhiteSpace(operand)) return operand;
 
+        operand = operand.Replace("PPUCTRL", "0x2000");
+        operand = operand.Replace("PPUMASK", "0x2001");
         operand = operand.Replace("PPUSTATUS", "0x2002");
         operand = operand.Replace("PPUADDR", "0x2006");
         operand = operand.Replace("PPUDATA", "0x2007");

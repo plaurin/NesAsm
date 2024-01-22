@@ -3,7 +3,9 @@ using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Example;
 
-[PostFileInclude("wrapper-no-nmi.s")]
+[HeaderSegment()]
+[VectorsSegment()]
+[StartupSegment()]
 public class Game1 : ScriptBase
 {
     public Game1(NESEmulator emulator) : base(emulator)
@@ -49,6 +51,82 @@ public class Game1 : ScriptBase
 
         CPXi(44);
         if (BNE()) goto spriteLoop;
+    }
+
+    public void Reset()
+    {
+        SEI();
+        CLD();
+        
+        LDXi(0b_0100_0000);
+        STX(0x4017);
+
+        LDXi(0xff);
+        TXS();
+
+        LDXi(0b_0001_0000);
+        STX(0x2000);
+        STX(0x2001);
+        STX(0x4010);
+
+        BIT(0x2002);
+
+        vblankWait1:
+        BIT(0x2002);
+        if (BPL()) goto vblankWait1;
+
+        clearMemory:
+
+        LDAi(0x00);
+
+        STA(0x0000, X);
+        STA(0x0100, X);
+        STA(0x0200, X);
+        STA(0x0300, X);
+        STA(0x0400, X);
+        STA(0x0500, X);
+        STA(0x0600, X);
+        STA(0x0700, X);
+
+        INX();
+        if (BNE()) goto clearMemory;
+
+        vblankWait2:
+        BIT(0x2002);
+        if (BPL()) goto vblankWait2;
+
+        ResetPalettes();
+
+        // To Main
+
+        // Enable Sprites & Background
+        LDAi(0b_0001_1000); 
+        STA(PPUMASK);
+
+        // Enable NMI
+        LDAi(0b_1000_0000);
+        STA(PPUCTRL);
+
+        Main();
+    }
+
+    public void ResetPalettes()
+    {
+        BIT(0x2002);
+        
+        LDAi(0x3f);
+        STA(0x2006);
+        LDAi(0x00);
+        STA(0x2006);
+
+        LDAi(0x0F);
+        LDXi(0x20);
+
+        paletteLoadLoop:
+
+        STA(0x2007);
+        DEX();
+        if (BNE()) goto paletteLoadLoop;
     }
 
     [RomData]

@@ -69,7 +69,7 @@ internal class MethodVisitor
                     parameters.Add((paramIndex++, match.Groups["ReturnValue"].Value, "byte"));
                 }
 
-                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, location, context);
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, string.Empty, location, context);
 
                 continue;
             }
@@ -77,7 +77,7 @@ internal class MethodVisitor
             match = opPattern.Match(line);
             if (match.Success)
             {
-                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, location, context);
+                ParseOp(match.Groups["Operation"].Value, match.Groups["Operand"].Value, string.Empty, location, context);
 
                 continue;
             }
@@ -123,7 +123,7 @@ internal class MethodVisitor
                     // Hack to be removed after proper support of other script call with parameters
                     if (operands.Single() != ")")
                     {
-                        ParseOp(operation, operands.Single(), location, context);
+                        ParseOp(operation, operands.Single(), string.Empty, location, context);
 
                         continue;
                     }
@@ -147,6 +147,7 @@ internal class MethodVisitor
                     switch (operation)
                     {
                         case "LDA": writer.WriteOpCode("lda", Utilities.GetLabelName(operands.ElementAt(0)), indexorRegister); break;
+                        case "STA": ParseOp(operation, operands.ElementAt(0), indexorRegister, location, context); break; //writer.WriteOpCode("sta", Utilities.GetLabelName(operands.ElementAt(0)), indexorRegister); break;
                         default:
                             context.ReportDiagnostic(Diagnostics.AbsoluteIndexedOpCodeNotSupported, location, operation);
                             continue;
@@ -204,6 +205,7 @@ internal class MethodVisitor
                 {
                     case "BNE": writer.WriteBranchOpCode("bne", label); continue;
                     case "BCC": writer.WriteBranchOpCode("bcc", label); continue;
+                    case "BPL": writer.WriteBranchOpCode("bpl", label); continue;
                 }
 
                 context.ReportDiagnostic(Diagnostics.BranchingOpCodeNotSupported, location, branchingOpCode);
@@ -256,35 +258,53 @@ internal class MethodVisitor
         return true;
     }
 
-    private static void ParseOp(string operation, string operand, Location location, ClassVisitorContext context)
+    private static void ParseOp(string operation, string operand, string indexorRegister, Location location, ClassVisitorContext context)
     {
         try
         {
             var numericOperand = Utilities.ConvertOperandToNumericText(operand);
-            switch (operation)
+            if (string.IsNullOrEmpty(indexorRegister))
             {
-                case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
-                case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
-                case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
-                case "INX": context.Writer.WriteOpCode("inx"); break;
-                case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
-                case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
-                case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
-                case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
-                case "LSR": context.Writer.WriteOpCode("lsr a"); break;
-                case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
-                default:
-                    {
-                        var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
-                        if (callingProc != null)
+                switch (operation)
+                {
+                    case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
+                    case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
+                    case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
+                    case "INX": context.Writer.WriteOpCode("inx"); break;
+                    case "DEX": context.Writer.WriteOpCode("dex"); break;
+                    case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
+                    case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
+                    case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
+                    case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
+                    case "LSR": context.Writer.WriteOpCode("lsr a"); break;
+                    case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
+                    case "SEI": context.Writer.WriteOpCode("sei"); break;
+                    case "CLD": context.Writer.WriteOpCode("cld"); break;
+                    case "TXS": context.Writer.WriteOpCode("txs"); break;
+                    case "BIT": context.Writer.WriteOpCode("bit", numericOperand); break;
+                    default:
                         {
-                            context.Writer.WriteJSROpCode(Utilities.GetProcName(operation));
-                            break;
-                        }
+                            var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
+                            if (callingProc != null)
+                            {
+                                context.Writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                                break;
+                            }
 
-                        context.ReportDiagnostic(Diagnostics.InstructionNotSupported, location, operation);
-                    }
-                    break;
+                            context.ReportDiagnostic(Diagnostics.InstructionNotSupported, location, operation);
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                switch (operation)
+                {
+                    case "STA": context.Writer.WriteOpCode("sta", numericOperand, indexorRegister); break;
+                    default:
+                        context.ReportDiagnostic(Diagnostics.AbsoluteIndexedOpCodeNotSupported, location, operation);
+                        break;
+                }
             }
         }
         catch (InvalidOperationException ex)

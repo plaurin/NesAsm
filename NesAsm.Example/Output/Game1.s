@@ -1,4 +1,18 @@
 ; Auto generated code using the NesAsm project
+.segment "HEADER"
+  .byte $4E, $45, $53, $1A  ; iNES header identifier
+  .byte 2                   ; 2x 16KB PRG-ROM Banks
+  .byte 1                   ; 1x  8KB CHR-ROM
+  .byte $01                 ; mapper 0 - $01
+  .byte $00                 ; $00 - vertical mirroring
+
+.segment "VECTORS"
+  .addr nmi
+  .addr reset
+  .addr 0
+
+.segment "STARTUP"
+
 .segment "CODE"
 
 .proc main
@@ -41,6 +55,84 @@ nmi:
   cpx #44
   bne @spriteLoop
   rti
+
+.proc reset
+  sei
+  cld
+
+  ldx #%01000000
+  stx $4017
+
+  ldx #$ff
+  txs
+
+  ldx #%00010000
+  stx $2000
+  stx $2001
+  stx $4010
+
+  bit $2002
+
+@vblankWait1:
+  bit $2002
+  bpl @vblankWait1
+
+@clearMemory:
+
+  lda #$00
+
+  sta 0x0000, x
+  sta 0x0100, x
+  sta 0x0200, x
+  sta 0x0300, x
+  sta 0x0400, x
+  sta 0x0500, x
+  sta 0x0600, x
+  sta 0x0700, x
+
+  inx
+  bne @clearMemory
+
+@vblankWait2:
+  bit $2002
+  bpl @vblankWait2
+
+  jsr resetPalettes
+
+  ; To Main
+
+  ; Enable Sprites & Background
+  lda #%00011000
+  sta $2001
+
+  ; Enable NMI
+  lda #%10000000
+  sta $2000
+
+  jsr main
+
+  rts
+.endproc
+
+.proc resetPalettes
+  bit $2002
+
+  lda #$3f
+  sta $2006
+  lda #$00
+  sta $2006
+
+  lda #$0F
+  ldx #$20
+
+@paletteLoadLoop:
+
+  sta $2007
+  dex
+  bne @paletteLoadLoop
+
+  rts
+.endproc
 
 .segment "CODE"
 
@@ -279,5 +371,4 @@ palettes:
   .byte 0
   .byte 0
 
-.include "wrapper-no-nmi.s"
 .include "ReadController.s"

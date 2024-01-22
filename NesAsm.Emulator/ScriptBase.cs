@@ -54,6 +54,8 @@ public abstract partial class ScriptBase
     protected void STX(ushort address) => _emulator.STX(address);
     protected void STY(ushort address) => _emulator.STY(address);
 
+    protected void STA(ushort baseAddress, AddressingRegister register) { }
+
     protected void CMPi(byte value) => _emulator.CMPi(value);
     protected void CPXi(byte value) => _emulator.CPXi(value);
     protected void CPYi(byte value) => _emulator.CPYi(value);
@@ -74,4 +76,10 @@ public abstract partial class ScriptBase
     protected void LSR() => _emulator.LSR();
     protected void ROL() => _emulator.ROL();
     protected void ROL(ushort address) => _emulator.ROL(address);
+
+    protected void SEI() { }
+    protected void CLD() { }
+    protected void TXS() { }
+    protected void BIT(ushort address) { }
+
 }

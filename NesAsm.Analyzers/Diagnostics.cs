@@ -93,7 +93,7 @@ internal static class Diagnostics
         isEnabledByDefault: true);
 
     /// <summary>
-    /// NA0008: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+    /// NA0008: Instruction is not currently supported: {0}
     /// </summary>
     internal static DiagnosticDescriptor InstructionNotSupported = new(
         "NA0008",

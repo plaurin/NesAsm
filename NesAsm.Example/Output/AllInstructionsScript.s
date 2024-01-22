@@ -5,6 +5,10 @@
   lda #2
   ldx #3
   ldy #4
+  lda #%00011000
+  lda #$10
+
+  ;LDAi(5); // Enable Sprites & Background - Inline comment not supported yet
 
   lda $3F
   lda $2002
@@ -12,17 +16,30 @@
 
   lda data, x
   lda data, y
+  sta $20, x
+  sta $200, y
 
   sta $2006
+  sta $2000
+  sta $2001
+  sta $2002
   sta $2006
   sta $2007
 
+  inx
+  dex
+
   lsr a
   rol $20
+  sei
+  cld
+  txs
+  bit $2002
 
 @label:
   bne @label
   bcc @label
+  bpl @label
 
   rts
 .endproc

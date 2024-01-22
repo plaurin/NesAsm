@@ -14,6 +14,10 @@ internal class AllInstructionsScript : ScriptBase
         LDAi(2);
         LDXi(3);
         LDYi(4);
+        LDAi(0b_0001_1000);
+        LDAi(0x10);
+
+        //LDAi(5); // Enable Sprites & Background - Inline comment not supported yet
 
         LDA(0x3F);
         LDA(0x2002);
@@ -21,19 +25,32 @@ internal class AllInstructionsScript : ScriptBase
 
         LDA(Data, X);
         LDA(Data, Y);
+        STA(0x20, X);
+        STA(0x200, Y);
 
         STA(0x2006);
+        STA(PPUCTRL);
+        STA(PPUMASK);
+        STA(PPUSTATUS);
         STA(PPUADDR);
         STA(PPUDATA);
 
+        INX();
+        DEX();
+
         LSR();
         ROL(0x20);
+        SEI();
+        CLD();
+        TXS();
+        BIT(0x2002);
 
         label:
         if (BNE()) goto label;
         if (BCC()) goto label;
+        if (BPL()) goto label;
     }
 
     [RomData]
-    private byte[] Data = [0, 1, 2, 3, 4];
+    private readonly byte[] Data = [0, 1, 2, 3, 4];
 }
