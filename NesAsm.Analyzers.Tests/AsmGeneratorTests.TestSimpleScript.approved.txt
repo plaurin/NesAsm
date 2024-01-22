@@ -1,16 +1,16 @@
 ﻿- Main diagnostics:
-(23,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
-(29,23): error NA0001: Type long is not supported for method parameters
+(24,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+(30,23): error NA0001: Type long is not supported for method parameters
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-(23,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
-(29,23): error NA0001: Type long is not supported for method parameters
+(24,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+(30,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-(23,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
-(29,23): error NA0001: Type long is not supported for method parameters
+(24,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+(30,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.SimpleScript.cs

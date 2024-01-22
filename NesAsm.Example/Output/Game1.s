@@ -279,5 +279,5 @@ palettes:
   .byte 0
   .byte 0
 
-.include ""wrapper-no-nmi.s".s"
+.include "wrapper-no-nmi.s"
 .include "ReadController.s"

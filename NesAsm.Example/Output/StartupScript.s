@@ -1,6 +1,4 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
-
 .segment "HEADER"
   .byte $4E, $45, $53, $1A  ; iNES header identifier
   .byte 2                   ; 2x 16KB PRG-ROM Banks
@@ -14,6 +12,8 @@
   .addr 0
 
 .segment "STARTUP"
+
+.segment "CODE"
 
 .proc main
   lda 25

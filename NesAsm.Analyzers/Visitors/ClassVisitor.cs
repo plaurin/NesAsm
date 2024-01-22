@@ -9,11 +9,11 @@ internal static class ClassVisitor
     {
         var writer = context.Writer;
 
-        writer.StartCodeSegment();
-
         var classVisitorContext = new ClassVisitorContext(context, GetAllClassMethods(classDeclarationSyntax));
 
         ProcessClassAttributes(classDeclarationSyntax, classVisitorContext);
+
+        writer.StartCodeSegment();
 
         foreach (var member in classDeclarationSyntax.Members)
         {
@@ -22,7 +22,7 @@ internal static class ClassVisitor
 
         foreach (var scriptReference in classVisitorContext.ScriptReferences)
         {
-            writer.IncludeFile($"{scriptReference}.s");
+            writer.IncludeFile(scriptReference);
         }
     }
 
@@ -50,7 +50,7 @@ internal static class ClassVisitor
             {
                 if (attribute.Name.ToString() == "PostFileInclude")
                 {
-                    var filepath = attribute.ArgumentList.Arguments.ToString();
+                    var filepath = attribute.ArgumentList.Arguments.ToString().Trim('"');
                     context.AddScriptReference(filepath);
                 }
 

@@ -157,7 +157,7 @@ internal class MethodVisitor
 
                 if (!string.IsNullOrEmpty(script))
                 {
-                    context.AddScriptReference(script);
+                    context.AddScriptReference($"{script}.s");
                     writer.WriteJSROpCode(Utilities.GetProcName(operation));
                     continue;
                 }

@@ -1,4 +1,5 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
