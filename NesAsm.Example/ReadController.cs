@@ -27,5 +27,9 @@ public class ReadController : ScriptBase
         LSR();
         ROL(0x20);
         if (BCC()) goto read_loop;
+
+        // Temp copy
+        LDA(0x20);
+        STA(0x21);
     }
 }

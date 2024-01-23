@@ -11,7 +11,10 @@ internal class CallingOtherScript : ScriptBase
     public void Main()
     {
         Call<MultiProcScript>(s => s.ProcB());
+
         MyProcC();
+
+        Jump<MultiProcScript>(s => s.ProcC());
     }
 
     public void MyProcC()

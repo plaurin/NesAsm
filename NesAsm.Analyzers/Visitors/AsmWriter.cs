@@ -100,7 +100,9 @@ internal class AsmWriter
     public void WriteOpCodeImmediate(string opCode, string value) => _sb.AppendLine($"  {opCode} #{value}");
 
     public void WriteJSROpCode(string procName) => _sb.AppendLine($"  jsr {procName}");
-    
+    public void WriteJMPOpCode(string procName) => _sb.AppendLine($"  jmp {procName}");
+    public void WriteJMPToLabelOpCode(string label) => _sb.AppendLine($"  jmp @{label}");
+
     public void WriteBranchOpCode(string opCode, string label) => _sb.AppendLine($"  {opCode} @{label}");
 
     public override string ToString() => _sb.ToString();

@@ -20,6 +20,10 @@
   rol $20
   bcc @read_loop
 
+  ; Temp copy
+  lda $20
+  sta $21
+
   rts
 .endproc
 

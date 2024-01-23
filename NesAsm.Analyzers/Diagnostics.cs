@@ -135,4 +135,15 @@ internal static class Diagnostics
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0012: Invalid Jump Type {0} is not supported
+    /// </summary>
+    internal static DiagnosticDescriptor InvalidJumpTypeNotSupported = new(
+        "NA0012",
+        "Jump Type not supported",
+        "Invalid Jump Type {0} is not supported",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

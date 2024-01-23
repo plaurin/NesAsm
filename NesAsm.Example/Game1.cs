@@ -35,7 +35,11 @@ public class Game1 : ScriptBase
 
         if (BNE()) goto loop;
 
+        endless_loop:
+
         Call<ReadController>(s => s.ReadControllerOne());
+
+        goto endless_loop;
     }
 
     public void Nmi()
@@ -107,7 +111,7 @@ public class Game1 : ScriptBase
         LDAi(0b_1000_0000);
         STA(PPUCTRL);
 
-        Main();
+        Jump<Game1>(s => s.Main());
     }
 
     public void ResetPalettes()

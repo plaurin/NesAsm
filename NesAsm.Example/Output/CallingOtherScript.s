@@ -3,7 +3,10 @@
 
 .proc main
   jsr procB
+
   jsr myProcC
+
+  jmp procC
 
   rts
 .endproc

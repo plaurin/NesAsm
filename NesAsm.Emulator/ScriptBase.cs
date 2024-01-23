@@ -16,6 +16,13 @@ public abstract partial class ScriptBase
         action.Invoke(instance);
     }
 
+    protected void Jump<T>(Action<T> action) where T : ScriptBase
+    {
+        var ctor = typeof(T).GetConstructors().First();
+        var instance = (T)ctor.Invoke(new[] { _emulator });
+        action.Invoke(instance);
+    }
+
     protected AddressingRegister X = AddressingRegister.X;
     protected AddressingRegister Y = AddressingRegister.Y;
 

@@ -11,11 +11,12 @@ namespace NesAsm.Analyzers.Visitors;
 internal class MethodVisitor
 {
     private static readonly Regex opPattern = new("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9__]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
-    private static readonly Regex opXPattern = new("\\s*(Call<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static readonly Regex opXPattern = new("\\s*((?'JumpType'Call|Jump)<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
     private static readonly Regex opReturnPattern = new("\\s*var ((?'ReturnValue'\\w+)|([((](?'ReturnValues'.+)[))]))\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
 
     private static readonly Regex commentPattern = new("//(?'Comment'.+)", RegexOptions.Compiled);
     private static readonly Regex labelPattern = new("(?'Label'.+):", RegexOptions.Compiled);
+    private static readonly Regex gotoPattern = new("^\\s*goto (?'Label'.+);", RegexOptions.Compiled);
     private static readonly Regex branchPattern = new("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
@@ -54,6 +55,13 @@ internal class MethodVisitor
                 continue;
             }
 
+            match = gotoPattern.Match(line);
+            if (match.Success)
+            {
+                writer.WriteJMPToLabelOpCode(match.Groups["Label"].Value.Trim());
+                continue;
+            }
+
             match = opReturnPattern.Match(line);
             if (match.Success)
             {
@@ -85,6 +93,7 @@ internal class MethodVisitor
             match = opXPattern.Match(line);
             if (match.Success)
             {
+                var jumpType = match.Groups["JumpType"].Value;
                 var script = match.Groups["Script"].Value;
                 var operation = match.Groups["Operation"].Value;
                 var operands = match.Groups["Operands"].Value.Split(',').Select(o => o.Trim());
@@ -158,8 +167,16 @@ internal class MethodVisitor
 
                 if (!string.IsNullOrEmpty(script))
                 {
-                    context.AddScriptReference($"{script}.s");
-                    writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                    if (script != (method.Parent as ClassDeclarationSyntax)?.Identifier.Text)
+                        context.AddScriptReference($"{script}.s");
+
+                    if (jumpType == "Call")
+                        writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                    else if (jumpType == "Jump")
+                        writer.WriteJMPOpCode(Utilities.GetProcName(operation));
+                    else
+                        context.ReportDiagnostic(Diagnostics.InvalidJumpTypeNotSupported, location, jumpType);
+
                     continue;
                 }
 

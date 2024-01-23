@@ -37,7 +37,11 @@
 
   bne @loop
 
+@endless_loop:
+
   jsr readControllerOne
+
+  jmp @endless_loop
 
   rts
 .endproc
@@ -81,14 +85,14 @@ nmi:
 
   lda #$00
 
-  sta 0x0000, x
-  sta 0x0100, x
-  sta 0x0200, x
-  sta 0x0300, x
-  sta 0x0400, x
-  sta 0x0500, x
-  sta 0x0600, x
-  sta 0x0700, x
+  sta $0000, x
+  sta $0100, x
+  sta $0200, x
+  sta $0300, x
+  sta $0400, x
+  sta $0500, x
+  sta $0600, x
+  sta $0700, x
 
   inx
   bne @clearMemory
@@ -109,7 +113,7 @@ nmi:
   lda #%10000000
   sta $2000
 
-  jsr main
+  jmp main
 
   rts
 .endproc

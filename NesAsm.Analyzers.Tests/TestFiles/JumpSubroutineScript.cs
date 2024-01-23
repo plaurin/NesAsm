@@ -17,10 +17,21 @@ internal class JumpSubroutineScript : ScriptBase
     public void ProcB()
     {
         LDAi(1);
+
+        Jump<JumpSubroutineScript>(s => s.ProcC());
     }
 
     public void ProcC()
     {
         LDAi(2);
+    }
+
+    public void JumpInsideProc()
+    {
+        loop:
+
+        LDAi(2);
+
+        goto loop;
     }
 }
