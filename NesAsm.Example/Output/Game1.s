@@ -46,7 +46,7 @@
   sta $200, x
   inx
 
-  cpx #40
+  cpx #48
   bne @spriteLoop
 
   ; Main game loop
@@ -54,6 +54,23 @@
 
   jsr readControllerOne
 
+  jsr updateController
+
+  jsr moveFace
+
+  ; Wait for VBlank
+  lda $30
+
+@WaitForVBlank:
+  cmp $30
+  beq @WaitForVBlank
+
+  jmp @endless_loop
+
+  rts
+.endproc
+
+.proc updateController
   ; ## Update button palette
   ; Init palette to zero
   ldx #0
@@ -125,15 +142,39 @@
   stx $226
 
 @EndCheck:
+  ; Hack because it is not possible to finish a method with a label?!?
+  lda #0
 
-  ; Wait for VBlank
-  lda $30
+  rts
+.endproc
 
-@WaitForVBlank:
-  cmp #$30
-  beq @WaitForVBlank
+.proc moveFace
+  ; Move right
+  lda $21
+  and #%00000001
+  beq @MoveLeft
+  inc $22B
 
-  jmp @endless_loop
+@MoveLeft:
+  lda $21
+  and #%00000010
+  beq @MoveDown
+  dec $22B
+
+@MoveDown:
+  lda $21
+  and #%00000100
+  beq @MoveUp
+  inc $228
+
+@MoveUp:
+  lda $21
+  and #%00001000
+  beq @End
+  dec $228
+
+@End:
+  lda 0
 
   rts
 .endproc
@@ -278,6 +319,15 @@ controllerSprites:
   .byte 1
   .byte 90
 
+  .byte 80
+  .byte 9
+  .byte 3
+  .byte 80
+  .byte 80
+  .byte 10
+  .byte 2
+  .byte 100
+
 .segment "CODE"
 
 palettes:
@@ -309,11 +359,11 @@ palettes:
   .byte 0
 
   .byte 15
-  .byte 0
+  .byte 22
   .byte 0
   .byte 0
   .byte 15
-  .byte 0
+  .byte 18
   .byte 0
   .byte 0
 
@@ -471,6 +521,42 @@ palettes:
   .byte 255
   .byte 195
   .byte 195
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 60
+  .byte 126
+  .byte 219
+  .byte 219
+  .byte 255
+  .byte 195
+  .byte 126
+  .byte 60
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 0
+  .byte 102
+  .byte 126
+  .byte 255
+  .byte 255
+  .byte 126
+  .byte 60
+  .byte 24
 
   .byte 0
   .byte 0

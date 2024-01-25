@@ -27,6 +27,7 @@
   sta $2007
 
   inc $200
+  dec $200
   inx
   dex
 
@@ -39,7 +40,7 @@
 
   and #%01010010
 
-  cmp #$30
+  cmp $30
 
 @label:
   beq @label

@@ -51,6 +51,7 @@ public abstract partial class ScriptBase
     protected void INC(ushort address) { throw new NotImplementedException(); }
     protected void INX() => _emulator.INX();
     protected void INY() => _emulator.INY();
+    protected void DEC(ushort address) { throw new NotImplementedException(); }
     protected void DEX() => _emulator.DEX();
     protected void DEY() => _emulator.DEY();
 

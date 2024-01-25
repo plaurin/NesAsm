@@ -44,7 +44,7 @@ public class Game1 : ScriptBase
         STA(0x200, X);
         INX();
 
-        CPXi(40);
+        CPXi(48);
         if (BNE()) goto spriteLoop;
 
         // Main game loop
@@ -52,6 +52,22 @@ public class Game1 : ScriptBase
 
         Call<ReadController>(s => s.ReadControllerOne());
 
+        UpdateController();
+
+        MoveFace();
+
+        // Wait for VBlank
+        LDA(0x30);
+
+        WaitForVBlank:
+        CMP(0x30);
+        if (BEQ()) goto WaitForVBlank;
+
+        goto endless_loop;
+    }
+
+    public void UpdateController()
+    {
         // ## Update button palette
         // Init palette to zero
         LDXi(0);
@@ -123,15 +139,38 @@ public class Game1 : ScriptBase
         STX(0x226);
 
         EndCheck:
+        // Hack because it is not possible to finish a method with a label?!?
+        LDAi(0);
+    }
 
-        // Wait for VBlank
-        LDA(0x30);
+    public void MoveFace()
+    {
+        // Move right
+        LDA(0x21);
+        ANDi(0b_0000_0001);
+        if (BEQ()) goto MoveLeft;
+        INC(0x22B);
 
-        WaitForVBlank:
-        CMP(0x30);
-        if (BEQ()) goto WaitForVBlank;
+        MoveLeft:
+        LDA(0x21);
+        ANDi(0b_0000_0010);
+        if (BEQ()) goto MoveDown;
+        DEC(0x22B);
 
-        goto endless_loop;
+        MoveDown:
+        LDA(0x21);
+        ANDi(0b_0000_0100);
+        if (BEQ()) goto MoveUp;
+        INC(0x228);
+
+        MoveUp:
+        LDA(0x21);
+        ANDi(0b_0000_1000);
+        if (BEQ()) goto End;
+        DEC(0x228);
+
+        End:
+        LDA(0);
     }
 
     public void Nmi()
@@ -278,6 +317,18 @@ public class Game1 : ScriptBase
         8,   // Tile 8
         1,   // Palette 4
         90,  // X position - Left
+
+        // Face
+        80,  // Y position - Top
+        9,   // Tile 9
+        3,   // Palette 6
+        80,  // X position - Left
+
+        // Heart
+        80,  // Y position - Top
+        10,  // Tile 10
+        2,   // Palette 5
+        100, // X position - Left
     ];
 
     [RomData]
@@ -310,11 +361,11 @@ public class Game1 : ScriptBase
         0x00,
         0x00,
         0x0F,
-        0x00,
+        0x16,
         0x00,
         0x00,
         0x0F,
-        0x00,
+        0x12,
         0x00,
         0x00,
     ];
@@ -460,6 +511,42 @@ public class Game1 : ScriptBase
         0b_11111111,
         0b_11000011,
         0b_11000011,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // Face
+        0b_00111100,
+        0b_01111110,
+        0b_11011011,
+        0b_11011011,
+        0b_11111111,
+        0b_11000011,
+        0b_01111110,
+        0b_00111100,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // Heart
+        0b_00000000,
+        0b_01100110,
+        0b_01111110,
+        0b_11111111,
+        0b_11111111,
+        0b_01111110,
+        0b_00111100,
+        0b_00011000,
         0,
         0,
         0,

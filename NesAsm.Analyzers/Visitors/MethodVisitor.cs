@@ -289,6 +289,7 @@ internal class MethodVisitor
                     case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
                     case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
                     case "INC": context.Writer.WriteOpCode("inc", numericOperand); break;
+                    case "DEC": context.Writer.WriteOpCode("dec", numericOperand); break;
                     case "INX": context.Writer.WriteOpCode("inx"); break;
                     case "DEX": context.Writer.WriteOpCode("dex"); break;
                     case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;

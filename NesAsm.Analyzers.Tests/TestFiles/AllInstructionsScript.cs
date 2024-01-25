@@ -36,6 +36,7 @@ internal class AllInstructionsScript : ScriptBase
         STA(PPUDATA);
 
         INC(0x200);
+        DEC(0x200);
         INX();
         DEX();
 
