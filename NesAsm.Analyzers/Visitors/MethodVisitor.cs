@@ -220,6 +220,7 @@ internal class MethodVisitor
 
                 switch (branchingOpCode)
                 {
+                    case "BEQ": writer.WriteBranchOpCode("beq", label); continue;
                     case "BNE": writer.WriteBranchOpCode("bne", label); continue;
                     case "BCC": writer.WriteBranchOpCode("bcc", label); continue;
                     case "BPL": writer.WriteBranchOpCode("bpl", label); continue;
@@ -287,11 +288,13 @@ internal class MethodVisitor
                     case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
                     case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
                     case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
+                    case "INC": context.Writer.WriteOpCode("inc", numericOperand); break;
                     case "INX": context.Writer.WriteOpCode("inx"); break;
                     case "DEX": context.Writer.WriteOpCode("dex"); break;
                     case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
                     case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
                     case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
+                    case "CMP": context.Writer.WriteOpCode("cmp", numericOperand); break;
                     case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
                     case "LSR": context.Writer.WriteOpCode("lsr a"); break;
                     case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
@@ -299,6 +302,7 @@ internal class MethodVisitor
                     case "CLD": context.Writer.WriteOpCode("cld"); break;
                     case "TXS": context.Writer.WriteOpCode("txs"); break;
                     case "BIT": context.Writer.WriteOpCode("bit", numericOperand); break;
+                    case "ANDi": context.Writer.WriteOpCodeImmediate("and", numericOperand); break;
                     default:
                         {
                             var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);

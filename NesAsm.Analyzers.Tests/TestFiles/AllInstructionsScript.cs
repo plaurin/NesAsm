@@ -35,6 +35,7 @@ internal class AllInstructionsScript : ScriptBase
         STA(PPUADDR);
         STA(PPUDATA);
 
+        INC(0x200);
         INX();
         DEX();
 
@@ -45,7 +46,12 @@ internal class AllInstructionsScript : ScriptBase
         TXS();
         BIT(0x2002);
 
+        ANDi(0b_0101_0010);
+
+        CMP(0x30);
+
         label:
+        if (BEQ()) goto label;
         if (BNE()) goto label;
         if (BCC()) goto label;
         if (BPL()) goto label;

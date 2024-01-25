@@ -35,26 +35,118 @@ public class Game1 : ScriptBase
 
         if (BNE()) goto loop;
 
+        // Transfert sprite data into $200-$2ff memory range
+        LDXi(0x00);
+
+        spriteLoop:
+
+        LDA(ControllerSprites, X);
+        STA(0x200, X);
+        INX();
+
+        CPXi(40);
+        if (BNE()) goto spriteLoop;
+
+        // Main game loop
         endless_loop:
 
         Call<ReadController>(s => s.ReadControllerOne());
+
+        // ## Update button palette
+        // Init palette to zero
+        LDXi(0);
+        STX(0x20A);
+        STX(0x20E);
+        STX(0x212);
+        STX(0x216);
+        STX(0x21A);
+        STX(0x21E);
+        STX(0x222);
+        STX(0x226);
+
+        LDXi(1);
+
+        // Check Button Right
+        CheckRight:
+        LDA(0x21);
+        ANDi(0b_0000_0001);
+        if (BEQ()) goto CheckLeft;
+        STX(0x20A);
+
+        // Check Button Left
+        CheckLeft:
+        LDA(0x21);
+        ANDi(0b_0000_0010);
+        if (BEQ()) goto CheckDown;
+        STX(0x20E);
+
+        // Check Button Down
+        CheckDown:
+        LDA(0x21);
+        ANDi(0b_0000_0100);
+        if (BEQ()) goto CheckUp;
+        STX(0x212);
+
+        // Check Button Up
+        CheckUp:
+        LDA(0x21);
+        ANDi(0b_0000_1000);
+        if (BEQ()) goto CheckStart;
+        STX(0x216);
+
+        // Check Button Start
+        CheckStart:
+        LDA(0x21);
+        ANDi(0b_0001_0000);
+        if (BEQ()) goto CheckSelect;
+        STX(0x21A);
+
+        // Check Button Select
+        CheckSelect:
+        LDA(0x21);
+        ANDi(0b_0010_0000);
+        if (BEQ()) goto CheckB;
+        STX(0x21E);
+
+        // Check Button B
+        CheckB:
+        LDA(0x21);
+        ANDi(0b_0100_0000);
+        if (BEQ()) goto CheckA;
+        STX(0x222);
+
+        // Check Button A
+        CheckA:
+        LDA(0x21);
+        ANDi(0b_1000_0000);
+        if (BEQ()) goto EndCheck;
+        STX(0x226);
+
+        EndCheck:
+
+        // Wait for VBlank
+        LDA(0x30);
+
+        WaitForVBlank:
+        CMP(0x30);
+        if (BEQ()) goto WaitForVBlank;
 
         goto endless_loop;
     }
 
     public void Nmi()
     {
-        LDXi(0x00);
-        STX(0x2003);
+        // Transfer Sprites via OAM
+        LDAi(0x00);
+        // 0x2003 = OAM_ADDR
+        STA(0x2003);
 
-        spriteLoop:
+        LDAi(0x02);
+        // 0x4014 = OAM_DMA
+        STA(0x4014);
 
-        LDA(HiloWorldSprites, X);
-        STA(0x2004);
-        INX();
-
-        CPXi(44);
-        if (BNE()) goto spriteLoop;
+        // Increment frame counter
+        INC(0x30);
     }
 
     public void Reset()
@@ -134,64 +226,58 @@ public class Game1 : ScriptBase
     }
 
     [RomData]
-    private byte[] HiloWorldSprites = [
+    private byte[] ControllerSprites = [
         // Empty sprites
         0, 0, 0, 0,
         0, 0, 0, 0,
 
-        // H
+        // Right
         30,  // Y position - Top
         1,   // Tile 1
         0,   // Palette 4
-        30,  // X position - Left
+        50,  // X position - Left
 
-        // I
+        // Left
         30,  // Y position - Top
         2,   // Tile 2
         0,   // Palette 4
-        39,  // X position - Left
+        30,  // X position - Left
 
-        // L
-        30,  // Y position - Top
+        // Down
+        40,  // Y position - Top
         3,   // Tile 3
         0,   // Palette 4
-        48,  // X position - Left
+        40,  // X position - Left
 
-        // O
-        30,  // Y position - Top
+        // Up
+        20,  // Y position - Top
         4,   // Tile 4
         0,   // Palette 4
-        57,  // X position - Left
+        40,  // X position - Left
 
-        // W
-        40,  // Y position - Top
+        // Start
+        30,  // Y position - Top
         5,   // Tile 5
         0,   // Palette 4
-        75,  // X position - Left
+        70,  // X position - Left
 
-        // O
-        40,  // Y position - Top
-        4,   // Tile 4
-        0,   // Palette 4
-        84,  // X position - Left
-
-        // R
-        40,  // Y position - Top
+        // Select
+        30,  // Y position - Top
         6,   // Tile 6
         0,   // Palette 4
-        93,  // X position - Left
+        60,  // X position - Left
 
-        // L
-        40,  // Y position - Top
-        3,   // Tile 3
-        0,   // Palette 4
-        102,  // X position - Left
-
-        // D
-        40,  // Y position - Top
+        // B
+        30,  // Y position - Top
         7,   // Tile 7
         0,   // Palette 4
-        111,  // X position - Left
+        80,  // X position - Left
+
+        // A
+        30,  // Y position - Top
+        8,   // Tile 8
+        1,   // Palette 4
+        90,  // X position - Left
     ];
 
     [RomData]
@@ -220,7 +306,7 @@ public class Game1 : ScriptBase
         0x27,
         0x31,
         0x0F,
-        0x00,
+        0x29,
         0x00,
         0x00,
         0x0F,
@@ -239,15 +325,15 @@ public class Game1 : ScriptBase
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
 
-        // H
-        0b_11000011,
-        0b_11000011,
-        0b_11000011,
+        // Right
+        0b_00001000,
+        0b_00001100,
+        0b_00001110,
         0b_11111111,
         0b_11111111,
-        0b_11000011,
-        0b_11000011,
-        0b_11000011,
+        0b_00001110,
+        0b_00001100,
+        0b_00001000,
         0,
         0,
         0,
@@ -257,15 +343,15 @@ public class Game1 : ScriptBase
         0,
         0,
 
-        // I
+        // Left
+        0b_00010000,
+        0b_00110000,
+        0b_01110000,
         0b_11111111,
         0b_11111111,
-        0b_00011000,
-        0b_00011000,
-        0b_00011000,
-        0b_00011000,
-        0b_11111111,
-        0b_11111111,
+        0b_01110000,
+        0b_00110000,
+        0b_00010000,
         0,
         0,
         0,
@@ -275,51 +361,15 @@ public class Game1 : ScriptBase
         0,
         0,
 
-        // L
-        0b_11000000,
-        0b_11000000,
-        0b_11000000,
-        0b_11000000,
-        0b_11000000,
-        0b_11000000,
-        0b_11111111,
-        0b_11111111,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-
-        // O
+        // Down
         0b_00011000,
-        0b_00111100,
-        0b_01100110,
-        0b_11000011,
-        0b_11000011,
-        0b_01100110,
-        0b_00111100,
         0b_00011000,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-
-        // W
-        0b_11000011,
-        0b_11000011,
-        0b_11000011,
-        0b_11000011,
-        0b_01100110,
+        0b_00011000,
+        0b_00011000,
+        0b_11111111,
         0b_01111110,
-        0b_01100110,
-        0b_01100110,
+        0b_00111100,
+        0b_00011000,
         0,
         0,
         0,
@@ -329,15 +379,15 @@ public class Game1 : ScriptBase
         0,
         0,
 
-        // R
-        0b_11111000,
-        0b_11111110,
-        0b_11000011,
-        0b_11001111,
-        0b_11111000,
-        0b_11001100,
-        0b_11000110,
-        0b_11000011,
+        // Up
+        0b_00011000,
+        0b_00111100,
+        0b_01111110,
+        0b_11111111,
+        0b_00011000,
+        0b_00011000,
+        0b_00011000,
+        0b_00011000,
         0,
         0,
         0,
@@ -347,15 +397,69 @@ public class Game1 : ScriptBase
         0,
         0,
 
-        // D
+        // Start
+        0b_00000000,
+        0b_11100000,
+        0b_10001110,
+        0b_11000100,
+        0b_01100100,
+        0b_00100100,
+        0b_11100100,
+        0b_00000000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // Select
+        0b_00000000,
+        0b_11100000,
+        0b_10001110,
+        0b_11001000,
+        0b_01101110,
+        0b_00101000,
+        0b_11101110,
+        0b_00000000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // B
         0b_11111000,
         0b_11111100,
         0b_11000110,
-        0b_11000011,
-        0b_11000011,
+        0b_11111100,
+        0b_11111100,
         0b_11000110,
         0b_11111100,
         0b_11111000,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+
+        // A
+        0b_00111100,
+        0b_00111100,
+        0b_11100110,
+        0b_11000011,
+        0b_11111111,
+        0b_11111111,
+        0b_11000011,
+        0b_11000011,
         0,
         0,
         0,

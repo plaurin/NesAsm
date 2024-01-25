@@ -26,6 +26,7 @@
   sta $2006
   sta $2007
 
+  inc $200
   inx
   dex
 
@@ -36,7 +37,12 @@
   txs
   bit $2002
 
+  and #%01010010
+
+  cmp #$30
+
 @label:
+  beq @label
   bne @label
   bcc @label
   bpl @label

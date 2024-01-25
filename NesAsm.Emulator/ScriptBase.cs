@@ -48,6 +48,7 @@ public abstract partial class ScriptBase
 
     protected void LDA(byte[] baseAddress, AddressingRegister register) => _emulator.LDA(baseAddress, register);
 
+    protected void INC(ushort address) { throw new NotImplementedException(); }
     protected void INX() => _emulator.INX();
     protected void INY() => _emulator.INY();
     protected void DEX() => _emulator.DEX();
@@ -80,13 +81,15 @@ public abstract partial class ScriptBase
     protected bool BEQ() => _emulator.BEQ();
     protected bool BNE() => _emulator.BNE();
 
+    protected void ANDi(byte value) { throw new NotImplementedException(); }
+
     protected void LSR() => _emulator.LSR();
     protected void ROL() => _emulator.ROL();
     protected void ROL(ushort address) => _emulator.ROL(address);
 
-    protected void SEI() { }
-    protected void CLD() { }
-    protected void TXS() { }
-    protected void BIT(ushort address) { }
+    protected void SEI() { throw new NotImplementedException(); }
+    protected void CLD() { throw new NotImplementedException(); }
+    protected void TXS() { throw new NotImplementedException(); }
+    protected void BIT(ushort address) { throw new NotImplementedException(); }
 
 }

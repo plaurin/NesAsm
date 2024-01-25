@@ -37,9 +37,101 @@
 
   bne @loop
 
+  ; Transfert sprite data into $200-$2ff memory range
+  ldx #$00
+
+@spriteLoop:
+
+  lda controllerSprites, x
+  sta $200, x
+  inx
+
+  cpx #40
+  bne @spriteLoop
+
+  ; Main game loop
 @endless_loop:
 
   jsr readControllerOne
+
+  ; ## Update button palette
+  ; Init palette to zero
+  ldx #0
+  stx $20A
+  stx $20E
+  stx $212
+  stx $216
+  stx $21A
+  stx $21E
+  stx $222
+  stx $226
+
+  ldx #1
+
+  ; Check Button Right
+@CheckRight:
+  lda $21
+  and #%00000001
+  beq @CheckLeft
+  stx $20A
+
+  ; Check Button Left
+@CheckLeft:
+  lda $21
+  and #%00000010
+  beq @CheckDown
+  stx $20E
+
+  ; Check Button Down
+@CheckDown:
+  lda $21
+  and #%00000100
+  beq @CheckUp
+  stx $212
+
+  ; Check Button Up
+@CheckUp:
+  lda $21
+  and #%00001000
+  beq @CheckStart
+  stx $216
+
+  ; Check Button Start
+@CheckStart:
+  lda $21
+  and #%00010000
+  beq @CheckSelect
+  stx $21A
+
+  ; Check Button Select
+@CheckSelect:
+  lda $21
+  and #%00100000
+  beq @CheckB
+  stx $21E
+
+  ; Check Button B
+@CheckB:
+  lda $21
+  and #%01000000
+  beq @CheckA
+  stx $222
+
+  ; Check Button A
+@CheckA:
+  lda $21
+  and #%10000000
+  beq @EndCheck
+  stx $226
+
+@EndCheck:
+
+  ; Wait for VBlank
+  lda $30
+
+@WaitForVBlank:
+  cmp #$30
+  beq @WaitForVBlank
 
   jmp @endless_loop
 
@@ -47,17 +139,17 @@
 .endproc
 
 nmi:
-  ldx #$00
-  stx $2003
+  ; Transfer Sprites via OAM
+  lda #$00
+  ; 0x2003 = OAM_ADDR
+  sta $2003
 
-@spriteLoop:
+  lda #$02
+  ; 0x4014 = OAM_DMA
+  sta $4014
 
-  lda hiloWorldSprites, x
-  sta $2004
-  inx
-
-  cpx #44
-  bne @spriteLoop
+  ; Increment frame counter
+  inc $30
   rti
 
 .proc reset
@@ -140,7 +232,7 @@ nmi:
 
 .segment "CODE"
 
-hiloWorldSprites:
+controllerSprites:
   .byte 0
   .byte 0
   .byte 0
@@ -153,43 +245,39 @@ hiloWorldSprites:
   .byte 30
   .byte 1
   .byte 0
-  .byte 30
+  .byte 50
   .byte 30
   .byte 2
   .byte 0
-  .byte 39
-
   .byte 30
-  .byte 3
-  .byte 0
-  .byte 48
-  .byte 30
-  .byte 4
-  .byte 0
-  .byte 57
 
   .byte 40
+  .byte 3
+  .byte 0
+  .byte 40
+  .byte 20
+  .byte 4
+  .byte 0
+  .byte 40
+
+  .byte 30
   .byte 5
   .byte 0
-  .byte 75
-  .byte 40
-  .byte 4
-  .byte 0
-  .byte 84
-
-  .byte 40
+  .byte 70
+  .byte 30
   .byte 6
   .byte 0
-  .byte 93
-  .byte 40
-  .byte 3
-  .byte 0
-  .byte 102
+  .byte 60
 
-  .byte 40
+  .byte 30
   .byte 7
   .byte 0
-  .byte 111
+  .byte 80
+  .byte 30
+  .byte 8
+  .byte 1
+  .byte 90
+
 .segment "CODE"
 
 palettes:
@@ -216,7 +304,7 @@ palettes:
   .byte 39
   .byte 49
   .byte 15
-  .byte 0
+  .byte 41
   .byte 0
   .byte 0
 
@@ -249,14 +337,14 @@ palettes:
   .byte 0
   .byte 0
 
-  .byte 195
-  .byte 195
-  .byte 195
+  .byte 8
+  .byte 12
+  .byte 14
   .byte 255
   .byte 255
-  .byte 195
-  .byte 195
-  .byte 195
+  .byte 14
+  .byte 12
+  .byte 8
 
   .byte 0
   .byte 0
@@ -267,32 +355,14 @@ palettes:
   .byte 0
   .byte 0
 
+  .byte 16
+  .byte 48
+  .byte 112
   .byte 255
   .byte 255
-  .byte 24
-  .byte 24
-  .byte 24
-  .byte 24
-  .byte 255
-  .byte 255
-
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-
-  .byte 192
-  .byte 192
-  .byte 192
-  .byte 192
-  .byte 192
-  .byte 192
-  .byte 255
-  .byte 255
+  .byte 112
+  .byte 48
+  .byte 16
 
   .byte 0
   .byte 0
@@ -304,31 +374,13 @@ palettes:
   .byte 0
 
   .byte 24
-  .byte 60
-  .byte 102
-  .byte 195
-  .byte 195
-  .byte 102
-  .byte 60
   .byte 24
-
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-
-  .byte 195
-  .byte 195
-  .byte 195
-  .byte 195
-  .byte 102
+  .byte 24
+  .byte 24
+  .byte 255
   .byte 126
-  .byte 102
-  .byte 102
+  .byte 60
+  .byte 24
 
   .byte 0
   .byte 0
@@ -339,14 +391,50 @@ palettes:
   .byte 0
   .byte 0
 
-  .byte 248
-  .byte 254
-  .byte 195
-  .byte 207
-  .byte 248
-  .byte 204
-  .byte 198
-  .byte 195
+  .byte 24
+  .byte 60
+  .byte 126
+  .byte 255
+  .byte 24
+  .byte 24
+  .byte 24
+  .byte 24
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 0
+  .byte 224
+  .byte 142
+  .byte 196
+  .byte 100
+  .byte 36
+  .byte 228
+  .byte 0
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 0
+  .byte 224
+  .byte 142
+  .byte 200
+  .byte 110
+  .byte 40
+  .byte 238
+  .byte 0
 
   .byte 0
   .byte 0
@@ -360,11 +448,29 @@ palettes:
   .byte 248
   .byte 252
   .byte 198
-  .byte 195
-  .byte 195
+  .byte 252
+  .byte 252
   .byte 198
   .byte 252
   .byte 248
+
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+  .byte 0
+
+  .byte 60
+  .byte 60
+  .byte 230
+  .byte 195
+  .byte 255
+  .byte 255
+  .byte 195
+  .byte 195
 
   .byte 0
   .byte 0
