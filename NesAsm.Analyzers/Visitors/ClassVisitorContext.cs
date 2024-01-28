@@ -4,11 +4,17 @@ namespace NesAsm.Analyzers.Visitors;
 
 internal class ClassVisitorContext : VisitorContext
 {
-    private readonly List<string> _scriptReferences = new();
+    protected readonly List<string> _scriptReferences = new();
 
     public ClassVisitorContext(VisitorContext visitorContext, string[] allMethods) : base(visitorContext)
     {
         AllMethods = allMethods;
+    }
+
+    public ClassVisitorContext(ClassVisitorContext visitorContext) : base(visitorContext)
+    {
+        AllMethods = visitorContext.AllMethods;
+        _scriptReferences = visitorContext._scriptReferences;
     }
 
     public string[] AllMethods { get; }

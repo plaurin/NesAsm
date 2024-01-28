@@ -146,4 +146,48 @@ internal static class Diagnostics
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0013: Only X or Y register supported for loop variable but found {0}
+    /// </summary>
+    internal static DiagnosticDescriptor InvalidLoopVariableFound = new(
+        "NA0013",
+        "Invalid loop variable found",
+        "Only X or Y register supported for loop variable but found {0}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0014: Loop should only use 1 register
+    /// </summary>
+    internal static DiagnosticDescriptor MultipleLoopVariableFound = new(
+        "NA0014",
+        "Multiple loop variable found",
+        "Loop should only use 1 register",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0015: Loop cannot use local variable. Remove type declaration {0}
+    /// </summary>
+    internal static DiagnosticDescriptor LocalVariableForLoopNotSupported = new(
+        "NA0015",
+        "Local variable for loop not supported",
+        "Loop cannot use local variable, remove type declaration {0}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0016: Loop not closed. Ensure that all for loop block use bracket \{ \}
+    /// </summary>
+    internal static DiagnosticDescriptor ForLoopNotClosed = new(
+        "NA0016",
+        "For loop not closed",
+        "Loop not closed, ensure that all for loop block use bracket \\{ \\}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

@@ -23,8 +23,8 @@ public abstract partial class ScriptBase
         action.Invoke(instance);
     }
 
-    protected AddressingRegister X = AddressingRegister.X;
-    protected AddressingRegister Y = AddressingRegister.Y;
+    protected Register X = new();
+    protected Register Y = new();
 
     protected void LDAi(byte value) => _emulator.LDAi(value);
     protected void LDXi(byte value) => _emulator.LDXi(value);
@@ -46,7 +46,7 @@ public abstract partial class ScriptBase
     protected void LDXa(bool argumentValue) => _emulator.LDXi((byte)(argumentValue ? 1 : 0));
     protected void LDYa(bool argumentValue) => _emulator.LDYi((byte)(argumentValue ? 1 : 0));
 
-    protected void LDA(byte[] baseAddress, AddressingRegister register) => _emulator.LDA(baseAddress, register);
+    protected void LDA(byte[] baseAddress, Register register) => _emulator.LDA(baseAddress, register);
 
     protected void INC(ushort address) { throw new NotImplementedException(); }
     protected void INX() => _emulator.INX();
@@ -63,7 +63,7 @@ public abstract partial class ScriptBase
     protected void STX(ushort address) => _emulator.STX(address);
     protected void STY(ushort address) => _emulator.STY(address);
 
-    protected void STA(ushort baseAddress, AddressingRegister register) { }
+    protected void STA(ushort baseAddress, Register register) { }
 
     protected void CMPi(byte value) => _emulator.CMPi(value);
     protected void CPXi(byte value) => _emulator.CPXi(value);

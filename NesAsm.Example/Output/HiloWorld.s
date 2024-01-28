@@ -92,6 +92,7 @@ hiloWorldSprites:
   .byte 7
   .byte 0
   .byte 111
+
 .segment "CODE"
 
 palettes:
@@ -130,6 +131,7 @@ palettes:
   .byte 0
   .byte 0
   .byte 0
+
 
 .segment "CHARS"
 
@@ -276,5 +278,6 @@ palettes:
   .byte 0
   .byte 0
   .byte 0
+
 
 .include "wrapper-no-nmi.s"

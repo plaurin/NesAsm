@@ -233,19 +233,19 @@ public class NESEmulatorTests
     public void TestAbsoluteIndexedLoadInstructions()
     {
         _emulator.LDXi(3);
-        _emulator.LDA(_absoluteIndexedData, AddressingRegister.X);
+        _emulator.LDA(_absoluteIndexedData, _emulator.X);
         Assert.Equal(3, _emulator.A);
 
         _emulator.LDYi(1);
-        _emulator.LDA(_absoluteIndexedData, AddressingRegister.Y);
+        _emulator.LDA(_absoluteIndexedData, _emulator.Y);
         Assert.Equal(1, _emulator.A);
 
         _emulator.LDXi(0);
-        _emulator.LDA(_absoluteIndexedData, AddressingRegister.X);
+        _emulator.LDA(_absoluteIndexedData, _emulator.X);
         Assert.Equal(0, _emulator.A);
 
         _emulator.LDYi(5);
-        _emulator.LDA(_absoluteIndexedData, AddressingRegister.Y);
+        _emulator.LDA(_absoluteIndexedData, _emulator.Y);
         Assert.Equal(5, _emulator.A);
     }
 }

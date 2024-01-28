@@ -20,7 +20,7 @@ internal class MemberVisitor
             else
                 writer.StartProc(Utilities.GetProcName(method));
 
-            MethodVisitor.Visit(method, context);
+            MethodVisitor.Visit(method, new MethodVisitorContext(context));
 
             if (isNmi)
                 writer.EndNmi();

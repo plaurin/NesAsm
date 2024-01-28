@@ -86,6 +86,12 @@ public class AsmGeneratorTests
         TestScript("StartupScript.cs");
     }
 
+    [Fact]
+    public void TestIterationStatementsScript()
+    {
+        TestScript("IterationStatementsScript.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new AsmGenerator();

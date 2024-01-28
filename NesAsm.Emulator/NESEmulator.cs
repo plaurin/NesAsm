@@ -61,7 +61,7 @@ public class NESEmulator
     public void LDY(ushort address) => _y = _memory[address];
 
     // Absolute Indexed Mode Load instructions
-    public void LDA(byte[] baseAddress, AddressingRegister register) => _a = baseAddress[register == AddressingRegister.X ? _x : _y];
+    public void LDA(byte[] baseAddress, Register register) => _a = baseAddress[register];
 
     // Immediate Compare instructions
     public void CMPi(byte value) => CMPImpl(_a, value);

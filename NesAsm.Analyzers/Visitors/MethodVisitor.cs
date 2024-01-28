@@ -20,7 +20,7 @@ internal class MethodVisitor
     private static readonly Regex branchPattern = new("if \\((?'Operation'.+)\\(\\)\\) goto (?'Label'.+);", RegexOptions.Compiled);
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
-    internal static void Visit(MethodDeclarationSyntax method, ClassVisitorContext context)
+    internal static void Visit(MethodDeclarationSyntax method, MethodVisitorContext context)
     {
         var writer = context.Writer;
         var parameters = new List<(byte index, string identifier, string type)>();
@@ -35,10 +35,13 @@ internal class MethodVisitor
             }
         }
 
-        var lines = method.Body.ToString().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        int endlessloopIndex = 1;
+        string? expectedAndOfLoop = null;
+
+        var lines = method.Body.ToString().Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
         foreach (var line in lines)
         {
-            var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim() == line.Trim());
+            var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
             var location = statement != null ? statement.GetLocation() : Location.None;
 
             var match = commentPattern.Match(line);
@@ -243,11 +246,32 @@ internal class MethodVisitor
                 continue;
             }
 
+            // endless loop
+            if (line.Trim() == "while (true)")
+            {
+                writer.WriteLabel($"endless_loop");
+                expectedAndOfLoop = line.Replace("while (true)", "}");
+                continue;
+            }
+
+            if (line == expectedAndOfLoop)
+            {
+                writer.WriteJMPToLabelOpCode("endless_loop");
+                //endlessloopIndex++;
+                expectedAndOfLoop = null;
+                continue;
+            }
+
+            if (TryHandleFor(line, location, context)) continue;
+            if (TryHandleEndFor(line, location, context)) continue;
+
             // Ignore
             if (line.Trim() == "{" || line.Trim() == "}") continue;
 
-            throw new InvalidOperationException($"Not supported {line}");
+            context.ReportDiagnostic(Diagnostics.InstructionNotSupported, location, line.Trim());
         }
+
+        context.EnsureAllForLoopEnded(method.GetLocation());
 
         foreach (var statement in method.Body.Statements)
         {
@@ -255,6 +279,91 @@ internal class MethodVisitor
             {
             }
         }
+    }
+
+    private static readonly Regex forPattern = new("\\s*for \\(((?'VarType'\\w+) )?(?'Register'\\w+)? = (?'Init'\\d+); (?'Register2'\\w+) (?'Condition'[<|>|<=|>=]) (?'ConditionValue'\\d+); (?'Register3'\\w+)(?'Increment'.+)\\)", RegexOptions.Compiled);
+
+    private static bool TryHandleFor(string line, Location location, MethodVisitorContext context)
+    {
+        var match = forPattern.Match(line);
+        if (match.Success)
+        {
+            // local variable used
+            if (match.Groups["VarType"].Success)
+            {
+                context.ReportDiagnostic(Diagnostics.LocalVariableForLoopNotSupported, location, match.Groups["VarType"].Value);
+                return true;
+            }
+
+            var register = match.Groups["Register"].Value;
+
+            if (register != match.Groups["Register2"].Value || register != match.Groups["Register3"].Value)
+            {
+                context.ReportDiagnostic(Diagnostics.MultipleLoopVariableFound, location, line.Trim());
+                return true;
+            }
+
+            if (register != "X" && register != "Y")
+            {
+                context.ReportDiagnostic(Diagnostics.InvalidLoopVariableFound, location, register);
+                return true;
+            }
+
+            var init = match.Groups["Init"].Value;
+            var condition = match.Groups["Condition"].Value;
+            var conditionValue = match.Groups["ConditionValue"].Value;
+            var increment = match.Groups["Increment"].Value;
+
+            context.Writer.WriteEmptyLine();
+
+            // Init
+            ParseOp(register == "X" ? "LDXi" : "LDYi", init, string.Empty, location, context);
+
+            // Label
+            var labelName = $"loop{context.ForLoopIndex}_on_{register}";
+            context.Writer.WriteLabel(labelName);
+
+            // Code
+
+            // Increment
+            var incrementOpCode = register == "X" ? "INX" : "INY";
+
+            // Condition Evaluation
+            var conditionOpCode = register == "X" ? $"CPXi" : "CPYi";
+            var conditionOperand = conditionValue;
+
+            // Branch
+            var endloopPattern = line.Substring(0, line.IndexOf("for")) + "}";
+
+            context.PushForLoopData(labelName, conditionOpCode, conditionOperand, incrementOpCode, endloopPattern);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryHandleEndFor(string line, Location location, MethodVisitorContext context)
+    {
+        if (context.IsLineMatchingEndLoop(line))
+        {
+            context.Writer.WriteEmptyLine();
+
+            var forLoopData = context.PopForLoopData();
+
+            // Increment
+            ParseOp(forLoopData.IncrementOpCode, string.Empty, string.Empty, location, context);
+
+            // Condition
+            ParseOp(forLoopData.ConditionOpCode, forLoopData.ConditionOperand, string.Empty, location, context);
+
+            // Branch
+            context.Writer.WriteBranchOpCode("bne", forLoopData.LabelName);
+
+            return true;
+        }
+
+        return false;
     }
 
     private static bool StoreData(string[] dataItems, string line, AsmWriter writer)
@@ -291,12 +400,14 @@ internal class MethodVisitor
                     case "INC": context.Writer.WriteOpCode("inc", numericOperand); break;
                     case "DEC": context.Writer.WriteOpCode("dec", numericOperand); break;
                     case "INX": context.Writer.WriteOpCode("inx"); break;
+                    case "INY": context.Writer.WriteOpCode("iny"); break;
                     case "DEX": context.Writer.WriteOpCode("dex"); break;
                     case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
                     case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
                     case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
                     case "CMP": context.Writer.WriteOpCode("cmp", numericOperand); break;
                     case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
+                    case "CPYi": context.Writer.WriteOpCodeImmediate("cpy", numericOperand); break;
                     case "LSR": context.Writer.WriteOpCode("lsr a"); break;
                     case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
                     case "SEI": context.Writer.WriteOpCode("sei"); break;

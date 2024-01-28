@@ -82,8 +82,10 @@ internal class AsmWriter
         {
             _sb.AppendLine($"  .byte {charByte}");
 
-            if (++i % 8 == 0) _sb.AppendLine("");
+            if (++i % 8 == 0) WriteEmptyLine();
         }
+
+        WriteEmptyLine();
     }
 
     public void WriteComment(string comment) => _sb.AppendLine($"  ;{comment}");
