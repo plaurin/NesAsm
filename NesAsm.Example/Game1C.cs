@@ -23,47 +23,38 @@ public class Game1C : ScriptBase
         LDAi(0x00);
         STA(PPUADDR);
 
-        loop:
+        for (X = 0; X < 32; X++)
+        {
+            LDA(Palettes, X);
 
-        LDA(Palettes, X);
-
-        // Write palette data to PPUDATA $2007
-        STA(PPUDATA);
-        INX();
-
-        CPXi(0x20);
-
-        if (BNE()) goto loop;
+            // Write palette data to PPUDATA $2007
+            STA(PPUDATA);
+        }
 
         // Transfert sprite data into $200-$2ff memory range
-        LDXi(0x00);
 
-        spriteLoop:
-
-        LDA(ControllerSprites, X);
-        STA(0x200, X);
-        INX();
-
-        CPXi(48);
-        if (BNE()) goto spriteLoop;
+        for (X = 0; X < 48; X++)
+        {
+            LDA(ControllerSprites, X);
+            STA(0x200, X);
+        }
 
         // Main game loop
-        endless_loop:
+        while (true)
+        {
+            Call<ReadController>(s => s.ReadControllerOne());
 
-        Call<ReadController>(s => s.ReadControllerOne());
+            UpdateController();
 
-        UpdateController();
+            MoveFace();
 
-        MoveFace();
+            // Wait for VBlank
+            LDA(0x30);
 
-        // Wait for VBlank
-        LDA(0x30);
-
-        WaitForVBlank:
-        CMP(0x30);
-        if (BEQ()) goto WaitForVBlank;
-
-        goto endless_loop;
+            WaitForVBlank:
+            CMP(0x30);
+            if (BEQ()) goto WaitForVBlank;
+        }
     }
 
     public void UpdateController()
@@ -210,21 +201,19 @@ public class Game1C : ScriptBase
         BIT(0x2002);
         if (BPL()) goto vblankWait1;
 
-        clearMemory:
-
+        // Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
         LDAi(0x00);
-
-        STA(0x0000, X);
-        STA(0x0100, X);
-        STA(0x0200, X);
-        STA(0x0300, X);
-        STA(0x0400, X);
-        STA(0x0500, X);
-        STA(0x0600, X);
-        STA(0x0700, X);
-
-        INX();
-        if (BNE()) goto clearMemory;
+        for (X = 0; X < 255; X++)
+        {
+            STA(0x0000, X);
+            STA(0x0100, X);
+            STA(0x0200, X);
+            STA(0x0300, X);
+            STA(0x0400, X);
+            STA(0x0500, X);
+            STA(0x0600, X);
+            STA(0x0700, X);
+        }
 
         vblankWait2:
         BIT(0x2002);

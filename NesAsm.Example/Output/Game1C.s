@@ -25,33 +25,32 @@
   lda #$00
   sta $2006
 
-@loop:
 
+  ldx #0
+@loop1_on_X:
   lda palettes, x
 
   ; Write palette data to PPUDATA $2007
   sta $2007
+
   inx
-
-  cpx #$20
-
-  bne @loop
+  cpx #32
+  bne @loop1_on_X
 
   ; Transfert sprite data into $200-$2ff memory range
-  ldx #$00
 
-@spriteLoop:
 
+  ldx #0
+@loop2_on_X:
   lda controllerSprites, x
   sta $200, x
-  inx
 
+  inx
   cpx #48
-  bne @spriteLoop
+  bne @loop2_on_X
 
   ; Main game loop
 @endless_loop:
-
   jsr readControllerOne
 
   jsr updateController
@@ -64,7 +63,6 @@
 @WaitForVBlank:
   cmp $30
   beq @WaitForVBlank
-
   jmp @endless_loop
 
   rts
@@ -214,10 +212,11 @@ nmi:
   bit $2002
   bpl @vblankWait1
 
-@clearMemory:
-
+  ; Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
   lda #$00
 
+  ldx #0
+@loop1_on_X:
   sta $0000, x
   sta $0100, x
   sta $0200, x
@@ -228,7 +227,8 @@ nmi:
   sta $0700, x
 
   inx
-  bne @clearMemory
+  cpx #255
+  bne @loop1_on_X
 
 @vblankWait2:
   bit $2002
