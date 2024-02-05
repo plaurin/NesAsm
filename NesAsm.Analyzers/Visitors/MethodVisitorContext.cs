@@ -1,7 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
-using System.Reflection.Metadata;
 
 namespace NesAsm.Analyzers.Visitors;
 
@@ -10,11 +8,16 @@ internal class MethodVisitorContext : ClassVisitorContext
     private readonly Stack<ForLoopData> _forLoopDataStack = new();
     private int _forLoopIndex = 1;
 
+    private readonly Stack<IfExitData> _ifExitDataStack = new();
+    private int _ifExitIndex = 1;
+
     public MethodVisitorContext(ClassVisitorContext context) : base(context)
     {
     }
 
     public int ForLoopIndex => _forLoopIndex;
+
+    public int IdExitIndex => _ifExitIndex;
 
     internal void PushForLoopData(string labelName, string conditionOpCode, string conditionOperand, string incrementOpCode, string endloopPattern)
     {
@@ -42,6 +45,32 @@ internal class MethodVisitorContext : ClassVisitorContext
         }
     }
 
+    internal void PushIfExitData(string labelName, string ifExitPattern)
+    {
+        var ifExitData = new IfExitData { LabelName = labelName, IfExitPattern = ifExitPattern };
+
+        _ifExitDataStack.Push(ifExitData);
+        _ifExitIndex++;
+    }
+
+    internal bool IsLineMatchingIfExit(string line)
+    {
+        return _ifExitDataStack.Count > 0 && _ifExitDataStack.Peek().IfExitPattern == line;
+    }
+
+    internal IfExitData PopIfExitData()
+    {
+        return _ifExitDataStack.Pop();
+    }
+
+    internal void EnsureAllIfExitReached(Location location)
+    {
+        if (_ifExitDataStack.Count > 0)
+        {
+            ReportDiagnostic(Diagnostics.IfExitNotReached, location);
+        }
+    }
+
     public struct ForLoopData
     {
         public string LabelName;
@@ -50,6 +79,12 @@ internal class MethodVisitorContext : ClassVisitorContext
         public string IncrementOpCode;
         public string EndloopPattern;
     }
+
+    public struct IfExitData
+    {
+        public string LabelName;
+        public string IfExitPattern;
+    }
 }
-  
+
 

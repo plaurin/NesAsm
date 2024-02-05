@@ -74,11 +74,11 @@ public class Game1C : ScriptBase
         LDXi(1);
 
         // Check Button Right
-        CheckRight:
         LDA(0x21);
-        ANDi(0b_0000_0001);
-        if (BEQ()) goto CheckLeft;
-        STX(0x20A);
+        if ((A & 0b_0000_0001) != 0)
+        {
+            STX(0x20A);
+        }
 
         // Check Button Left
         CheckLeft:

@@ -181,12 +181,45 @@ internal static class Diagnostics
         isEnabledByDefault: true);
 
     /// <summary>
-    /// NA0016: Loop not closed. Ensure that all for loop block use bracket \{ \}
+    /// NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
     /// </summary>
     internal static DiagnosticDescriptor ForLoopNotClosed = new(
         "NA0016",
         "For loop not closed",
         "Loop not closed, ensure that all for loop block use bracket \\{ \\}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0017: If exist not reached, ensure that all if statement block use bracket \{ \}
+    /// </summary>
+    internal static DiagnosticDescriptor IfExitNotReached = new(
+        "NA0017",
+        "If exit not reached",
+        "If exist not reached, ensure that all if statement block use bracket \\{ \\}",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0018: Invalid if condition left operand : only register X, Y and A supported
+    /// </summary>
+    internal static DiagnosticDescriptor InvalidIfLeftOperand = new(
+        "NA0018",
+        "Invalid if condition left operand",
+        "Invalid if condition left operand : only register X, Y and A supported",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0019: Invalid if operator : only == supported
+    /// </summary>
+    internal static DiagnosticDescriptor InvalidIfOperator = new(
+        "NA0019",
+        "Invalid if operator",
+        "Invalid if operator : only == supported",
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);

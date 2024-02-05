@@ -23,6 +23,7 @@ public abstract partial class ScriptBase
         action.Invoke(instance);
     }
 
+    protected Register A = new();
     protected Register X = new();
     protected Register Y = new();
 

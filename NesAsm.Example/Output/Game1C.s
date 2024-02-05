@@ -84,11 +84,14 @@
   ldx #1
 
   ; Check Button Right
-@CheckRight:
   lda $21
+  ;if1_start
   and #%00000001
-  beq @CheckLeft
+  beq @if1_exit
+
   stx $20A
+
+@if1_exit:
 
   ; Check Button Left
 @CheckLeft:

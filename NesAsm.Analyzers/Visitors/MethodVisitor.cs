@@ -44,6 +44,8 @@ internal class MethodVisitor
             var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
             var location = statement != null ? statement.GetLocation() : Location.None;
 
+            if (TryHandleIf(statement, line, context)) continue;
+
             var match = commentPattern.Match(line);
             if (match.Success)
             {
@@ -264,6 +266,8 @@ internal class MethodVisitor
 
             if (TryHandleFor(line, location, context)) continue;
             if (TryHandleEndFor(line, location, context)) continue;
+            
+            if (TryHandleIfExit(line, location, context)) continue;
 
             // Ignore
             if (line.Trim() == "{" || line.Trim() == "}") continue;
@@ -272,6 +276,7 @@ internal class MethodVisitor
         }
 
         context.EnsureAllForLoopEnded(method.GetLocation());
+        context.EnsureAllIfExitReached(method.GetLocation());
 
         foreach (var statement in method.Body.Statements)
         {
@@ -359,6 +364,125 @@ internal class MethodVisitor
 
             // Branch
             context.Writer.WriteBranchOpCode("bne", forLoopData.LabelName);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryHandleIf(StatementSyntax? statementSyntax, string line, MethodVisitorContext context)
+    {
+        if (statementSyntax is IfStatementSyntax ifStatement && line.Contains("if ("))
+        {
+            if (ifStatement.Condition is BinaryExpressionSyntax binaryExpression)
+            {
+                var labelName = $"if{context.IdExitIndex}_exit";
+                context.Writer.WriteComment($"if{context.IdExitIndex}_start");
+
+                // (A & 0x01) != 0 pattern
+                if (binaryExpression.Left is ParenthesizedExpressionSyntax parenthesizedExpression)
+                {
+                    if (binaryExpression.OperatorToken.ToString() != "!=" && binaryExpression.Right.ToString() != "0")
+                    {
+                        // Only != 0 supported
+                        context.ReportDiagnostic(Diagnostics.InvalidIfLeftOperand, binaryExpression.OperatorToken.GetLocation());
+                        return true;
+                    }
+
+                    if (parenthesizedExpression.Expression is BinaryExpressionSyntax bitwiseAndExpression)
+                    {
+                        if (bitwiseAndExpression.OperatorToken.ToString() != "&")
+                        {
+                            // Only & is supported
+                            context.ReportDiagnostic(Diagnostics.InvalidIfLeftOperand, bitwiseAndExpression.OperatorToken.GetLocation());
+                            return true;
+                        }
+
+                        var operation = bitwiseAndExpression.Left.ToString() switch
+                        {
+                            "A" => "ANDi",
+                            _ => "",
+                        };
+
+                        if (string.IsNullOrEmpty(operation))
+                        {
+                            // Only A is supported for binary expression
+                            context.ReportDiagnostic(Diagnostics.InvalidIfLeftOperand, bitwiseAndExpression.Left.GetLocation());
+                            return true;
+                        }
+
+                        ParseOp(operation, bitwiseAndExpression.Right.ToString(), string.Empty, bitwiseAndExpression.Right.GetLocation(), context);
+                        context.Writer.WriteBranchOpCode("beq", labelName);
+                    }
+                    else
+                    {
+                        // Only (A & 0x01) pattern supported
+                        context.ReportDiagnostic(Diagnostics.InvalidIfLeftOperand, parenthesizedExpression.Expression.GetLocation());
+                        return true;
+                    }
+                }
+                else // A > 0 pattern
+                {
+                    // Compare
+                    var operation = binaryExpression.Left.ToString() switch
+                    {
+                        "X" => "CPXi",
+                        "Y" => "CPYi",
+                        "A" => "CMP",
+                        _ => "",
+                    };
+
+                    if (string.IsNullOrEmpty(operation))
+                    {
+                        context.ReportDiagnostic(Diagnostics.InvalidIfLeftOperand, binaryExpression.Left.GetLocation());
+                        return true;
+                    }
+
+                    ParseOp(operation, binaryExpression.Right.ToString(), string.Empty, binaryExpression.Right.GetLocation(), context);
+
+                    // Jump if condition is false
+                    var branch = binaryExpression.OperatorToken.ToString() switch
+                    {
+                        "==" => "bne",
+                        "!=" => "beq",
+                        ">" => "bpl",
+                        "<" => "bmi",
+                        _ => "",
+                    };
+
+                    if (string.IsNullOrEmpty(branch))
+                    {
+                        context.ReportDiagnostic(Diagnostics.InvalidIfOperator, binaryExpression.OperatorToken.GetLocation());
+                        return true;
+                    }
+
+                    context.Writer.WriteBranchOpCode(branch, labelName);
+                }
+
+                // ... body instructions
+                context.Writer.WriteEmptyLine();
+
+                var ifExitPattern = line.Substring(0, line.IndexOf("if")) + "}";
+                context.PushIfExitData(labelName, ifExitPattern);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryHandleIfExit(string line, Location location, MethodVisitorContext context)
+    {
+        if (context.IsLineMatchingIfExit(line))
+        {
+            context.Writer.WriteEmptyLine();
+
+            var ifExitData = context.PopIfExitData();
+
+            // Label for end if
+            context.Writer.WriteLabel(ifExitData.LabelName);
 
             return true;
         }
