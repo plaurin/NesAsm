@@ -8,8 +8,8 @@
   lda 0
   sta $40
 
-  ;LDAa(b);
-  ;STA(0x41);
+  ; LDAa(b);
+  ; STA(0x41);
 
   lda 2
   sta $42

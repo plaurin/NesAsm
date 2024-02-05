@@ -19,8 +19,8 @@
   lda 0
   sta $40
 
-  ;LDXa(b);
-  ;STA(0x41);
+  ; LDXa(b);
+  ; STA(0x41);
 
   ldy 2
   sta $42

@@ -85,7 +85,7 @@
 
   ; Check Button Right
   lda $21
-  ;if1_start
+  ; if1_start
   and #%00000001
   beq @if1_exit
 

@@ -49,7 +49,7 @@ internal class MethodVisitor
             var match = commentPattern.Match(line);
             if (match.Success)
             {
-                writer.WriteComment(match.Groups["Comment"].Value);
+                writer.WriteComment(match.Groups["Comment"].Value.TrimStart());
                 continue;
             }
 

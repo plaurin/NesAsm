@@ -20,7 +20,7 @@
   lda #%00011000
   lda #$10
 
-  ;LDAi(5); // Enable Sprites & Background - Inline comment not supported yet
+  ; LDAi(5); // Enable Sprites & Background - Inline comment not supported yet
 
   lda $3F
   lda $2002

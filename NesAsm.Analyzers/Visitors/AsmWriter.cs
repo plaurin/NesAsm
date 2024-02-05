@@ -88,7 +88,7 @@ internal class AsmWriter
         WriteEmptyLine();
     }
 
-    public void WriteComment(string comment) => _sb.AppendLine($"  ;{comment}");
+    public void WriteComment(string comment) => _sb.AppendLine($"  ; {comment}");
     
     public void WriteLabel(string label) => _sb.AppendLine($"@{label}:");
     public void WriteVariableLabel(string variableLabel) => _sb.AppendLine($"{variableLabel}:");

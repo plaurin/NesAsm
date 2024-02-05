@@ -5,7 +5,7 @@
   ldx #12
   ldy #12
 
-  ;if1_start
+  ; if1_start
   cpx #12
   bne @if1_exit
 
@@ -13,7 +13,7 @@
 
 @if1_exit:
 
-  ;if2_start
+  ; if2_start
   cpy #15
   bpl @if2_exit
 
@@ -21,7 +21,7 @@
 
 @if2_exit:
 
-  ;if3_start
+  ; if3_start
   and #%00000001
   beq @if3_exit
 
