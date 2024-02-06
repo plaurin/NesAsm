@@ -81,87 +81,84 @@ public class Game1C : ScriptBase
         }
 
         // Check Button Left
-        CheckLeft:
         LDA(0x21);
-        ANDi(0b_0000_0010);
-        if (BEQ()) goto CheckDown;
-        STX(0x20E);
+        if ((A & 0b_0000_0010) != 0)
+        {
+            STX(0x20E);
+        }
 
         // Check Button Down
-        CheckDown:
         LDA(0x21);
-        ANDi(0b_0000_0100);
-        if (BEQ()) goto CheckUp;
-        STX(0x212);
+        if ((A & 0b_0000_0100) != 0)
+        {
+            STX(0x212);
+        }
 
         // Check Button Up
-        CheckUp:
         LDA(0x21);
-        ANDi(0b_0000_1000);
-        if (BEQ()) goto CheckStart;
-        STX(0x216);
+        if ((A & 0b_0000_1000) != 0)
+        {
+            STX(0x216);
+        }
 
         // Check Button Start
-        CheckStart:
         LDA(0x21);
-        ANDi(0b_0001_0000);
-        if (BEQ()) goto CheckSelect;
-        STX(0x21A);
+        if ((A & 0b_0001_0000) != 0)
+        {
+            STX(0x21A);
+        }
 
         // Check Button Select
-        CheckSelect:
         LDA(0x21);
-        ANDi(0b_0010_0000);
-        if (BEQ()) goto CheckB;
-        STX(0x21E);
+        if ((A & 0b_0010_0000) != 0)
+        {
+            STX(0x21E);
+        }
 
         // Check Button B
-        CheckB:
         LDA(0x21);
-        ANDi(0b_0100_0000);
-        if (BEQ()) goto CheckA;
-        STX(0x222);
+        if ((A & 0b_0100_0000) != 0)
+        {
+            STX(0x222);
+        }
 
         // Check Button A
-        CheckA:
         LDA(0x21);
-        ANDi(0b_1000_0000);
-        if (BEQ()) goto EndCheck;
-        STX(0x226);
-
-        EndCheck:
-        // Hack because it is not possible to finish a method with a label?!?
-        LDAi(0);
+        if ((A & 0b_1000_0000) != 0)
+        {
+            STX(0x226);
+        }
     }
 
     public void MoveFace()
     {
         // Move right
         LDA(0x21);
-        ANDi(0b_0000_0001);
-        if (BEQ()) goto MoveLeft;
-        INC(0x22B);
+        if ((A & 0b_0000_0001) != 0)
+        {
+            INC(0x22B);
+        }
 
-        MoveLeft:
+        // Move right
         LDA(0x21);
-        ANDi(0b_0000_0010);
-        if (BEQ()) goto MoveDown;
-        DEC(0x22B);
+        if ((A & 0b_0000_0010) != 0)
+        {
+            DEC(0x22B);
+        }
 
-        MoveDown:
+        // Move down
         LDA(0x21);
-        ANDi(0b_0000_0100);
-        if (BEQ()) goto MoveUp;
-        INC(0x228);
+        if ((A & 0b_0000_0100) != 0)
+        {
+            INC(0x228);
+        }
 
-        MoveUp:
+        // Move up
         LDA(0x21);
-        ANDi(0b_0000_1000);
-        if (BEQ()) goto End;
-        DEC(0x228);
-
-        End:
-        LDA(0);
+        if ((A & 0b_0000_1000) != 0)
+        {
+            DEC(0x228);
+        }
     }
 
     public void Nmi()

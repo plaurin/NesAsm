@@ -85,7 +85,7 @@
 
   ; Check Button Right
   lda $21
-  ; if1_start
+  ;if1_start
   and #%00000001
   beq @if1_exit
 
@@ -94,57 +94,74 @@
 @if1_exit:
 
   ; Check Button Left
-@CheckLeft:
   lda $21
+  ;if2_start
   and #%00000010
-  beq @CheckDown
+  beq @if2_exit
+
   stx $20E
 
+@if2_exit:
+
   ; Check Button Down
-@CheckDown:
   lda $21
+  ;if3_start
   and #%00000100
-  beq @CheckUp
+  beq @if3_exit
+
   stx $212
 
+@if3_exit:
+
   ; Check Button Up
-@CheckUp:
   lda $21
+  ;if4_start
   and #%00001000
-  beq @CheckStart
+  beq @if4_exit
+
   stx $216
 
+@if4_exit:
+
   ; Check Button Start
-@CheckStart:
   lda $21
+  ;if5_start
   and #%00010000
-  beq @CheckSelect
+  beq @if5_exit
+
   stx $21A
 
+@if5_exit:
+
   ; Check Button Select
-@CheckSelect:
   lda $21
+  ;if6_start
   and #%00100000
-  beq @CheckB
+  beq @if6_exit
+
   stx $21E
 
+@if6_exit:
+
   ; Check Button B
-@CheckB:
   lda $21
+  ;if7_start
   and #%01000000
-  beq @CheckA
+  beq @if7_exit
+
   stx $222
 
+@if7_exit:
+
   ; Check Button A
-@CheckA:
   lda $21
+  ;if8_start
   and #%10000000
-  beq @EndCheck
+  beq @if8_exit
+
   stx $226
 
-@EndCheck:
-  ; Hack because it is not possible to finish a method with a label?!?
-  lda #0
+@if8_exit:
 
   rts
 .endproc
@@ -152,30 +169,43 @@
 .proc moveFace
   ; Move right
   lda $21
+  ;if1_start
   and #%00000001
-  beq @MoveLeft
+  beq @if1_exit
+
   inc $22B
 
-@MoveLeft:
+@if1_exit:
+
+  ; Move right
   lda $21
+  ;if2_start
   and #%00000010
-  beq @MoveDown
+  beq @if2_exit
+
   dec $22B
 
-@MoveDown:
+@if2_exit:
+
+  ; Move down
   lda $21
+  ;if3_start
   and #%00000100
-  beq @MoveUp
+  beq @if3_exit
+
   inc $228
 
-@MoveUp:
+@if3_exit:
+
+  ; Move up
   lda $21
+  ;if4_start
   and #%00001000
-  beq @End
+  beq @if4_exit
+
   dec $228
 
-@End:
-  lda 0
+@if4_exit:
 
   rts
 .endproc
