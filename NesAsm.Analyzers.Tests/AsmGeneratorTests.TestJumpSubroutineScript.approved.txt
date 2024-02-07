@@ -11,38 +11,40 @@
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.JumpSubroutineScript.s
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope JumpSubroutineScript
 
-.proc procA
-  jsr procB
-  jsr procC
+  .proc procA
+    jsr procB
+    jsr procC
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procB
-  lda #1
+  .proc procB
+    lda #1
 
-  jmp procC
+    jmp procC
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procC
-  lda #2
+  .proc procC
+    lda #2
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc jumpInsideProc
-@loop:
+  .proc jumpInsideProc
+  @loop:
 
-  lda #2
+    lda #2
 
-  jmp @loop
+    jmp @loop
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 
 
 */

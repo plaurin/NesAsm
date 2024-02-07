@@ -6,6 +6,7 @@ namespace NesAsm.Example;
 [HeaderSegment()]
 [VectorsSegment()]
 [StartupSegment()]
+[FileInclude<Controller>]
 public class Game1C : ScriptBase
 {
     public Game1C(NESEmulator emulator) : base(emulator)
@@ -42,7 +43,7 @@ public class Game1C : ScriptBase
         // Main game loop
         while (true)
         {
-            Call<ReadController>(s => s.ReadControllerOne());
+            Call<Controller>(s => s.ReadControllerOne());
 
             UpdateController();
 

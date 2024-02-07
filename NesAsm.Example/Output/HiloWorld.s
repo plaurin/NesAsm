@@ -1,30 +1,30 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope HiloWorld
 
-.proc main
-  ; Read the PPUSTATUS register $2002
-  lda $2002
+  .proc main
+    ; Read the PPUSTATUS register $2002
+    lda $2002
 
-  ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
-  lda #$3F
-  sta $2006
-  lda #$00
-  sta $2006
+    ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
+    lda #$3F
+    sta $2006
+    lda #$00
+    sta $2006
 
-@loop:
+  @loop:
 
-  lda palettes, x
+    lda palettes, x
 
-  ; Write palette data to PPUDATA $2007
-  sta $2007
-  inx
+    ; Write palette data to PPUDATA $2007
+    sta $2007
+    inx
 
-  cpx #$20
+    cpx #$20
 
-  bne @loop
+    bne @loop
 
-  rts
-.endproc
+    rts
+  .endproc
 
 nmi:
   ldx #$00
@@ -279,5 +279,7 @@ palettes:
   .byte 0
   .byte 0
 
+
+.endscope
 
 .include "wrapper-no-nmi.s"

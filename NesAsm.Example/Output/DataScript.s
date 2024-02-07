@@ -1,10 +1,10 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope DataScript
 
-.proc main
+  .proc main
 
-  rts
-.endproc
+    rts
+  .endproc
 
 .segment "CODE"
 
@@ -45,4 +45,6 @@ palettes:
   .byte 0
   .byte 0
 
+
+.endscope
 

@@ -1,15 +1,17 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope TestScript
 
-.proc start
-  lda #10
-  ldx #$FF
+  .proc start
+    lda #10
+    ldx #$FF
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc stop
+  .proc stop
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 

@@ -11,12 +11,12 @@
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.CharScript.s
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope CharScript
 
-.proc main
+  .proc main
 
-  rts
-.endproc
+    rts
+  .endproc
 
 .segment "CHARS"
 
@@ -38,6 +38,8 @@
   .byte 66
   .byte 135
 
+
+.endscope
 
 
 */

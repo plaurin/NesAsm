@@ -11,50 +11,55 @@
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.CallingOtherScript.s
 ; Auto generated code using the NesAsm project
-.segment "CODE"
-
-.proc main
-  jsr procB
-
-  jsr myProcC
-
-  jmp procC
-
-  rts
-.endproc
-
-.proc myProcC
-  lda #30
-
-  rts
-.endproc
-
 .include "MultiProcScript.s"
+
+.scope CallingOtherScript
+
+  .proc main
+    jsr MultiProcScript::procB
+
+    jsr myProcC
+
+    jmp MultiProcScript::procC
+
+    rts
+  .endproc
+
+  .proc myProcC
+    lda #30
+
+    rts
+  .endproc
+
+.endscope
+
 
 */
 - RunResult[0].GeneratedSources[1].HintName: Asm.MultiProcScript.cs
 - RunResult[0].GeneratedSources[1].SourceText:
 /* Generator Asm code in file Asm.MultiProcScript.s
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope MultiProcScript
 
-.proc procA
-  lda #10
+  .proc procA
+    lda #10
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procB
-  lda #20
+  .proc procB
+    lda #20
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procC
-  lda #30
+  .proc procC
+    lda #30
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 
 
 */

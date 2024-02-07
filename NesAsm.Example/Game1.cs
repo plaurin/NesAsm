@@ -50,7 +50,7 @@ public class Game1 : ScriptBase
         // Main game loop
         endless_loop:
 
-        Call<ReadController>(s => s.ReadControllerOne());
+        Call<Controller>(s => s.ReadControllerOne());
 
         UpdateController();
 

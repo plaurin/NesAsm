@@ -4,6 +4,7 @@ namespace NesAsm.Analyzers.Visitors;
 
 internal class ClassVisitorContext : VisitorContext
 {
+    protected readonly List<string> _preScriptReferences = new();
     protected readonly List<string> _scriptReferences = new();
 
     public ClassVisitorContext(VisitorContext visitorContext, string[] allMethods) : base(visitorContext)
@@ -14,6 +15,7 @@ internal class ClassVisitorContext : VisitorContext
     public ClassVisitorContext(ClassVisitorContext visitorContext) : base(visitorContext)
     {
         AllMethods = visitorContext.AllMethods;
+        _preScriptReferences = visitorContext._preScriptReferences;
         _scriptReferences = visitorContext._scriptReferences;
     }
 
@@ -21,9 +23,27 @@ internal class ClassVisitorContext : VisitorContext
 
     public IEnumerable<string> ScriptReferences => _scriptReferences;
 
+    public bool IsStartupClass { get; private set; } = false;
+
+    internal void AddPreScriptReference(string filepath)
+    {
+        var script = $"{filepath}.s";
+        if (!_preScriptReferences.Contains(script))
+        {
+            _preScriptReferences.Add(script);
+            Writer.IncludeFile(script);
+            Writer.WriteEmptyLine();
+        }
+    }
+
     internal void AddScriptReference(string script)
     {
-        if (!_scriptReferences.Contains(script))
+        if (!_scriptReferences.Contains(script) && !_preScriptReferences.Contains(script))
             _scriptReferences.Add(script);
+    }
+
+    internal void SetStartupClass()
+    {
+        IsStartupClass = true;
     }
 }

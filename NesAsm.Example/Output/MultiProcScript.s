@@ -1,21 +1,23 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope MultiProcScript
 
-.proc procA
-  lda #10
+  .proc procA
+    lda #10
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procB
-  lda #20
+  .proc procB
+    lda #20
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procC
-  lda #30
+  .proc procC
+    lda #30
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 

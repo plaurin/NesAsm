@@ -29,57 +29,57 @@
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.IterationStatementsScript.s
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope IterationStatementsScript
 
-.proc main
-  ; for - using X or Y register
+  .proc main
+    ; for - using X or Y register
 
-  ldx #0
-@loop1_on_X:
-  lda data, x
+    ldx #0
+  @loop1_on_X:
+    lda data, x
 
-  sta $2007
+    sta $2007
 
-  inx
-  cpx #10
-  bne @loop1_on_X
+    inx
+    cpx #10
+    bne @loop1_on_X
 
 
-  ldy #0
-@loop2_on_Y:
-  lda data, y
+    ldy #0
+  @loop2_on_Y:
+    lda data, y
 
-  iny
-  cpy #10
-  bne @loop2_on_Y
+    iny
+    cpy #10
+    bne @loop2_on_Y
 
-  ; for - nested loop
+    ; for - nested loop
 
-  ldx #0
-@loop3_on_X:
+    ldx #0
+  @loop3_on_X:
 
-  ldy #0
-@loop4_on_Y:
-  lda data, x
-  lda data, y
+    ldy #0
+  @loop4_on_Y:
+    lda data, x
+    lda data, y
 
-  iny
-  cpy #4
-  bne @loop4_on_Y
+    iny
+    cpy #4
+    bne @loop4_on_Y
 
-  inx
-  cpx #4
-  bne @loop3_on_X
+    inx
+    cpx #4
+    bne @loop3_on_X
 
-  ; TODO while condition
+    ; TODO while condition
 
-  ; while true - infinite loop
-@endless_loop:
-  lda #42
-  jmp @endless_loop
+    ; while true - infinite loop
+  @endless_loop:
+    lda #42
+    jmp @endless_loop
 
-  rts
-.endproc
+    rts
+  .endproc
 
 .segment "CODE"
 
@@ -96,29 +96,31 @@ data:
   .byte 9
   .byte 10
 
-.proc invalidFor
-  ; NA0013 - Should be X or Y only
+  .proc invalidFor
+    ; NA0013 - Should be X or Y only
 
-  ; NA0015 - Should not declare new local variable X
+    ; NA0015 - Should not declare new local variable X
 
-  ; NA0014 - Should not mix X and Y
+    ; NA0014 - Should not mix X and Y
 
-  ; NA0016 - Should not use the same register in nester loop
+    ; NA0016 - Should not use the same register in nester loop
 
-  ldx #0
-@loop1_on_X:
+    ldx #0
+  @loop1_on_X:
 
-  ldx #0
-@loop2_on_X:
+    ldx #0
+  @loop2_on_X:
 
-  inx
-  cpx #10
-  bne @loop2_on_X
+    inx
+    cpx #10
+    bne @loop2_on_X
 
-  ; NA0008 - do is not supported
+    ; NA0008 - do is not supported
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 
 .include "wrapper.s"
 

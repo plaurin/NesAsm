@@ -2,9 +2,9 @@
 
 namespace NesAsm.Example;
 
-public class ReadController : ScriptBase
+public class Controller : ScriptBase
 {
-    public ReadController(NESEmulator emulator) : base(emulator)
+    public Controller(NESEmulator emulator) : base(emulator)
     {
     }
 

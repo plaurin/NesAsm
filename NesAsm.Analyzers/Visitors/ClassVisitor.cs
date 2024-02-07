@@ -7,22 +7,26 @@ internal static class ClassVisitor
 {
     public static void Visit(ClassDeclarationSyntax classDeclarationSyntax, VisitorContext context)
     {
-        var writer = context.Writer;
-
         var classVisitorContext = new ClassVisitorContext(context, GetAllClassMethods(classDeclarationSyntax));
 
         ProcessClassAttributes(classDeclarationSyntax, classVisitorContext);
 
-        writer.StartCodeSegment();
+        if (classVisitorContext.IsStartupClass)
+            classVisitorContext.Writer.StartCodeSegment();
+        else
+            classVisitorContext.Writer.StartClassScope(classDeclarationSyntax.Identifier.ToString());
 
         foreach (var member in classDeclarationSyntax.Members)
         {
             MemberVisitor.Visit(member, classVisitorContext);
         }
 
+        if (!classVisitorContext.IsStartupClass)
+            classVisitorContext.Writer.EndClassScope();
+
         foreach (var scriptReference in classVisitorContext.ScriptReferences)
         {
-            writer.IncludeFile(scriptReference);
+            classVisitorContext.Writer.IncludeFile(scriptReference);
         }
     }
 
@@ -48,6 +52,12 @@ internal static class ClassVisitor
         {
             foreach (var attribute in att.Attributes)
             {
+                if (attribute.Name is GenericNameSyntax genericNameSyntax && genericNameSyntax.Identifier.Text == "FileInclude")
+                {
+                    var filepath = genericNameSyntax.TypeArgumentList.Arguments.ToString().Trim('"');
+                    context.AddPreScriptReference(filepath);
+                }
+
                 if (attribute.Name.ToString() == "PostFileInclude")
                 {
                     var filepath = attribute.ArgumentList.Arguments.ToString().Trim('"');
@@ -88,6 +98,7 @@ internal static class ClassVisitor
                     }
 
                     context.Writer.StartHeaderSegment(prgRomBanks, chrRomBanks, mapper, verticalMirroring);
+                    context.SetStartupClass();
                 }
 
                 if (attribute.Name.ToString() == "VectorsSegment")

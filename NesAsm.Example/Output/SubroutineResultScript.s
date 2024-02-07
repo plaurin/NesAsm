@@ -1,20 +1,22 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope SubroutineResultScript
 
-.proc main
-  ; Argument of the method could not be used after calling a subroutine with return values
-  jsr procB
+  .proc main
+    ; Argument of the method could not be used after calling a subroutine with return values
+    jsr procB
 
-  lda 0
-  sta $40
+    lda 0
+    sta $40
 
-  rts
-.endproc
+    rts
+  .endproc
 
-.proc procB
-  lda #178
-  sta 0
+  .proc procB
+    lda #178
+    sta 0
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 

@@ -13,6 +13,8 @@
 
 .segment "STARTUP"
 
+.include "Controller.s"
+
 .segment "CODE"
 
 .proc main
@@ -51,7 +53,7 @@
 
   ; Main game loop
 @endless_loop:
-  jsr readControllerOne
+  jsr Controller::readControllerOne
 
   jsr updateController
 
@@ -85,7 +87,7 @@
 
   ; Check Button Right
   lda $21
-  ;if1_start
+  ; if1_start
   and #%00000001
   beq @if1_exit
 
@@ -95,7 +97,7 @@
 
   ; Check Button Left
   lda $21
-  ;if2_start
+  ; if2_start
   and #%00000010
   beq @if2_exit
 
@@ -105,7 +107,7 @@
 
   ; Check Button Down
   lda $21
-  ;if3_start
+  ; if3_start
   and #%00000100
   beq @if3_exit
 
@@ -115,7 +117,7 @@
 
   ; Check Button Up
   lda $21
-  ;if4_start
+  ; if4_start
   and #%00001000
   beq @if4_exit
 
@@ -125,7 +127,7 @@
 
   ; Check Button Start
   lda $21
-  ;if5_start
+  ; if5_start
   and #%00010000
   beq @if5_exit
 
@@ -135,7 +137,7 @@
 
   ; Check Button Select
   lda $21
-  ;if6_start
+  ; if6_start
   and #%00100000
   beq @if6_exit
 
@@ -145,7 +147,7 @@
 
   ; Check Button B
   lda $21
-  ;if7_start
+  ; if7_start
   and #%01000000
   beq @if7_exit
 
@@ -155,7 +157,7 @@
 
   ; Check Button A
   lda $21
-  ;if8_start
+  ; if8_start
   and #%10000000
   beq @if8_exit
 
@@ -169,7 +171,7 @@
 .proc moveFace
   ; Move right
   lda $21
-  ;if1_start
+  ; if1_start
   and #%00000001
   beq @if1_exit
 
@@ -179,7 +181,7 @@
 
   ; Move right
   lda $21
-  ;if2_start
+  ; if2_start
   and #%00000010
   beq @if2_exit
 
@@ -189,7 +191,7 @@
 
   ; Move down
   lda $21
-  ;if3_start
+  ; if3_start
   and #%00000100
   beq @if3_exit
 
@@ -199,7 +201,7 @@
 
   ; Move up
   lda $21
-  ;if4_start
+  ; if4_start
   and #%00001000
   beq @if4_exit
 
@@ -211,18 +213,18 @@
 .endproc
 
 nmi:
-  ; Transfer Sprites via OAM
-  lda #$00
-  ; 0x2003 = OAM_ADDR
-  sta $2003
+; Transfer Sprites via OAM
+lda #$00
+; 0x2003 = OAM_ADDR
+sta $2003
 
-  lda #$02
-  ; 0x4014 = OAM_DMA
-  sta $4014
+lda #$02
+; 0x4014 = OAM_DMA
+sta $4014
 
-  ; Increment frame counter
-  inc $30
-  rti
+; Increment frame counter
+inc $30
+rti
 
 .proc reset
   sei
@@ -307,300 +309,299 @@ nmi:
 .segment "CODE"
 
 controllerSprites:
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 30
-  .byte 1
-  .byte 0
-  .byte 50
-  .byte 30
-  .byte 2
-  .byte 0
-  .byte 30
+.byte 30
+.byte 1
+.byte 0
+.byte 50
+.byte 30
+.byte 2
+.byte 0
+.byte 30
 
-  .byte 40
-  .byte 3
-  .byte 0
-  .byte 40
-  .byte 20
-  .byte 4
-  .byte 0
-  .byte 40
+.byte 40
+.byte 3
+.byte 0
+.byte 40
+.byte 20
+.byte 4
+.byte 0
+.byte 40
 
-  .byte 30
-  .byte 5
-  .byte 0
-  .byte 70
-  .byte 30
-  .byte 6
-  .byte 0
-  .byte 60
+.byte 30
+.byte 5
+.byte 0
+.byte 70
+.byte 30
+.byte 6
+.byte 0
+.byte 60
 
-  .byte 30
-  .byte 7
-  .byte 0
-  .byte 80
-  .byte 30
-  .byte 8
-  .byte 1
-  .byte 90
+.byte 30
+.byte 7
+.byte 0
+.byte 80
+.byte 30
+.byte 8
+.byte 1
+.byte 90
 
-  .byte 80
-  .byte 9
-  .byte 3
-  .byte 80
-  .byte 80
-  .byte 10
-  .byte 2
-  .byte 100
+.byte 80
+.byte 9
+.byte 3
+.byte 80
+.byte 80
+.byte 10
+.byte 2
+.byte 100
 
 
 .segment "CODE"
 
 palettes:
-  .byte 15
-  .byte 32
-  .byte 33
-  .byte 34
-  .byte 15
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 15
+.byte 32
+.byte 33
+.byte 34
+.byte 15
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 15
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 15
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 15
+.byte 0
+.byte 0
+.byte 0
+.byte 15
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 15
-  .byte 32
-  .byte 39
-  .byte 49
-  .byte 15
-  .byte 41
-  .byte 0
-  .byte 0
+.byte 15
+.byte 32
+.byte 39
+.byte 49
+.byte 15
+.byte 41
+.byte 0
+.byte 0
 
-  .byte 15
-  .byte 22
-  .byte 0
-  .byte 0
-  .byte 15
-  .byte 18
-  .byte 0
-  .byte 0
+.byte 15
+.byte 22
+.byte 0
+.byte 0
+.byte 15
+.byte 18
+.byte 0
+.byte 0
 
 
 .segment "CHARS"
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 8
-  .byte 12
-  .byte 14
-  .byte 255
-  .byte 255
-  .byte 14
-  .byte 12
-  .byte 8
+.byte 8
+.byte 12
+.byte 14
+.byte 255
+.byte 255
+.byte 14
+.byte 12
+.byte 8
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 16
-  .byte 48
-  .byte 112
-  .byte 255
-  .byte 255
-  .byte 112
-  .byte 48
-  .byte 16
+.byte 16
+.byte 48
+.byte 112
+.byte 255
+.byte 255
+.byte 112
+.byte 48
+.byte 16
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 24
-  .byte 24
-  .byte 24
-  .byte 24
-  .byte 255
-  .byte 126
-  .byte 60
-  .byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 24
+.byte 255
+.byte 126
+.byte 60
+.byte 24
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 24
-  .byte 60
-  .byte 126
-  .byte 255
-  .byte 24
-  .byte 24
-  .byte 24
-  .byte 24
+.byte 24
+.byte 60
+.byte 126
+.byte 255
+.byte 24
+.byte 24
+.byte 24
+.byte 24
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 0
-  .byte 224
-  .byte 142
-  .byte 196
-  .byte 100
-  .byte 36
-  .byte 228
-  .byte 0
+.byte 0
+.byte 224
+.byte 142
+.byte 196
+.byte 100
+.byte 36
+.byte 228
+.byte 0
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 0
-  .byte 224
-  .byte 142
-  .byte 200
-  .byte 110
-  .byte 40
-  .byte 238
-  .byte 0
+.byte 0
+.byte 224
+.byte 142
+.byte 200
+.byte 110
+.byte 40
+.byte 238
+.byte 0
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 248
-  .byte 252
-  .byte 198
-  .byte 252
-  .byte 252
-  .byte 198
-  .byte 252
-  .byte 248
+.byte 248
+.byte 252
+.byte 198
+.byte 252
+.byte 252
+.byte 198
+.byte 252
+.byte 248
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 60
-  .byte 60
-  .byte 230
-  .byte 195
-  .byte 255
-  .byte 255
-  .byte 195
-  .byte 195
+.byte 60
+.byte 60
+.byte 230
+.byte 195
+.byte 255
+.byte 255
+.byte 195
+.byte 195
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 60
-  .byte 126
-  .byte 219
-  .byte 219
-  .byte 255
-  .byte 195
-  .byte 126
-  .byte 60
+.byte 60
+.byte 126
+.byte 219
+.byte 219
+.byte 255
+.byte 195
+.byte 126
+.byte 60
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
-  .byte 0
-  .byte 102
-  .byte 126
-  .byte 255
-  .byte 255
-  .byte 126
-  .byte 60
-  .byte 24
+.byte 0
+.byte 102
+.byte 126
+.byte 255
+.byte 255
+.byte 126
+.byte 60
+.byte 24
 
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
-  .byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
 
 
-.include "ReadController.s"

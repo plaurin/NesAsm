@@ -1,20 +1,22 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope BranchScript
 
-.proc main
-  ldx #0
+  .proc main
+    ldx #0
 
-@loop:
+  @loop:
 
-  stx 1
-  inx
+    stx 1
+    inx
 
-  cpx #4
+    cpx #4
 
-  bne @loop
+    bne @loop
 
-  ; Memory location 0x01 should be equals to 3
+    ; Memory location 0x01 should be equals to 3
 
-  rts
-.endproc
+    rts
+  .endproc
+
+.endscope
 

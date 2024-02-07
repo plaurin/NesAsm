@@ -1,10 +1,10 @@
 ; Auto generated code using the NesAsm project
-.segment "CODE"
+.scope CharScript
 
-.proc main
+  .proc main
 
-  rts
-.endproc
+    rts
+  .endproc
 
 .segment "CHARS"
 
@@ -26,4 +26,6 @@
   .byte 66
   .byte 135
 
+
+.endscope
 

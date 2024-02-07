@@ -172,13 +172,16 @@ internal class MethodVisitor
 
                 if (!string.IsNullOrEmpty(script))
                 {
-                    if (script != (method.Parent as ClassDeclarationSyntax)?.Identifier.Text)
-                        context.AddScriptReference($"{script}.s");
+                    var callingScope = script != (method.Parent as ClassDeclarationSyntax)?.Identifier.Text ? script : null;
+
+                    // TODO Should Report Error if script not already referenced on the class using FileInclude
+                    if (callingScope != null)
+                        context.AddScriptReference($"{callingScope}.s");
 
                     if (jumpType == "Call")
-                        writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                        writer.WriteJSROpCode(callingScope, Utilities.GetProcName(operation));
                     else if (jumpType == "Jump")
-                        writer.WriteJMPOpCode(Utilities.GetProcName(operation));
+                        writer.WriteJMPOpCode(callingScope, Utilities.GetProcName(operation));
                     else
                         context.ReportDiagnostic(Diagnostics.InvalidJumpTypeNotSupported, location, jumpType);
 
@@ -213,7 +216,7 @@ internal class MethodVisitor
                     }
                 }
 
-                if (operation != "return") writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                if (operation != "return") writer.WriteJSROpCode(null, Utilities.GetProcName(operation));
                 continue;
             }
 
@@ -544,7 +547,7 @@ internal class MethodVisitor
                             var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
                             if (callingProc != null)
                             {
-                                context.Writer.WriteJSROpCode(Utilities.GetProcName(operation));
+                                context.Writer.WriteJSROpCode(null, Utilities.GetProcName(operation));
                                 break;
                             }
 
