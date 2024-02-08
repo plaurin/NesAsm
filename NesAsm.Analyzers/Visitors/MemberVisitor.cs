@@ -37,13 +37,24 @@ internal class MemberVisitor
 
     private static void VisitField(FieldDeclarationSyntax field, ClassVisitorContext context)
     {
+        var fieldName = field.Declaration.Variables.First().Identifier.ToString();
+        var fieldType = field.Declaration.Type.ToString();
+
         var charBytes = new List<int>();
-        if (field.Declaration.Type.ToString() == "byte[]")
+        if (fieldType == "byte[]")
         {
             foreach (var element in (field.Declaration.Variables[0].Initializer.Value as CollectionExpressionSyntax).Elements)
             {
                 charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
             }
+        }
+        else if (fieldType == "ushort" || fieldType == "byte")
+        {
+            var value = field.Declaration.Variables[0].Initializer?.Value.ToString();
+            var asmValue =  Utilities.ConvertOperandToNumericText(value);
+
+            context.Writer.WriteConstant(Utilities.GetConstName(fieldName), asmValue);
+            context.AddConst(fieldName);
         }
 
         if (charBytes.Any())
@@ -81,7 +92,7 @@ internal class MemberVisitor
             if (dataType.Any(dt => dt == "RomData"))
             {
                 context.Writer.StartCodeSegment();
-                context.Writer.WriteVariableLabel(Utilities.GetLabelName(field.Declaration.Variables.First().Identifier.ToString()));
+                context.Writer.WriteVariableLabel(Utilities.GetLabelName(fieldName));
             }
 
             context.Writer.WriteChars(charBytes.ToArray());

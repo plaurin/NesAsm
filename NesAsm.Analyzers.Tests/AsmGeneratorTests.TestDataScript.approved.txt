@@ -1,16 +1,17 @@
 ﻿- Main diagnostics:
-(31,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
-(35,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+(38,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(42,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
 - SyntaxTrees Count: 2
 - Output diagnostics:
+(13,29): warning CS0414: The field 'DataScript.JOYPAD2' is assigned but its value is never used
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-(31,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
-(35,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+(38,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(42,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-(31,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
-(35,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
+(38,5): error NA0007: Only one of RomDataAttribute or CharDataAttribute can be used at the same time
+(42,5): error NA0006: Missing RomDataAttribute or CharDataAttribute on byte[] field
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.DataScript.cs
@@ -19,7 +20,13 @@
 ; Auto generated code using the NesAsm project
 .scope DataScript
 
+  JOYPAD1 = $4016
+  JOYPAD2 = $4017
   .proc main
+    lda #1
+    sta JOYPAD1
+    lda #0
+    sta JOYPAD1
 
     rts
   .endproc

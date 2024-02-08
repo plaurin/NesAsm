@@ -117,6 +117,8 @@ internal class AsmWriter
     public void WriteLabel(string label) => _sb.AppendLine($"{CurrentLabelIndentation}@{label}:");
     public void WriteVariableLabel(string variableLabel) => _sb.AppendLine($"{CurrentLabelIndentation}{variableLabel}:");
 
+    public void WriteConstant(string constName, string value) => _sb.AppendLine($"{CurrentIndentation}{constName} = {value}");
+
     public void WriteOpCode(string opCode) => _sb.AppendLine($"{CurrentIndentation}{opCode}");
     public void WriteOpCode(string opCode, byte address) => _sb.AppendLine($"{CurrentIndentation}{opCode} {address}");
     public void WriteOpCode(string opCode, string address) => _sb.AppendLine($"{CurrentIndentation}{opCode} {address}");

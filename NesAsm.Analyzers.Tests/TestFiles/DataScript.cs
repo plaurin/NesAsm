@@ -9,8 +9,15 @@ internal class DataScript : ScriptBase
     {
     }
 
+    private readonly ushort JOYPAD1 = 0x4016;
+    private readonly ushort JOYPAD2 = 0x4017;
+
     public void Main()
     {
+        LDAi(1);
+        STA(JOYPAD1);
+        LDAi(0);
+        STA(JOYPAD1);
     }
 
     [RomData]

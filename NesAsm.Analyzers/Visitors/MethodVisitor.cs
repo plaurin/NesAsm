@@ -516,32 +516,35 @@ internal class MethodVisitor
     {
         try
         {
-            var numericOperand = Utilities.ConvertOperandToNumericText(operand);
+            var resolvedOperand = context.Consts.Any(c => c == operand)
+                ? operand
+                : Utilities.ConvertOperandToNumericText(operand);
+
             if (string.IsNullOrEmpty(indexorRegister))
             {
                 switch (operation)
                 {
-                    case "LDAi": context.Writer.WriteOpCodeImmediate("lda", numericOperand); break;
-                    case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", numericOperand); break;
-                    case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", numericOperand); break;
-                    case "INC": context.Writer.WriteOpCode("inc", numericOperand); break;
-                    case "DEC": context.Writer.WriteOpCode("dec", numericOperand); break;
+                    case "LDAi": context.Writer.WriteOpCodeImmediate("lda", resolvedOperand); break;
+                    case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", resolvedOperand); break;
+                    case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", resolvedOperand); break;
+                    case "INC": context.Writer.WriteOpCode("inc", resolvedOperand); break;
+                    case "DEC": context.Writer.WriteOpCode("dec", resolvedOperand); break;
                     case "INX": context.Writer.WriteOpCode("inx"); break;
                     case "INY": context.Writer.WriteOpCode("iny"); break;
                     case "DEX": context.Writer.WriteOpCode("dex"); break;
-                    case "LDA": context.Writer.WriteOpCode("lda", numericOperand); break;
-                    case "STA": context.Writer.WriteOpCode("sta", numericOperand); break;
-                    case "STX": context.Writer.WriteOpCode("stx", numericOperand); break;
-                    case "CMP": context.Writer.WriteOpCode("cmp", numericOperand); break;
-                    case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", numericOperand); break;
-                    case "CPYi": context.Writer.WriteOpCodeImmediate("cpy", numericOperand); break;
+                    case "LDA": context.Writer.WriteOpCode("lda", resolvedOperand); break;
+                    case "STA": context.Writer.WriteOpCode("sta", resolvedOperand); break;
+                    case "STX": context.Writer.WriteOpCode("stx", resolvedOperand); break;
+                    case "CMP": context.Writer.WriteOpCode("cmp", resolvedOperand); break;
+                    case "CPXi": context.Writer.WriteOpCodeImmediate("cpx", resolvedOperand); break;
+                    case "CPYi": context.Writer.WriteOpCodeImmediate("cpy", resolvedOperand); break;
                     case "LSR": context.Writer.WriteOpCode("lsr a"); break;
-                    case "ROL": context.Writer.WriteOpCode("rol", numericOperand); break;
+                    case "ROL": context.Writer.WriteOpCode("rol", resolvedOperand); break;
                     case "SEI": context.Writer.WriteOpCode("sei"); break;
                     case "CLD": context.Writer.WriteOpCode("cld"); break;
                     case "TXS": context.Writer.WriteOpCode("txs"); break;
-                    case "BIT": context.Writer.WriteOpCode("bit", numericOperand); break;
-                    case "ANDi": context.Writer.WriteOpCodeImmediate("and", numericOperand); break;
+                    case "BIT": context.Writer.WriteOpCode("bit", resolvedOperand); break;
+                    case "ANDi": context.Writer.WriteOpCodeImmediate("and", resolvedOperand); break;
                     default:
                         {
                             var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
@@ -560,7 +563,7 @@ internal class MethodVisitor
             {
                 switch (operation)
                 {
-                    case "STA": context.Writer.WriteOpCode("sta", numericOperand, indexorRegister); break;
+                    case "STA": context.Writer.WriteOpCode("sta", resolvedOperand, indexorRegister); break;
                     default:
                         context.ReportDiagnostic(Diagnostics.AbsoluteIndexedOpCodeNotSupported, location, operation);
                         break;

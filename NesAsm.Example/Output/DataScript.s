@@ -1,7 +1,13 @@
 ; Auto generated code using the NesAsm project
 .scope DataScript
 
+  JOYPAD1 = $4016
+  JOYPAD2 = $4017
   .proc main
+    lda #1
+    sta JOYPAD1
+    lda #0
+    sta JOYPAD1
 
     rts
   .endproc
