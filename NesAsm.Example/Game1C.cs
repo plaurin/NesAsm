@@ -75,57 +75,57 @@ public class Game1C : ScriptBase
         LDXi(1);
 
         // Check Button Right
-        LDA(0x21);
-        if ((A & 0b_0000_0001) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_RIGHT) != 0)
         {
             STX(0x20A);
         }
 
         // Check Button Left
-        LDA(0x21);
-        if ((A & 0b_0000_0010) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_LEFT) != 0)
         {
             STX(0x20E);
         }
 
         // Check Button Down
-        LDA(0x21);
-        if ((A & 0b_0000_0100) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_DOWN) != 0)
         {
             STX(0x212);
         }
 
         // Check Button Up
-        LDA(0x21);
-        if ((A & 0b_0000_1000) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_UP) != 0)
         {
             STX(0x216);
         }
 
         // Check Button Start
-        LDA(0x21);
-        if ((A & 0b_0001_0000) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_START) != 0)
         {
             STX(0x21A);
         }
 
         // Check Button Select
-        LDA(0x21);
-        if ((A & 0b_0010_0000) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_SELECT) != 0)
         {
             STX(0x21E);
         }
 
         // Check Button B
-        LDA(0x21);
-        if ((A & 0b_0100_0000) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_B) != 0)
         {
             STX(0x222);
         }
 
         // Check Button A
-        LDA(0x21);
-        if ((A & 0b_1000_0000) != 0)
+        LDA(Controller.Down1);
+        if ((A & Controller.BUTTON_A) != 0)
         {
             STX(0x226);
         }
@@ -134,28 +134,28 @@ public class Game1C : ScriptBase
     public void MoveFace()
     {
         // Move right
-        LDA(0x21);
+        LDA(Controller.Down1);
         if ((A & 0b_0000_0001) != 0)
         {
             INC(0x22B);
         }
 
         // Move right
-        LDA(0x21);
+        LDA(Controller.Down1);
         if ((A & 0b_0000_0010) != 0)
         {
             DEC(0x22B);
         }
 
         // Move down
-        LDA(0x21);
+        LDA(Controller.Down1);
         if ((A & 0b_0000_0100) != 0)
         {
             INC(0x228);
         }
 
         // Move up
-        LDA(0x21);
+        LDA(Controller.Down1);
         if ((A & 0b_0000_1000) != 0)
         {
             DEC(0x228);

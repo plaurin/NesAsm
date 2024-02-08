@@ -8,6 +8,8 @@ internal class MultiProcScript : ScriptBase
     {
     }
 
+    public static readonly byte Data = 0xFF;
+
     public void ProcA()
     {
         LDAi(10);

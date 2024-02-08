@@ -21,6 +21,6 @@ internal class CallingOtherScript : ScriptBase
 
     public void MyProcC()
     {
-        LDAi(30);
+        LDA(MultiProcScript.Data);
     }
 }

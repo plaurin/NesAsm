@@ -516,14 +516,17 @@ internal class MethodVisitor
     {
         try
         {
-            var resolvedOperand = context.Consts.Any(c => c == operand)
-                ? operand
-                : Utilities.ConvertOperandToNumericText(operand);
+            var resolvedOperand = operand.Contains(".") 
+                ? operand.Replace(".", "::")
+                : context.Consts.Any(c => c == operand)
+                    ? operand
+                    : Utilities.ConvertOperandToNumericText(operand);
 
             if (string.IsNullOrEmpty(indexorRegister))
             {
                 switch (operation)
                 {
+                    // TODO Validate LD?i with const should generate error
                     case "LDAi": context.Writer.WriteOpCodeImmediate("lda", resolvedOperand); break;
                     case "LDXi": context.Writer.WriteOpCodeImmediate("ldx", resolvedOperand); break;
                     case "LDYi": context.Writer.WriteOpCodeImmediate("ldy", resolvedOperand); break;

@@ -86,9 +86,9 @@
   ldx #1
 
   ; Check Button Right
-  lda $21
+  lda Controller::Down1
   ; if1_start
-  and #%00000001
+  and #Controller::BUTTON_RIGHT
   beq @if1_exit
 
   stx $20A
@@ -96,9 +96,9 @@
 @if1_exit:
 
   ; Check Button Left
-  lda $21
+  lda Controller::Down1
   ; if2_start
-  and #%00000010
+  and #Controller::BUTTON_LEFT
   beq @if2_exit
 
   stx $20E
@@ -106,9 +106,9 @@
 @if2_exit:
 
   ; Check Button Down
-  lda $21
+  lda Controller::Down1
   ; if3_start
-  and #%00000100
+  and #Controller::BUTTON_DOWN
   beq @if3_exit
 
   stx $212
@@ -116,9 +116,9 @@
 @if3_exit:
 
   ; Check Button Up
-  lda $21
+  lda Controller::Down1
   ; if4_start
-  and #%00001000
+  and #Controller::BUTTON_UP
   beq @if4_exit
 
   stx $216
@@ -126,9 +126,9 @@
 @if4_exit:
 
   ; Check Button Start
-  lda $21
+  lda Controller::Down1
   ; if5_start
-  and #%00010000
+  and #Controller::BUTTON_START
   beq @if5_exit
 
   stx $21A
@@ -136,9 +136,9 @@
 @if5_exit:
 
   ; Check Button Select
-  lda $21
+  lda Controller::Down1
   ; if6_start
-  and #%00100000
+  and #Controller::BUTTON_SELECT
   beq @if6_exit
 
   stx $21E
@@ -146,9 +146,9 @@
 @if6_exit:
 
   ; Check Button B
-  lda $21
+  lda Controller::Down1
   ; if7_start
-  and #%01000000
+  and #Controller::BUTTON_B
   beq @if7_exit
 
   stx $222
@@ -156,9 +156,9 @@
 @if7_exit:
 
   ; Check Button A
-  lda $21
+  lda Controller::Down1
   ; if8_start
-  and #%10000000
+  and #Controller::BUTTON_A
   beq @if8_exit
 
   stx $226
@@ -170,7 +170,7 @@
 
 .proc moveFace
   ; Move right
-  lda $21
+  lda Controller::Down1
   ; if1_start
   and #%00000001
   beq @if1_exit
@@ -180,7 +180,7 @@
 @if1_exit:
 
   ; Move right
-  lda $21
+  lda Controller::Down1
   ; if2_start
   and #%00000010
   beq @if2_exit
@@ -190,7 +190,7 @@
 @if2_exit:
 
   ; Move down
-  lda $21
+  lda Controller::Down1
   ; if3_start
   and #%00000100
   beq @if3_exit
@@ -200,7 +200,7 @@
 @if3_exit:
 
   ; Move up
-  lda $21
+  lda Controller::Down1
   ; if4_start
   and #%00001000
   beq @if4_exit

@@ -11,12 +11,12 @@
   BUTTON_DOWN = %00000100
   BUTTON_LEFT = %00000010
   BUTTON_RIGHT = %00000001
-  Down = $20
-  Pressed = $21
+  Down1 = $20
+  Pressed1 = $21
   .proc readControllerOne
     ; Initialize the output memory
     lda #1
-    sta Down
+    sta Down1
 
     ; Send the latch pulse down to the 4021
     sta JOYPAD1
@@ -29,12 +29,12 @@
 
     lda JOYPAD1
     lsr a
-    rol Down
+    rol Down1
     bcc @read_loop
 
     ; Temp copy
-    lda Down
-    sta Pressed
+    lda Down1
+    sta Pressed1
 
     rts
   .endproc

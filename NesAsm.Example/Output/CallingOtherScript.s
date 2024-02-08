@@ -14,7 +14,7 @@
   .endproc
 
   .proc myProcC
-    lda #30
+    lda MultiProcScript::Data
 
     rts
   .endproc

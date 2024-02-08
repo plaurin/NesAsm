@@ -1,6 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope MultiProcScript
 
+  Data = $FF
   .proc procA
     lda #10
 
