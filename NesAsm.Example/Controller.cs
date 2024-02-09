@@ -8,27 +8,27 @@ public class Controller : ScriptBase
     {
     }
 
-    private static readonly ushort JOYPAD1 = 0x4016;
-    private static readonly ushort JOYPAD2 = 0x4017;
+    private const ushort JOYPAD1 = 0x4016;
+    private const ushort JOYPAD2 = 0x4017;
 
-    public static readonly byte BUTTON_A = 0b_1000_0000;
-    public static readonly byte BUTTON_B = 0b_0100_0000;
-    public static readonly byte BUTTON_SELECT = 0b_0010_0000;
-    public static readonly byte BUTTON_START = 0b_0001_0000;
-    public static readonly byte BUTTON_UP = 0b_0000_1000;
-    public static readonly byte BUTTON_DOWN = 0b_0000_0100;
-    public static readonly byte BUTTON_LEFT = 0b_0000_0010;
-    public static readonly byte BUTTON_RIGHT = 0b_0000_0001;
+    public const byte BUTTON_A = 0b_1000_0000;
+    public const byte BUTTON_B = 0b_0100_0000;
+    public const byte BUTTON_SELECT = 0b_0010_0000;
+    public const byte BUTTON_START = 0b_0001_0000;
+    public const byte BUTTON_UP = 0b_0000_1000;
+    public const byte BUTTON_DOWN = 0b_0000_0100;
+    public const byte BUTTON_LEFT = 0b_0000_0010;
+    public const byte BUTTON_RIGHT = 0b_0000_0001;
 
     /// <summary>
     /// 0x20 States for controller 1 down buttons
     /// </summary>
-    public static readonly byte Down1 = 0x20;
+    public const byte Down1 = 0x20;
 
     /// <summary>
     /// 0x21 States for controller 1 just pressed buttons (TODO)
     /// </summary>
-    public static readonly byte Pressed1 = 0x21;
+    public const byte Pressed1 = 0x21;
 
     public void ReadControllerOne()
     {

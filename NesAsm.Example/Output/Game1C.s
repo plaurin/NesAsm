@@ -15,25 +15,39 @@
 
 .include "Controller.s"
 
+.include "PPU.s"
+
 .segment "CODE"
 
+RightButtonPalette = $20A
+LeftButtonPalette = $20E
+DownButtonPalette = $212
+UpButtonPalette = $216
+StartButtonPalette = $21A
+SelectButtonPalette = $21E
+BButtonPalette = $222
+AButtonPalette = $226
+FaceX = $22B
+FaceY = $228
 .proc main
-  ; Read the PPUSTATUS register $2002
-  lda $2002
+  ; Read the PPUSTATUS register $2002 PPU_STATUS
+  lda PPU::PPU_STATUS
 
   ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
   lda #$3F
-  sta $2006
+  ; 0x2006 PPU_ADDR
+  sta PPU::PPU_ADDR
   lda #$00
-  sta $2006
+  ; 0x2006 PPU_ADDR
+  sta PPU::PPU_ADDR
 
 
   ldx #0
 @loop1_on_X:
   lda palettes, x
 
-  ; Write palette data to PPUDATA $2007
-  sta $2007
+  ; Write palette data to PPUDATA $2007 PPU_DATA
+  sta PPU::PPU_DATA
 
   inx
   cpx #32
@@ -74,14 +88,14 @@
   ; ## Update button palette
   ; Init palette to zero
   ldx #0
-  stx $20A
-  stx $20E
-  stx $212
-  stx $216
-  stx $21A
-  stx $21E
-  stx $222
-  stx $226
+  stx RightButtonPalette
+  stx LeftButtonPalette
+  stx DownButtonPalette
+  stx UpButtonPalette
+  stx StartButtonPalette
+  stx SelectButtonPalette
+  stx BButtonPalette
+  stx AButtonPalette
 
   ldx #1
 
@@ -91,7 +105,7 @@
   and #Controller::BUTTON_RIGHT
   beq @if1_exit
 
-  stx $20A
+  stx RightButtonPalette
 
 @if1_exit:
 
@@ -101,7 +115,7 @@
   and #Controller::BUTTON_LEFT
   beq @if2_exit
 
-  stx $20E
+  stx LeftButtonPalette
 
 @if2_exit:
 
@@ -111,7 +125,7 @@
   and #Controller::BUTTON_DOWN
   beq @if3_exit
 
-  stx $212
+  stx DownButtonPalette
 
 @if3_exit:
 
@@ -121,7 +135,7 @@
   and #Controller::BUTTON_UP
   beq @if4_exit
 
-  stx $216
+  stx UpButtonPalette
 
 @if4_exit:
 
@@ -131,7 +145,7 @@
   and #Controller::BUTTON_START
   beq @if5_exit
 
-  stx $21A
+  stx StartButtonPalette
 
 @if5_exit:
 
@@ -141,7 +155,7 @@
   and #Controller::BUTTON_SELECT
   beq @if6_exit
 
-  stx $21E
+  stx SelectButtonPalette
 
 @if6_exit:
 
@@ -151,7 +165,7 @@
   and #Controller::BUTTON_B
   beq @if7_exit
 
-  stx $222
+  stx BButtonPalette
 
 @if7_exit:
 
@@ -161,7 +175,7 @@
   and #Controller::BUTTON_A
   beq @if8_exit
 
-  stx $226
+  stx AButtonPalette
 
 @if8_exit:
 
@@ -172,40 +186,40 @@
   ; Move right
   lda Controller::Down1
   ; if1_start
-  and #%00000001
+  and #Controller::BUTTON_RIGHT
   beq @if1_exit
 
-  inc $22B
+  inc FaceX
 
 @if1_exit:
 
-  ; Move right
+  ; Move left
   lda Controller::Down1
   ; if2_start
-  and #%00000010
+  and #Controller::BUTTON_LEFT
   beq @if2_exit
 
-  dec $22B
+  dec FaceX
 
 @if2_exit:
 
   ; Move down
   lda Controller::Down1
   ; if3_start
-  and #%00000100
+  and #Controller::BUTTON_DOWN
   beq @if3_exit
 
-  inc $228
+  inc FaceY
 
 @if3_exit:
 
   ; Move up
   lda Controller::Down1
   ; if4_start
-  and #%00001000
+  and #Controller::BUTTON_UP
   beq @if4_exit
 
-  dec $228
+  dec FaceY
 
 @if4_exit:
 
@@ -216,11 +230,11 @@ nmi:
 ; Transfer Sprites via OAM
 lda #$00
 ; 0x2003 = OAM_ADDR
-sta $2003
+sta PPU::OAM_ADDR
 
 lda #$02
 ; 0x4014 = OAM_DMA
-sta $4014
+sta PPU::OAM_DMA
 
 ; Increment frame counter
 inc $30
@@ -237,14 +251,18 @@ rti
   txs
 
   ldx #%00010000
-  stx $2000
-  stx $2001
+  ; 0x2000 PPU_CTRL
+  stx PPU::PPU_CTRL
+  ; 0x2001 PPU_MASK
+  stx PPU::PPU_MASK
   stx $4010
 
-  bit $2002
+  ; 0x2002 PPU_STATUS
+  bit PPU::PPU_STATUS
 
 @vblankWait1:
-  bit $2002
+  ; 0x2002 PPU_STATUS
+  bit PPU::PPU_STATUS
   bpl @vblankWait1
 
   ; Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
@@ -266,7 +284,8 @@ rti
   bne @loop1_on_X
 
 @vblankWait2:
-  bit $2002
+  ; 0x2002 PPU_STATUS
+  bit PPU::PPU_STATUS
   bpl @vblankWait2
 
   jsr resetPalettes
@@ -275,11 +294,13 @@ rti
 
   ; Enable Sprites & Background
   lda #%00011000
-  sta $2001
+  ; 0x2002 PPU_STATUS
+  sta PPU::PPU_MASK
 
   ; Enable NMI
   lda #%10000000
-  sta $2000
+  ; 0x2000 PPU_CTRL
+  sta PPU::PPU_CTRL
 
   jmp main
 
@@ -287,19 +308,23 @@ rti
 .endproc
 
 .proc resetPalettes
-  bit $2002
+  ; 0x2002 PPU_STATUS
+  bit PPU::PPU_STATUS
 
   lda #$3f
-  sta $2006
+  ; 0x2006 PPU_ADDR
+  sta PPU::PPU_ADDR
   lda #$00
-  sta $2006
+  ; 0x2006 PPU_ADDR
+  sta PPU::PPU_ADDR
 
   lda #$0F
   ldx #$20
 
 @paletteLoadLoop:
 
-  sta $2007
+  ; 0x2007 PPU_DATA
+  sta PPU::PPU_DATA
   dex
   bne @paletteLoadLoop
 

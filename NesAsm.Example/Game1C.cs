@@ -7,29 +7,44 @@ namespace NesAsm.Example;
 [VectorsSegment()]
 [StartupSegment()]
 [FileInclude<Controller>]
+[FileInclude<PPU>]
 public class Game1C : ScriptBase
 {
     public Game1C(NESEmulator emulator) : base(emulator)
     {
     }
 
+    private const ushort RightButtonPalette = 0x20A;
+    private const ushort LeftButtonPalette = 0x20E;
+    private const ushort DownButtonPalette = 0x212;
+    private const ushort UpButtonPalette = 0x216;
+    private const ushort StartButtonPalette = 0x21A;
+    private const ushort SelectButtonPalette = 0x21E;
+    private const ushort BButtonPalette = 0x222;
+    private const ushort AButtonPalette = 0x226;
+
+    private const ushort FaceX = 0x22B;
+    private const ushort FaceY = 0x228;
+
     public void Main()
     {
-        // Read the PPUSTATUS register $2002
-        LDA(PPUSTATUS);
+        // Read the PPUSTATUS register $2002 PPU_STATUS
+        LDA(PPU.PPU_STATUS);
 
         // Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
         LDAi(0x3F);
-        STA(PPUADDR);
+        // 0x2006 PPU_ADDR
+        STA(PPU.PPU_ADDR);
         LDAi(0x00);
-        STA(PPUADDR);
+        // 0x2006 PPU_ADDR
+        STA(PPU.PPU_ADDR);
 
         for (X = 0; X < 32; X++)
         {
             LDA(Palettes, X);
 
-            // Write palette data to PPUDATA $2007
-            STA(PPUDATA);
+            // Write palette data to PPUDATA $2007 PPU_DATA
+            STA(PPU.PPU_DATA);
         }
 
         // Transfert sprite data into $200-$2ff memory range
@@ -63,14 +78,14 @@ public class Game1C : ScriptBase
         // ## Update button palette
         // Init palette to zero
         LDXi(0);
-        STX(0x20A);
-        STX(0x20E);
-        STX(0x212);
-        STX(0x216);
-        STX(0x21A);
-        STX(0x21E);
-        STX(0x222);
-        STX(0x226);
+        STX(RightButtonPalette);
+        STX(LeftButtonPalette);
+        STX(DownButtonPalette);
+        STX(UpButtonPalette);
+        STX(StartButtonPalette);
+        STX(SelectButtonPalette);
+        STX(BButtonPalette);
+        STX(AButtonPalette);
 
         LDXi(1);
 
@@ -78,56 +93,56 @@ public class Game1C : ScriptBase
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_RIGHT) != 0)
         {
-            STX(0x20A);
+            STX(RightButtonPalette);
         }
 
         // Check Button Left
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_LEFT) != 0)
         {
-            STX(0x20E);
+            STX(LeftButtonPalette);
         }
 
         // Check Button Down
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_DOWN) != 0)
         {
-            STX(0x212);
+            STX(DownButtonPalette);
         }
 
         // Check Button Up
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_UP) != 0)
         {
-            STX(0x216);
+            STX(UpButtonPalette);
         }
 
         // Check Button Start
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_START) != 0)
         {
-            STX(0x21A);
+            STX(StartButtonPalette);
         }
 
         // Check Button Select
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_SELECT) != 0)
         {
-            STX(0x21E);
+            STX(SelectButtonPalette);
         }
 
         // Check Button B
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_B) != 0)
         {
-            STX(0x222);
+            STX(BButtonPalette);
         }
 
         // Check Button A
         LDA(Controller.Down1);
         if ((A & Controller.BUTTON_A) != 0)
         {
-            STX(0x226);
+            STX(AButtonPalette);
         }
     }
 
@@ -135,30 +150,30 @@ public class Game1C : ScriptBase
     {
         // Move right
         LDA(Controller.Down1);
-        if ((A & 0b_0000_0001) != 0)
+        if ((A & Controller.BUTTON_RIGHT) != 0)
         {
-            INC(0x22B);
+            INC(FaceX);
         }
 
-        // Move right
+        // Move left
         LDA(Controller.Down1);
-        if ((A & 0b_0000_0010) != 0)
+        if ((A & Controller.BUTTON_LEFT) != 0)
         {
-            DEC(0x22B);
+            DEC(FaceX);
         }
 
         // Move down
         LDA(Controller.Down1);
-        if ((A & 0b_0000_0100) != 0)
+        if ((A & Controller.BUTTON_DOWN) != 0)
         {
-            INC(0x228);
+            INC(FaceY);
         }
 
         // Move up
         LDA(Controller.Down1);
-        if ((A & 0b_0000_1000) != 0)
+        if ((A & Controller.BUTTON_UP) != 0)
         {
-            DEC(0x228);
+            DEC(FaceY);
         }
     }
 
@@ -167,11 +182,11 @@ public class Game1C : ScriptBase
         // Transfer Sprites via OAM
         LDAi(0x00);
         // 0x2003 = OAM_ADDR
-        STA(0x2003);
+        STA(PPU.OAM_ADDR);
 
         LDAi(0x02);
         // 0x4014 = OAM_DMA
-        STA(0x4014);
+        STA(PPU.OAM_DMA);
 
         // Increment frame counter
         INC(0x30);
@@ -189,14 +204,18 @@ public class Game1C : ScriptBase
         TXS();
 
         LDXi(0b_0001_0000);
-        STX(0x2000);
-        STX(0x2001);
+        // 0x2000 PPU_CTRL
+        STX(PPU.PPU_CTRL);
+        // 0x2001 PPU_MASK
+        STX(PPU.PPU_MASK);
         STX(0x4010);
 
-        BIT(0x2002);
+        // 0x2002 PPU_STATUS
+        BIT(PPU.PPU_STATUS);
 
         vblankWait1:
-        BIT(0x2002);
+        // 0x2002 PPU_STATUS
+        BIT(PPU.PPU_STATUS);
         if (BPL()) goto vblankWait1;
 
         // Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
@@ -214,7 +233,8 @@ public class Game1C : ScriptBase
         }
 
         vblankWait2:
-        BIT(0x2002);
+        // 0x2002 PPU_STATUS
+        BIT(PPU.PPU_STATUS);
         if (BPL()) goto vblankWait2;
 
         ResetPalettes();
@@ -222,31 +242,37 @@ public class Game1C : ScriptBase
         // To Main
 
         // Enable Sprites & Background
-        LDAi(0b_0001_1000); 
-        STA(PPUMASK);
+        LDAi(0b_0001_1000);
+        // 0x2002 PPU_STATUS
+        STA(PPU.PPU_MASK);
 
         // Enable NMI
         LDAi(0b_1000_0000);
-        STA(PPUCTRL);
+        // 0x2000 PPU_CTRL
+        STA(PPU.PPU_CTRL);
 
         Jump<Game1C>(s => s.Main());
     }
 
     public void ResetPalettes()
     {
-        BIT(0x2002);
+        // 0x2002 PPU_STATUS
+        BIT(PPU.PPU_STATUS);
         
         LDAi(0x3f);
-        STA(0x2006);
+        // 0x2006 PPU_ADDR
+        STA(PPU.PPU_ADDR);
         LDAi(0x00);
-        STA(0x2006);
+        // 0x2006 PPU_ADDR
+        STA(PPU.PPU_ADDR);
 
         LDAi(0x0F);
         LDXi(0x20);
 
         paletteLoadLoop:
 
-        STA(0x2007);
+        // 0x2007 PPU_DATA
+        STA(PPU.PPU_DATA);
         DEX();
         if (BNE()) goto paletteLoadLoop;
     }
