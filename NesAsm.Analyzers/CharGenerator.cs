@@ -7,15 +7,14 @@ using NesAsm.Analyzers.Visitors;
 
 namespace NesAsm.Analyzers;
 
-[Generator]
-public class AsmGenerator : IIncrementalGenerator
+public class CharGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var classProviders = context.SyntaxProvider
             .CreateSyntaxProvider(
-                predicate: static (s, _) => IsSyntaxTargetForGeneration(s), 
-                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx)) 
+                predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
+                transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Combine(context.CompilationProvider);
 
         context.RegisterSourceOutput(classProviders, Generate);
@@ -38,7 +37,7 @@ public class AsmGenerator : IIncrementalGenerator
             }
 
             var fullName = typeSymbol.ToDisplayString();
-            if (fullName == "NesAsm.Emulator.ScriptBase")
+            if (fullName == "NesAsm.Emulator.CharDefinition")
             {
                 return classDeclarationSyntax;
             }
@@ -55,6 +54,8 @@ public class AsmGenerator : IIncrementalGenerator
         {
             var (node, compilation) = tuple;
             var writer = new AsmWriter();
+
+            CharClassVisitor.Visit(node);
 
             ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
 

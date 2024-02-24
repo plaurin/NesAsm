@@ -31,5 +31,4 @@ public class UtilitiesTests
     {
         Assert.Throws<InvalidOperationException>(() => Utilities.ConvertOperandToNumericText(invalidInput));
     }
-
 }

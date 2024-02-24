@@ -278,7 +278,7 @@ public class Game1C : ScriptBase
     }
 
     [RomData]
-    private byte[] ControllerSprites = [
+    private readonly byte[] ControllerSprites = [
         // Empty sprites
         0, 0, 0, 0,
         0, 0, 0, 0,
@@ -345,7 +345,7 @@ public class Game1C : ScriptBase
     ];
 
     [RomData]
-    private byte[] Palettes = [
+    private readonly byte[] Palettes = [
         // Background palettes
         0x0F,
         0x20,
@@ -384,7 +384,7 @@ public class Game1C : ScriptBase
     ];
 
     [CharData]
-    private byte[] Characters = [
+    private readonly byte[] Characters = [
         // First tile is empty
         0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0,
