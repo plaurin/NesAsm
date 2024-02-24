@@ -2,7 +2,6 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace NesAsm.Analyzers.Visitors;
@@ -20,50 +19,34 @@ public static class CharClassVisitor
 
         // Error if not 287x287
 
-        //var colorPalettes = new HashSet<ColorPalette>(new ColorPaletteComparer());
-        var colorPalettes = new List<ColorPalette>();
-
-        var tilesPalette = new int[16, 16];
+        var colorPalettes = new ColorPalettes();
 
         // Generate palette for each tile
-        for (var tileIndexY = 0; tileIndexY < 16; tileIndexY++)
-            for (var tileIndexX = 0; tileIndexX < 16; tileIndexX++)
-            {
-                var colors = GetColors(bitmap, tileIndexX, tileIndexY);
-                //if (!colorPalettes.Contains(colors))
-                //    colorPalettes.Add(colors);
+        for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
+        {
+            var colorPalette = GetColorPalette(bitmap, tileIndex, colorPalettes);
 
-                var paletteIndex = colorPalettes.IndexOf(colors);
-                if (paletteIndex == -1)
-                {
-                    paletteIndex = colorPalettes.Count;
-                    colorPalettes.Add(colors);
-                }
-
-                tilesPalette[tileIndexX, tileIndexY] = paletteIndex;
-            }
+            // Create Tile data using PaletteColor
+            WriteTileData(bitmap, tileIndex, colorPalette, writer);
+        }
 
         // Warning if more than 4 palettes?
-
-        // Create Tile data using PaletteColor
-        for (var tileIndexY = 0; tileIndexY < 16; tileIndexY++)
-            for (var tileIndexX = 0; tileIndexX < 16; tileIndexX++)
-            {
-                WriteTileData(bitmap, tileIndexX, tileIndexY, colorPalettes[tilesPalette[tileIndexX, tileIndexY]], writer);
-            }
 
         return writer.ToString();
     }
 
-    private static void WriteTileData(SKBitmap bitmap, int tileIndexX, int tileIndexY, ColorPalette colorPalette, AsmWriter writer)
+    private static void WriteTileData(SKBitmap bitmap, int tileIndex, ColorPalette colorPalette, AsmWriter writer)
     {
-        var tileStartX = tileIndexX * 9;
-        var tileStartY = tileIndexY * 9;
+        var tileStartX = (tileIndex % 16) * 9;
+        var tileStartY = (tileIndex / 16) * 9;
 
-        var pixelData = new int[8, 8];
+        var lowBytes = new List<int>();
+        var highBytes = new List<int>();
 
         for (var j = 0; j < 8; j++)
         {
+            var lowByte = 0;
+            var highByte = 0;
             for (var i = 0; i < 8; i++)
             {
                 var color = bitmap.GetPixel(tileStartX + i, tileStartY + j);
@@ -73,49 +56,30 @@ public static class CharClassVisitor
                 if (colorIndex == -1)
                     throw new Exception("Color not in palette");
 
-                pixelData[i, j] = colorIndex;
-            }
-        }
+                lowByte *= 2;
+                lowByte += colorIndex % 2;
 
-        var values = new List<int>();
-
-        for (var j = 0; j < 8; j++)
-        {
-            var total = 0;
-            for (var i = 0; i < 8; i++)
-            {
-                total *= 2;
-                total += pixelData[i, j] % 2;
+                highByte *= 2;
+                highByte += colorIndex / 2;
             }
 
-            values.Add(total);
+            lowBytes.Add(lowByte);
+            highBytes.Add(highByte);
         }
 
-        for (var j = 0; j < 8; j++)
-        {
-            var total = 0;
-            for (var i = 0; i < 8; i++)
-            {
-                total *= 2;
-                total += pixelData[i, j] / 2;
-            }
-
-            values.Add(total);
-        }
-
-        writer.WriteChars(values.ToArray());
-
+        writer.WriteChars(lowBytes.ToArray());
+        writer.WriteChars(highBytes.ToArray());
     }
 
-    private static ColorPalette GetColors(SKBitmap bitmap, int tileIndexX, int tileIndexY)
+    private static ColorPalette GetColorPalette(SKBitmap bitmap, int tileIndex, ColorPalettes colorPalettes)
     {
         var colors = new HashSet<SKColor>
         {
             new(0, 0, 0)
         };
 
-        var tileStartX = tileIndexX * 9;
-        var tileStartY = tileIndexY * 9;
+        var tileStartX = (tileIndex % 16) * 9;
+        var tileStartY = (tileIndex / 16) * 9;
 
         for (var j = 0; j < 8; j++)
             for (var i = 0; i < 8; i++)
@@ -130,7 +94,7 @@ public static class CharClassVisitor
 
         // Error if more than 3 non default color
 
-        return new ColorPalette(colors.ToArray());
+        return colorPalettes.GetFromColors(colors.ToArray());
     }
 
     private static SKColor MatchNesColor(SKColor color)
@@ -228,76 +192,60 @@ public static class CharClassVisitor
         return closestColor;
     }
 
+    public class ColorPalettes
+    {
+        private HashSet<ColorPalette> palettes = new(new ColorPaletteComparer());
+
+        public ColorPalette GetFromColors(SKColor[] colors)
+        {
+            var palette = new ColorPalette(colors);
+
+            if (!palettes.Contains(palette))
+            {
+                palettes.Add(palette);
+            }
+
+            return palette;
+        }
+
+        private class ColorPaletteComparer : IEqualityComparer<ColorPalette>
+        {
+            public bool Equals(ColorPalette x, ColorPalette y) => x.Colors.All(y.Colors.Contains);
+
+            public int GetHashCode(ColorPalette obj) => obj.HashCode;
+        }
+    }
+
     public class ColorPalette
     {
-        public ColorPalette(SKColor color1, SKColor color2, SKColor color3, SKColor color4)
-        {
-            Color1 = color1;
-            Color2 = color2;
-            Color3 = color3;
-            Color4 = color4;
-        }
+        private readonly SKColor[] _colors = new SKColor[4];
 
         public ColorPalette(SKColor[] colors)
         {
-            if (colors.Length > 0) Color1 = colors[0];
-            if (colors.Length > 1) Color2 = colors[1];
-            if (colors.Length > 2) Color3 = colors[2];
-            if (colors.Length > 3) Color4 = colors[3];
+            colors.CopyTo(_colors, 0);
         }
+
+        public bool IsEmpty => _colors[0].Red == 0 && _colors[0].Green == 0 && _colors[0].Blue == 0 && _colors[1] == SKColor.Empty && _colors[2] == SKColor.Empty && _colors[3] == SKColor.Empty;
 
         public int GetColorIndex(SKColor color)
         {
             int CalcDistance(SKColor otherColor) => Math.Abs(color.Red - otherColor.Red) + Math.Abs(color.Green - otherColor.Green) + Math.Abs(color.Blue - otherColor.Blue) + Math.Abs(color.Alpha - otherColor.Alpha);
 
-            var closestColorIndex = 0;
-            var closestDistance = CalcDistance(Color1);
-
-            var distance = CalcDistance(Color2);
-            if (distance < closestDistance)
-            {
-                closestColorIndex = 1;
-                closestDistance = distance;
-            }
-
-            distance = CalcDistance(Color3);
-            if (distance < closestDistance)
-            {
-                closestColorIndex = 2;
-                closestDistance = distance;
-            }
-
-            distance = CalcDistance(Color4);
-            if (distance < closestDistance)
-            {
-                closestColorIndex = 3;
-            }
-
-            return closestColorIndex;
+            var matchingColor = _colors.OrderBy(CalcDistance).First();
+            return Array.IndexOf(_colors, matchingColor);
         }
 
-        public SKColor Color1 { get; }
-        public SKColor Color2 { get; }
-        public SKColor Color3 { get; }
-        public SKColor Color4 { get; }
-    }
-
-    public class ColorPaletteComparer : IEqualityComparer<ColorPalette>
-    {
-        public bool Equals(ColorPalette x, ColorPalette y)
+        public int HashCode
         {
-            var leftColors = new[] { x.Color1, x.Color2, x.Color3 };
-            var rightColors = new[] { y.Color1, y.Color2, y.Color3 };
-
-            return leftColors.All(rightColors.Contains);
-        }
-
-        public int GetHashCode(ColorPalette obj)
-        {
-            unchecked
+            get
             {
-                return obj.Color1.GetHashCode() + obj.Color2.GetHashCode() + obj.Color3.GetHashCode();
+                unchecked
+                {
+                    return _colors[0].GetHashCode() + _colors[1].GetHashCode() + _colors[2].GetHashCode() + _colors[3].GetHashCode();
+                }
             }
         }
+
+        public SKColor[] Colors => _colors;
     }
 }
