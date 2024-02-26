@@ -112,6 +112,19 @@ internal class AsmWriter
         WriteEmptyLine();
     }
 
+    public void WriteChars(byte[] charBytes)
+    {
+        int i = 0;
+        foreach (var charByte in charBytes)
+        {
+            _sb.AppendLine($"{CurrentIndentation}.byte {charByte}");
+
+            if (++i % 8 == 0) WriteEmptyLine();
+        }
+
+        WriteEmptyLine();
+    }
+
     public void WriteComment(string comment) => _sb.AppendLine($"{CurrentIndentation}; {comment}");
     
     public void WriteLabel(string label) => _sb.AppendLine($"{CurrentLabelIndentation}@{label}:");
