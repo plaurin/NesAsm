@@ -7,6 +7,7 @@ using NesAsm.Analyzers.Visitors;
 
 namespace NesAsm.Analyzers;
 
+[Generator]
 public class CharGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -50,9 +51,11 @@ public class CharGenerator : IIncrementalGenerator
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
     private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
     {
+        var (node, compilation) = tuple;
+        if (node == null) return;
+
         try
         {
-            var (node, compilation) = tuple;
             var writer = new AsmWriter();
 
             CharClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
@@ -66,7 +69,9 @@ public class CharGenerator : IIncrementalGenerator
         }
         catch (Exception ex)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InternalAnalyzerFailure, Location.None, ex.ToString()));
+            var message = $"{nameof(CharGenerator)} for {node.SyntaxTree?.FilePath} : {ex.Message} {ex.StackTrace}";
+
+            context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InternalAnalyzerFailure, node.GetLocation(), message));
         }
     }
 }

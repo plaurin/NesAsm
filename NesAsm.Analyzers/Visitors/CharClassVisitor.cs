@@ -17,8 +17,7 @@ public static class CharClassVisitor
             {
                 if (attribute.Name.ToString() == "ImportChar")
                 {
-                    var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax)!.Token.ValueText;
-                    // TODO convert to normal string
+                    var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
 
                     var sourceFilePath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
                     var sourceFolderPath = Path.GetDirectoryName(sourceFilePath);
