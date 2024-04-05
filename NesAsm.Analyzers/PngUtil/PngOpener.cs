@@ -8,12 +8,7 @@ namespace BigGustave;
 
 internal static class PngOpener
 {
-    public static Png Open(Stream stream, IChunkVisitor chunkVisitor = null) => Open(stream, new PngOpenerSettings
-    {
-        ChunkVisitor = chunkVisitor
-    });
-
-    public static Png Open(Stream stream, PngOpenerSettings settings)
+    public static Png Open(Stream stream)
     {
         if (stream == null)
         {
@@ -47,11 +42,6 @@ internal static class PngOpener
                 {
                     if (hasEncounteredImageEnd)
                     {
-                        if (settings?.DisallowTrailingData == true)
-                        {
-                            throw new InvalidOperationException($"Found another chunk {header} after already reading the IEND chunk.");
-                        }
-
                         break;
                     }
 
@@ -115,8 +105,6 @@ internal static class PngOpener
                     {
                         throw new InvalidOperationException($"CRC calculated {result} did not match file {crcActual} for chunk: {header.Name}.");
                     }
-
-                    settings?.ChunkVisitor?.Visit(stream, imageHeader, header, bytes, crc);
                 }
 
                 memoryStream.Flush();

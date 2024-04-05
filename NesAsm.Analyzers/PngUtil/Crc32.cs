@@ -35,36 +35,6 @@ public static class Crc32
     }
 
     /// <summary>
-    /// Calculate the CRC32 for data.
-    /// </summary>
-    public static uint Calculate(byte[] data)
-    {
-        var crc32 = uint.MaxValue;
-        for (var i = 0; i < data.Length; i++)
-        {
-            var index = (crc32 ^ data[i]) & 0xFF;
-            crc32 = (crc32 >> 8) ^ Lookup[index];
-        }
-
-        return crc32 ^ uint.MaxValue;
-    }
-
-    /// <summary>
-    /// Calculate the CRC32 for data.
-    /// </summary>
-    public static uint Calculate(List<byte> data)
-    {
-        var crc32 = uint.MaxValue;
-        for (var i = 0; i < data.Count; i++)
-        {
-            var index = (crc32 ^ data[i]) & 0xFF;
-            crc32 = (crc32 >> 8) ^ Lookup[index];
-        }
-
-        return crc32 ^ uint.MaxValue;
-    }
-
-    /// <summary>
     /// Calculate the combined CRC32 for data.
     /// </summary>
     public static uint Calculate(byte[] data, byte[] data2)
