@@ -10,29 +10,29 @@ namespace NesAsm.Analyzers.Tests;
 
 internal class GeneratorTestUtilities
 {
-    public static void TestGenerator(ISourceGenerator generator, string source) => TestGenerator(generator, new[] { source });
+    public static void TestGenerator(ISourceGenerator generator, string sourcePath) => TestGenerator(generator, new[] { sourcePath });
 
-    public static void TestGenerator(ISourceGenerator generator, string[] sources)
+    public static void TestGenerator(ISourceGenerator generator, string[] sourcePaths)
     {
         // Create the driver that will control the generation, passing in our generator
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        TestGenerator(driver, sources);
+        TestGenerator(driver, sourcePaths);
     }
 
-    public static void TestGenerator(IIncrementalGenerator generator, string source) => TestGenerator(generator, new[] { source });
+    public static void TestGenerator(IIncrementalGenerator generator, string sourcePath) => TestGenerator(generator, new[] { sourcePath });
 
-    public static void TestGenerator(IIncrementalGenerator generator, string[] sources)
+    public static void TestGenerator(IIncrementalGenerator generator, string[] sourcePaths)
     {
         // Create the driver that will control the generation, passing in our generator
         GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-        TestGenerator(driver, sources);
+        TestGenerator(driver, sourcePaths);
     }
 
-    private static void TestGenerator(GeneratorDriver driver, string[] sources)
+    private static void TestGenerator(GeneratorDriver driver, string[] sourcePaths)
     {
-        Compilation inputCompilation = CreateCompilation(sources);
+        Compilation inputCompilation = CreateCompilation(sourcePaths);
 
         // Run the generation pass
         // (Note: the generator driver itself is immutable, and all calls return an updated version of the driver that you should use for subsequent calls)
@@ -44,7 +44,7 @@ internal class GeneratorTestUtilities
         Approvals.Verify(summary);
     }
 
-    private static Compilation CreateCompilation(string[] sources)
+    private static Compilation CreateCompilation(string[] sourcePaths)
     {
         var references = new List<MetadataReference>
         {
@@ -58,7 +58,7 @@ internal class GeneratorTestUtilities
             .ForEach(a => references.Add(MetadataReference.CreateFromFile(Assembly.Load(a).Location)));
 
         return CSharpCompilation.Create("compilation",
-                    sources.Select(source => CSharpSyntaxTree.ParseText(source)),
+                    sourcePaths.Select(sourcePath => CSharpSyntaxTree.ParseText(File.ReadAllText(sourcePath), path: sourcePath)),
                     references,
                     new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
     }

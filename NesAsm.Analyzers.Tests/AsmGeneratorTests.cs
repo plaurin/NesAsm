@@ -9,9 +9,8 @@ public class AsmGeneratorTests
     public void TestExampleScript()
     {
         var generator = new AsmGenerator();
-        var content = File.ReadAllText($@"..\..\..\..\NesAsm.Example\HiloWorld.cs");
 
-        GeneratorTestUtilities.TestGenerator(generator, content);
+        GeneratorTestUtilities.TestGenerator(generator, $@"..\..\..\..\NesAsm.Example\HiloWorld.cs");
     }
 
     [Fact]
@@ -102,8 +101,9 @@ public class AsmGeneratorTests
     {
         var generator = new AsmGenerator();
 
-        var contents = filenames.Select(filename => File.ReadAllText($@"..\..\..\TestFiles\{filename}"));
+        //var contents = filenames.Select(filename => File.ReadAllText($@"..\..\..\TestFiles\{filename}"));
+        var sourcePaths = filenames.Select(filename => $@"..\..\..\TestFiles\{filename}").ToArray();
 
-        GeneratorTestUtilities.TestGenerator(generator, contents.ToArray());
+        GeneratorTestUtilities.TestGenerator(generator, sourcePaths);
     }
 }

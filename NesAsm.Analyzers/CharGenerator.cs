@@ -55,9 +55,7 @@ public class CharGenerator : IIncrementalGenerator
             var (node, compilation) = tuple;
             var writer = new AsmWriter();
 
-            CharClassVisitor.Visit(node);
-
-            ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
+            CharClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
 
             var source = writer.ToString();
 

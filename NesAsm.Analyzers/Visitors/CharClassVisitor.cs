@@ -2,19 +2,47 @@
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NesAsm.Analyzers.Visitors;
 
 public static class CharClassVisitor
 {
-    public static void Visit(ClassDeclarationSyntax classDeclarationSyntax)
+    internal static void Visit(ClassDeclarationSyntax classDeclarationSyntax, VisitorContext context)
     {
+        foreach (var att in classDeclarationSyntax.AttributeLists)
+        {
+            foreach (var attribute in att.Attributes)
+            {
+                if (attribute.Name.ToString() == "ImportChar")
+                {
+                    var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax)!.Token.ValueText;
+                    // TODO convert to normal string
+
+                    var sourceFilePath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
+                    var sourceFolderPath = Path.GetDirectoryName(sourceFilePath);
+                    var charFilePath = Path.Combine(sourceFolderPath, filepath);
+
+                    Process(charFilePath, context.Writer);
+
+                    return;
+                }
+            }
+        }
     }
 
     public static string Process(string filename)
     {
         var writer = new AsmWriter();
+
+        Process(filename, writer);
+
+        return writer.ToString();
+    }
+
+    internal static void Process(string filename, AsmWriter writer)
+    {
         var bitmap = SKBitmap.Decode(filename);
 
         // Error if not 287x287
@@ -45,8 +73,6 @@ public static class CharClassVisitor
 
         // Generate palettes data
         colorPalettes.WriteData(writer);
-
-        return writer.ToString();
     }
 
     private static TileData CreateTileData(SKBitmap bitmap, int tileIndex, ColorPalettes colorPalettes)

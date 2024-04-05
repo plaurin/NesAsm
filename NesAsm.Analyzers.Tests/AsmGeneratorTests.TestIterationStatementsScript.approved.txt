@@ -1,28 +1,28 @@
 ﻿- Main diagnostics:
-(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-(65,9): error NA0014: Loop should only use 1 register
-(76,9): warning NA0008: Instruction is not currently supported: do
-(76,9): error NA0005: Invalid format true for type byte or ushort
-(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
+..\..\..\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-(65,9): error NA0014: Loop should only use 1 register
-(76,9): warning NA0008: Instruction is not currently supported: do
-(76,9): error NA0005: Invalid format true for type byte or ushort
-(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
+..\..\..\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-(65,9): error NA0014: Loop should only use 1 register
-(76,9): warning NA0008: Instruction is not currently supported: do
-(76,9): error NA0005: Invalid format true for type byte or ushort
-(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
+..\..\..\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.IterationStatementsScript.cs

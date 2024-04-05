@@ -5,7 +5,7 @@ namespace NesAsm.Example;
 
 [ImportChar("game1.png")]
 //[ImportChar("game1.png", GridWith1pxSpacing)]
-public partial class Game1Char : ChartDefinition
+public partial class Game1Char : CharDefinition
 {
     // [ImportPalettes("game1.png", "Palettes")]
     // private readonly byte[] Palettes;
