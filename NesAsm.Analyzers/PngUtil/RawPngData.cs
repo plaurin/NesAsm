@@ -46,7 +46,7 @@ internal class RawPngData
         {
             var pixelsPerByte = (8 / bitDepth);
 
-            var bytesInRow = (1 + (width / pixelsPerByte));
+            var bytesInRow = (int)(1 + Math.Ceiling((double)width / pixelsPerByte));
 
             var byteIndexInRow = x / pixelsPerByte;
             var paletteIndex = (1 + (y * bytesInRow)) + byteIndexInRow;

@@ -14,7 +14,7 @@ internal static class Diagnostics
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
-
+    
     /// <summary>
     /// NA0001: Type {0} is not supported for method parameters
     /// </summary>

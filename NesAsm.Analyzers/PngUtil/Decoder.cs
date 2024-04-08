@@ -93,6 +93,7 @@ internal static class Decoder
         {
             case ColorType.None:
                 return 1;
+            case ColorType.PaletteUsed | ColorType.ColorUsed:
             case ColorType.PaletteUsed:
                 return 1;
             case ColorType.ColorUsed:

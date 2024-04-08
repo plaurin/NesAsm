@@ -1,5 +1,6 @@
 ﻿// Reference : https://github.com/EliotJones/BigGustave
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace BigGustave;
@@ -51,11 +52,10 @@ public class Png
     /// <returns>The pixel at the coordinate.</returns>
     public Pixel GetPixel(int x, int y) => data.GetPixel(x, y);
 
-    /// <summary>
-    /// Read the PNG image from the stream.
-    /// </summary>
-    /// <param name="stream">The stream containing PNG data to be read.</param>
-    /// <returns>The <see cref="Png"/> data from the stream.</returns>
-    public static Png Open(Stream stream)
-        => PngOpener.Open(stream);
+    [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
+    public static Png Open(string filename)
+    {
+        using var stream = File.OpenRead(filename);
+        return PngOpener.Open(stream);
+    }
 }

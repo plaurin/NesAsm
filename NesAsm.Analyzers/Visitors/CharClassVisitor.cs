@@ -1,5 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
-using SkiaSharp;
+﻿using BigGustave;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,7 +42,8 @@ public static class CharClassVisitor
 
     internal static void Process(string filename, AsmWriter writer)
     {
-        var bitmap = SKBitmap.Decode(filename);
+        var image = Png.Open(filename);
+        //var bitmap = SKBitmap.Decode(filename);
 
         // Error if not 287x287
 
@@ -54,7 +55,7 @@ public static class CharClassVisitor
         // Generate palette for each tile
         for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
         {
-            var tileData = CreateTileData(bitmap, tileIndex, colorPalettes);
+            var tileData = CreateTileData(image, tileIndex, colorPalettes);
             tiles.Add(tileData);
 
             if (!tileData.Palette.IsEmpty)
@@ -74,24 +75,29 @@ public static class CharClassVisitor
         colorPalettes.WriteData(writer);
     }
 
-    private static TileData CreateTileData(SKBitmap bitmap, int tileIndex, ColorPalettes colorPalettes)
+    private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes)
     {
         var tileStartX = (tileIndex % 16) * 9;
         var tileStartY = (tileIndex / 16) * 9;
 
-        var pixels = new List<SKColor>();
+        var pixels = new List<Pixel>();
 
         for (var j = 0; j < 8; j++)
             for (var i = 0; i < 8; i++)
             {
-                var color = bitmap.GetPixel(tileStartX + i, tileStartY + j);
+                var color = image.GetPixel(tileStartX + i, tileStartY + j);
                 var nesColor = ColorPalette.MatchNesColor(color);
                 pixels.Add(nesColor);
             }
 
-        // Error if more than 3 non default color
-
         var colors = pixels.Distinct().ToArray();
+
+        // Error if more than 3 non default color
+        if (colors.Length > 4)
+        {
+            colors = colors.Take(4).ToArray();
+        }
+
         var colorPalette = colorPalettes.GetFromColors(colors);
 
         return new TileData(pixels.ToArray(), colorPalette);
@@ -99,7 +105,7 @@ public static class CharClassVisitor
 
     public class TileData
     {
-        public TileData(SKColor[] pixels, ColorPalette palette)
+        public TileData(Pixel[] pixels, ColorPalette palette)
         {
             if (pixels.Length != 64)
                 throw new ArgumentException("pixels must be 64 length", nameof(pixels));
@@ -108,7 +114,7 @@ public static class CharClassVisitor
             Palette = palette;
         }
 
-        public SKColor[] Pixels { get; }
+        public Pixel[] Pixels { get; }
 
         public ColorPalette Palette { get; }
 
@@ -150,7 +156,7 @@ public static class CharClassVisitor
     {
         private readonly HashSet<ColorPalette> palettes = new(new ColorPaletteComparer());
 
-        public ColorPalette GetFromColors(SKColor[] colors)
+        public ColorPalette GetFromColors(Pixel[] colors)
         {
             var palette = new ColorPalette(colors);
 
@@ -190,7 +196,7 @@ public static class CharClassVisitor
 
     public class ColorPalette
     {
-        private static readonly SKColor[] AllNesColors = new SKColor[]
+        private static readonly Pixel[] AllNesColors = new Pixel[]
         {
             new(98, 98, 98),
             new(0, 31, 178),
@@ -205,8 +211,8 @@ public static class CharClassVisitor
             new(0, 92, 0),
             new(0, 83, 36),
             new(0, 60, 118),
-            SKColor.Empty,
-            SKColor.Empty, // new(0, 0, 0),
+            new(),
+            new(), // new(0, 0, 0),
             new(0, 0, 0),
 
             new(171, 171, 171),
@@ -222,9 +228,9 @@ public static class CharClassVisitor
             new(0, 163, 0),
             new(0, 153, 66),
             new(0, 125, 180),
-            SKColor.Empty, // new(0, 0, 0),
-            SKColor.Empty, // new(0, 0, 0),
-            SKColor.Empty, // new(0, 0, 0),
+            new(), // new(0, 0, 0),
+            new(), // new(0, 0, 0),
+            new(), // new(0, 0, 0),
 
             new(255, 255, 255),
             new(83, 174, 255),
@@ -240,10 +246,10 @@ public static class CharClassVisitor
             new(38, 239, 126),
             new(44, 213, 246),
             new(78, 78, 78),
-            SKColor.Empty, // new(0, 0, 0),
-            SKColor.Empty, // new(0, 0, 0),
+            new(), // new(0, 0, 0),
+            new(), // new(0, 0, 0),
 
-            SKColor.Empty, // new(255, 255, 255),
+            new(), // new(255, 255, 255),
             new(182, 225, 255),
             new(206, 209, 255),
             new(233, 195, 255),
@@ -257,22 +263,22 @@ public static class CharClassVisitor
             new(169, 250, 195),
             new(169, 240, 244),
             new(184, 184, 184),
-            SKColor.Empty, // new(0, 0, 0),
-            SKColor.Empty, // new(0, 0, 0),
+            new(), // new(0, 0, 0),
+            new(), // new(0, 0, 0),
         };
 
-        private readonly SKColor[] _colors = new SKColor[4];
+        private readonly Pixel[] _colors = new Pixel[4];
 
-        public ColorPalette(SKColor[] colors)
+        public ColorPalette(Pixel[] colors)
         {
             colors.CopyTo(_colors, 0);
         }
 
-        public bool IsEmpty => _colors[0].Red == 0 && _colors[0].Green == 0 && _colors[0].Blue == 0 && _colors[1] == SKColor.Empty && _colors[2] == SKColor.Empty && _colors[3] == SKColor.Empty;
+        public bool IsEmpty => _colors[0].R == 0 && _colors[0].G == 0 && _colors[0].B == 0 && _colors[1] == Pixel.Empty && _colors[2] == Pixel.Empty && _colors[3] == Pixel.Empty;
 
-        public byte GetColorIndex(SKColor color)
+        public byte GetColorIndex(Pixel color)
         {
-            int CalcDistance(SKColor otherColor) => Math.Abs(color.Red - otherColor.Red) + Math.Abs(color.Green - otherColor.Green) + Math.Abs(color.Blue - otherColor.Blue) + Math.Abs(color.Alpha - otherColor.Alpha);
+            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B) + Math.Abs(color.A - otherColor.A);
 
             var matchingColor = _colors.OrderBy(CalcDistance).First();
             return (byte)Array.IndexOf(_colors, matchingColor);
@@ -289,11 +295,11 @@ public static class CharClassVisitor
             }
         }
 
-        public SKColor[] Colors => _colors;
+        public Pixel[] Colors => _colors;
 
         public byte[] NesColors => _colors.Select(c => GetNesColorIndex(c)).ToArray();
 
-        private static byte GetNesColorIndex(SKColor color)
+        private static byte GetNesColorIndex(Pixel color)
         {
             for (byte i = 0; i < AllNesColors.Length; i++)
                 if (color == AllNesColors[i]) return i;
@@ -302,9 +308,9 @@ public static class CharClassVisitor
             return 255;
         }
 
-        public static SKColor MatchNesColor(SKColor color)
+        public static Pixel MatchNesColor(Pixel color)
         {
-            int CalcDistance(SKColor otherColor) => Math.Abs(color.Red - otherColor.Red) + Math.Abs(color.Green - otherColor.Green) + Math.Abs(color.Blue - otherColor.Blue) + Math.Abs(color.Alpha - otherColor.Alpha);
+            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B) + Math.Abs(color.A - otherColor.A);
 
             var closestColor = AllNesColors.OrderBy(CalcDistance).First();
 

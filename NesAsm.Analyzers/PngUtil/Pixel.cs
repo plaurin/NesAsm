@@ -31,6 +31,8 @@ public readonly struct Pixel
     /// </summary>
     public bool IsGrayscale { get; }
 
+    public static Pixel Empty = new();
+
     /// <summary>
     /// Create a new <see cref="Pixel"/>.
     /// </summary>
@@ -90,6 +92,9 @@ public readonly struct Pixel
 
         return false;
     }
+
+    public static bool operator ==(Pixel pixel1, Pixel pixel2) => pixel1.Equals(pixel2);
+    public static bool operator !=(Pixel pixel1, Pixel pixel2) => !pixel1.Equals(pixel2);
 
     /// <summary>
     /// Whether the pixel values are equal.
