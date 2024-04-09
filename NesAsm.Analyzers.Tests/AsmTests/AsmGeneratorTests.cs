@@ -101,8 +101,7 @@ public class AsmGeneratorTests
     {
         var generator = new AsmGenerator();
 
-        //var contents = filenames.Select(filename => File.ReadAllText($@"..\..\..\TestFiles\{filename}"));
-        var sourcePaths = filenames.Select(filename => $@"..\..\..\TestFiles\{filename}").ToArray();
+        var sourcePaths = filenames.Select(filename => $@"..\..\..\AsmTests\TestFiles\{filename}").ToArray();
 
         GeneratorTestUtilities.TestGenerator(generator, sourcePaths);
     }

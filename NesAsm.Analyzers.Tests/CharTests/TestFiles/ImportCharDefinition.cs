@@ -1,7 +1,7 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
 
-namespace NesAsm.Analyzers.Tests.TestFiles;
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
 
 [ImportChar(@"ImportChar.png")]
 public partial class ImportCharDefinition : CharDefinition

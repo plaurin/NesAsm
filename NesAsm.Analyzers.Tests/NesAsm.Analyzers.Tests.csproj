@@ -28,4 +28,12 @@
     <ProjectReference Include="..\NesAsm.Emulator\NesAsm.Emulator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="CharTests\CharClassVisitorTests.TestImportCharScript.approved.txt">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0])</ParentFile>
+      <ParentExtension>$(ProjectExt.Replace('proj', ''))</ParentExtension>
+      <DependentUpon>%(ParentFile)%(ParentExtension)</DependentUpon>
+    </None>
+  </ItemGroup>
+
 </Project>

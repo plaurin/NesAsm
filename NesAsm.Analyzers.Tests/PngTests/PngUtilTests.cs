@@ -3,7 +3,7 @@ using ApprovalTests.Reporters;
 using BigGustave;
 using System.Text;
 
-namespace NesAsm.Analyzers.Tests;
+namespace NesAsm.Analyzers.Tests.PngTests;
 
 [UseReporter(typeof(VisualStudioReporter))]
 public class PngUtilTests
@@ -11,21 +11,25 @@ public class PngUtilTests
     [Fact]
     public void TestReadPng()
     {
-        var image = Png.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\TestFiles\ImportChar.png"));
+        var image = Png.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\CharTests\TestFiles\ImportChar.png"));
         TestImage(image);
     }
 
     [Fact]
     public void TestRead4TilesPngEvenWidth()
     {
-        var image = Png.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\TestFiles\Png\4Tiles.png"));
-        TestImage(image);
+        TestImage("4Tiles.png");
     }
 
     [Fact]
     public void TestRead4TilesOddWidth()
     {
-        var image = Png.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\TestFiles\Png\4TilesNoEndSeparator.png"));
+        TestImage("4TilesNoEndSeparator.png");
+    }
+
+    private static void TestImage(string imageFileName)
+    {
+        var image = Png.Open(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $@"..\..\..\PngTests\TestFiles\{imageFileName}"));
         TestImage(image);
     }
 
