@@ -21,9 +21,44 @@ public class CharGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(classProviders, Generate);
     }
 
-    private static bool IsSyntaxTargetForGeneration(SyntaxNode node) =>
-        node is ClassDeclarationSyntax m
-        && m.BaseList != null;
+    private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
+    {
+        if (node is ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            var hasBaseClass = false;
+
+            if (classDeclarationSyntax.BaseList != null)
+            {
+                foreach (var type in classDeclarationSyntax.BaseList.Types)
+                {
+                    if (type.Type is IdentifierNameSyntax identifier)
+                    {
+                        if (identifier.Identifier.Text == "CharDefinition")
+                        {
+                            hasBaseClass = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (hasBaseClass)
+            {
+                foreach (var att in classDeclarationSyntax.AttributeLists)
+                {
+                    foreach (var attribute in att.Attributes)
+                    {
+                        if (attribute.Name.ToString() == "ImportChar")
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
     private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NesAsm.Analyzers.Visitors;
@@ -21,9 +22,27 @@ public class AsmGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(classProviders, Generate);
     }
 
-    private static bool IsSyntaxTargetForGeneration(SyntaxNode node) =>
-        node is ClassDeclarationSyntax m
-        && m.BaseList != null;
+    private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
+    {
+        if (node is ClassDeclarationSyntax classDeclarationSyntax)
+        {
+            if (classDeclarationSyntax.BaseList != null)
+            {
+                foreach (var type in classDeclarationSyntax.BaseList.Types)
+                {
+                    if (type.Type is IdentifierNameSyntax identifier)
+                    {
+                        if (identifier.Identifier.Text == "ScriptBase")
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
 
     private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
