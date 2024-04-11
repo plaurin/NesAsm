@@ -11,6 +11,24 @@ public class CharClassVisitorTests
         TestScript("ImportCharDefinition.cs");
     }
 
+    [Fact]
+    public void TestInvalidSizeCharScript()
+    {
+        TestScript("InvalidSize.cs");
+    }
+
+    [Fact]
+    public void TestMoreThanFourPalettesCharScript()
+    {
+        TestScript("MoreThanFourPalettes.cs");
+    }
+
+    [Fact]
+    public void TestMoreThanThreeNonDefaultColorCharScript()
+    {
+        TestScript("MoreThanThreeNonDefaultColor.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new CharGenerator();

@@ -1,0 +1,102 @@
+﻿- Main diagnostics:
+..\..\..\CharTests\TestFiles\MoreThanThreeNonDefaultColor.cs(6,2): warning NA1003: Tile index 1 contains 7 non default colors (should be 3 maximum in a color palette), excess colors will be ignored
+- SyntaxTrees Count: 2
+- Output diagnostics:
+- RunResult.GeneratedTrees Count: 1
+- RunResults diagnostics:
+..\..\..\CharTests\TestFiles\MoreThanThreeNonDefaultColor.cs(6,2): warning NA1003: Tile index 1 contains 7 non default colors (should be 3 maximum in a color palette), excess colors will be ignored
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+..\..\..\CharTests\TestFiles\MoreThanThreeNonDefaultColor.cs(6,2): warning NA1003: Tile index 1 contains 7 non default colors (should be 3 maximum in a color palette), excess colors will be ignored
+- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.MoreThanThreeNonDefaultColor.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.MoreThanThreeNonDefaultColor.s
+; Auto generated code using the NesAsm project
+; Tile 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+
+; Tile 1
+.byte 8
+.byte 12
+.byte 12
+.byte 192
+.byte 192
+.byte 0
+.byte 0
+.byte 0
+
+
+.byte 0
+.byte 0
+.byte 2
+.byte 255
+.byte 255
+.byte 2
+.byte 0
+.byte 0
+
+
+; Palette 0
+.byte 15
+.byte 13
+.byte 13
+.byte 13
+
+.byte 15
+.byte 13
+.byte 13
+.byte 13
+
+.byte 15
+.byte 13
+.byte 13
+.byte 13
+
+.byte 15
+.byte 13
+.byte 13
+.byte 13
+
+; Palette 1
+.byte 15
+.byte 5
+.byte 34
+.byte 41
+
+.byte 15
+.byte 5
+.byte 34
+.byte 41
+
+.byte 15
+.byte 5
+.byte 34
+.byte 41
+
+.byte 15
+.byte 5
+.byte 34
+.byte 41
+
+
+*/

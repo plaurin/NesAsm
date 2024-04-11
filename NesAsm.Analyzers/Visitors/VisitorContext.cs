@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
 
 namespace NesAsm.Analyzers.Visitors;
 

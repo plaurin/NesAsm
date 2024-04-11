@@ -106,7 +106,7 @@ public class CharGenerator : IIncrementalGenerator
         {
             var message = $"{nameof(CharGenerator)} for {node.SyntaxTree?.FilePath} : {ex.Message} {ex.StackTrace}";
 
-            context.ReportDiagnostic(Diagnostic.Create(Diagnostics.InternalAnalyzerFailure, node.GetLocation(), message));
+            context.ReportDiagnostic(Diagnostic.Create(CharDiagnostics.InternalAnalyzerFailure, node.GetLocation(), message));
         }
     }
 }

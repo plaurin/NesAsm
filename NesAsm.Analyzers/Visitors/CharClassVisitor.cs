@@ -1,4 +1,5 @@
 ﻿using BigGustave;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,9 @@ public static class CharClassVisitor
                     var sourceFolderPath = Path.GetDirectoryName(sourceFilePath);
                     var charFilePath = Path.Combine(sourceFolderPath, filepath);
 
-                    Process(charFilePath, context.Writer);
+                    var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
+
+                    Process(charFilePath, charVisitorContext);
 
                     return;
                 }
@@ -31,21 +34,29 @@ public static class CharClassVisitor
         }
     }
 
-    public static string Process(string filename)
+    internal static string Process(string filename, VisitorContext context)
     {
         var writer = new AsmWriter();
 
-        Process(filename, writer);
+        var charVisitorContext = new CharVisitorContext(context, Location.None);
+
+        Process(filename, charVisitorContext);
 
         return writer.ToString();
     }
 
-    internal static void Process(string filename, AsmWriter writer)
+    internal static void Process(string filename, CharVisitorContext context)
     {
-        var image = Png.Open(filename);
-        //var bitmap = SKBitmap.Decode(filename);
+        var writer = context.Writer;
 
-        // Error if not 287x287
+        var image = Png.Open(filename);
+
+        // Image should have specific size
+        if (image.Width != 143 || image.Height != 287)
+        {
+            context.ReportDiagnostic(CharDiagnostics.ImageSizeNotValid, context.Location, image.Width, image.Height);
+            return;
+        }
 
         var tiles = new List<TileData>();
         var colorPalettes = new ColorPalettes();
@@ -55,14 +66,12 @@ public static class CharClassVisitor
         // Generate palette for each tile
         for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
         {
-            var tileData = CreateTileData(image, tileIndex, colorPalettes);
+            var tileData = CreateTileData(image, tileIndex, colorPalettes, context);
             tiles.Add(tileData);
 
             if (!tileData.Palette.IsEmpty)
                 lastTile = tileIndex;
         }
-
-        // Warning if more than 4 palettes?
 
         // Generate tiles data
         for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
@@ -73,9 +82,15 @@ public static class CharClassVisitor
 
         // Generate palettes data
         colorPalettes.WriteData(writer);
+
+        // NES only support 4 color palettes at a time, could be a problem if more
+        if (colorPalettes.Count > 4)
+        {
+            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.Count);
+        }
     }
 
-    private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes)
+    private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, CharVisitorContext context)
     {
         var tileStartX = (tileIndex % 16) * 9;
         var tileStartY = (tileIndex / 16) * 9;
@@ -92,9 +107,10 @@ public static class CharClassVisitor
 
         var colors = pixels.Distinct().ToArray();
 
-        // Error if more than 3 non default color
+        // Warning if more than 3 non default color
         if (colors.Length > 4)
         {
+            context.ReportDiagnostic(CharDiagnostics.MoreThanThreeNonDefaultColorTile, context.Location, tileIndex, colors.Length);
             colors = colors.Take(4).ToArray();
         }
 
@@ -155,6 +171,8 @@ public static class CharClassVisitor
     public class ColorPalettes
     {
         private readonly HashSet<ColorPalette> palettes = new(new ColorPaletteComparer());
+
+        public int Count => palettes.Count;
 
         public ColorPalette GetFromColors(Pixel[] colors)
         {
