@@ -253,22 +253,22 @@
 
 ; Palette 1
 .byte 15
-.byte 12
+.byte 1
 .byte 13
 .byte 13
 
 .byte 15
-.byte 12
+.byte 1
 .byte 13
 .byte 13
 
 .byte 15
-.byte 12
+.byte 1
 .byte 13
 .byte 13
 
 .byte 15
-.byte 12
+.byte 1
 .byte 13
 .byte 13
 

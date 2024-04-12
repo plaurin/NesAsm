@@ -86,7 +86,19 @@ public static class CharClassVisitor
         // NES only support 4 color palettes at a time, could be a problem if more
         if (colorPalettes.Count > 4)
         {
+            // TODO only default color should use any other palette, don't create a palette only for that!
             context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.Count);
+        }
+
+        // Warn if using colors that doesn't match exactly NES colors palette (from Mesen)
+        if (context.MismatchColors.Any())
+        {
+            foreach (var (actualColor, expectedColor, x, y) in context.MismatchColors)
+            {
+                var actual = $"{actualColor.R}, {actualColor.G}, {actualColor.B}";
+                var expected = $"{expectedColor.R}, {expectedColor.G}, {expectedColor.B}";
+                context.ReportDiagnostic(CharDiagnostics.ColorMismatch, context.Location, actual, expected, x, y);
+            }
         }
     }
 
@@ -101,7 +113,7 @@ public static class CharClassVisitor
             for (var i = 0; i < 8; i++)
             {
                 var color = image.GetPixel(tileStartX + i, tileStartY + j);
-                var nesColor = ColorPalette.MatchNesColor(color);
+                var nesColor = ColorPalette.MatchNesColor(color, tileStartX + i, tileStartY + j, context);
                 pixels.Add(nesColor);
             }
 
@@ -216,70 +228,74 @@ public static class CharClassVisitor
     {
         private static readonly Pixel[] AllNesColors = new Pixel[]
         {
-            new(98, 98, 98),
-            new(0, 31, 178),
-            new(36, 4, 200),
-            new(82, 0, 178),
-            new(115, 0, 118),
-            new(128, 0, 36),
-            new(115, 11, 0),
-            new(82, 40, 0),
-            new(36, 68, 0),
-            new(0, 87, 0),
-            new(0, 92, 0),
-            new(0, 83, 36),
-            new(0, 60, 118),
-            new(),
+            new(102, 102, 102),
+            new(0, 42, 136),
+            new(20, 18, 167),
+            new(59, 0, 164),
+            new(92, 0, 126),
+            new(110, 0, 64),
+            new(108, 6, 0),
+            new(86, 29, 0),
+
+            new(51, 53, 0),
+            new(11, 72, 0),
+            new(0, 82, 0),
+            new(0, 79, 8),
+            new(0, 64, 77),
+            new(), // Never use!! https://www.nesdev.org/wiki/Color_$0D_games
             new(), // new(0, 0, 0),
             new(0, 0, 0),
 
-            new(171, 171, 171),
-            new(13, 87, 255),
-            new(75, 48, 255),
-            new(138, 19, 255),
-            new(188, 8, 214),
-            new(210, 18, 105),
-            new(199, 46, 0),
-            new(157, 84, 0),
-            new(96, 124, 0),
-            new(32, 152, 0),
-            new(0, 163, 0),
-            new(0, 153, 66),
-            new(0, 125, 180),
+            new(173, 173, 173),
+            new(21, 95, 217),
+            new(66, 64, 255),
+            new(117, 39, 254),
+            new(160, 26, 204),
+            new(183, 30, 123),
+            new(181, 49, 32),
+            new(153, 78, 0),
+
+            new(107, 109, 0),
+            new(56, 135, 0),
+            new(12, 147, 0),
+            new(0, 143, 50),
+            new(0, 124, 141),
             new(), // new(0, 0, 0),
             new(), // new(0, 0, 0),
             new(), // new(0, 0, 0),
 
-            new(255, 255, 255),
-            new(83, 174, 255),
-            new(144, 133, 255),
-            new(211, 101, 255),
-            new(255, 87, 255),
-            new(255, 93, 207),
-            new(255, 119, 87),
-            new(250, 158, 0),
-            new(189, 199, 0),
-            new(122, 231, 0),
-            new(67, 246, 17),
-            new(38, 239, 126),
-            new(44, 213, 246),
-            new(78, 78, 78),
+            new(255, 255, 255), // new(255, 254, 255),
+            new(100, 176, 255),
+            new(146, 144, 255),
+            new(198, 118, 255),
+            new(243, 106, 255),
+            new(254, 110, 204),
+            new(254, 129, 112),
+            new(234, 158, 34),
+
+            new(188, 190, 0),
+            new(136, 216, 0),
+            new(92, 228, 48),
+            new(69, 224, 130),
+            new(72, 205, 222),
+            new(79, 79, 79),
             new(), // new(0, 0, 0),
             new(), // new(0, 0, 0),
 
-            new(), // new(255, 255, 255),
-            new(182, 225, 255),
-            new(206, 209, 255),
-            new(233, 195, 255),
-            new(255, 188, 255),
-            new(255, 189, 244),
-            new(255, 198, 195),
-            new(255, 213, 154),
-            new(233, 230, 129),
-            new(206, 244, 129),
-            new(182, 251, 154),
-            new(169, 250, 195),
-            new(169, 240, 244),
+            new(), // new(255, 254, 255),
+            new(192, 223, 255),
+            new(211, 210, 255),
+            new(232, 200, 255),
+            new(251, 194, 255),
+            new(254, 196, 234),
+            new(254, 204, 197),
+            new(247, 216, 165),
+
+            new(228, 229, 148),
+            new(207, 239, 150),
+            new(189, 244, 171),
+            new(179, 243, 204),
+            new(181, 235, 242),
             new(184, 184, 184),
             new(), // new(0, 0, 0),
             new(), // new(0, 0, 0),
@@ -326,15 +342,16 @@ public static class CharClassVisitor
             return 255;
         }
 
-        public static Pixel MatchNesColor(Pixel color)
+        internal static Pixel MatchNesColor(Pixel color, int x, int y, CharVisitorContext context)
         {
             int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B) + Math.Abs(color.A - otherColor.A);
 
             var closestColor = AllNesColors.OrderBy(CalcDistance).First();
 
+            // Warn if not exactly matching color
             if (CalcDistance(closestColor) > 0)
             {
-                // Warn if not exactly matching color
+                context.RecordColorMismatch(closestColor, color, x, y);
             }
 
             return closestColor;

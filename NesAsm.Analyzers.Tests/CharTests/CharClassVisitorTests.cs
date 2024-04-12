@@ -29,6 +29,12 @@ public class CharClassVisitorTests
         TestScript("MoreThanThreeNonDefaultColor.cs");
     }
 
+    [Fact]
+    public void TestColorMismatchCharScript()
+    {
+        TestScript("ColorMismatch.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new CharGenerator();

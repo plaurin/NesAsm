@@ -34,8 +34,8 @@
 .byte 0
 .byte 0
 .byte 2
-.byte 255
-.byte 255
+.byte 207
+.byte 207
 .byte 2
 .byte 0
 .byte 0

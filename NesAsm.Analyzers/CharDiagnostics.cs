@@ -47,4 +47,15 @@ internal static class CharDiagnostics
         "Todo",
         DiagnosticSeverity.Warning,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA1004: Color RGB {0} is not a valid NES color (using Mesen color palette), use the closest color RGB {1} instead
+    /// </summary>
+    internal static DiagnosticDescriptor ColorMismatch = new(
+        "NA1003",
+        "Color mismatch",
+        "Color RGB {0} is not a valid NES color (using Mesen color palette), use the closest color RGB {1} instead (position x: {2}, y: {3})",
+        "Todo",
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }
