@@ -85,11 +85,10 @@ public static class CharClassVisitor
         // Generate palettes data
         colorPalettes.WriteData(writer);
 
-        // NES only support 4 color palettes at a time, could be a problem if more
-        if (colorPalettes.Count > 4)
+        // NES only support 4 non empty color palettes at a time, could be a problem if more
+        if (colorPalettes.NonEmptyCount > 4)
         {
-            // TODO only default color should use any other palette, don't create a palette only for that!
-            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.Count);
+            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
         }
 
         // Warn if using colors that doesn't match exactly NES colors palette (from Mesen)
@@ -187,7 +186,7 @@ public static class CharClassVisitor
     {
         private readonly HashSet<ColorPalette> palettes = new(new ColorPaletteComparer());
 
-        public int Count => palettes.Count;
+        public int NonEmptyCount => palettes.Count(p => !p.IsEmpty);
 
         public ColorPalette GetFromColors(Pixel[] colors)
         {
@@ -209,7 +208,7 @@ public static class CharClassVisitor
         internal void WriteData(AsmWriter writer)
         {
             var index = 0;
-            foreach (var palette in palettes)
+            foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
                 writer.WriteComment($"Palette {index++}");
                 writer.WritePaletteColorsChars(palette.NesColors);
@@ -312,7 +311,7 @@ public static class CharClassVisitor
 
         public byte GetColorIndex(Pixel color)
         {
-            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B) + Math.Abs(color.A - otherColor.A);
+            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B);
 
             var matchingColor = _colors.OrderBy(CalcDistance).First();
             return (byte)Array.IndexOf(_colors, matchingColor);
@@ -335,6 +334,8 @@ public static class CharClassVisitor
 
         private static byte GetNesColorIndex(Pixel color)
         {
+            if (color.IsEmpty) return 0x0F;
+
             for (byte i = 0; i < AllNesColors.Length; i++)
                 if (color == AllNesColors[i]) return i;
 
@@ -344,7 +345,7 @@ public static class CharClassVisitor
 
         internal static Pixel MatchNesColor(Pixel color, int x, int y, CharVisitorContext context)
         {
-            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B) + Math.Abs(color.A - otherColor.A);
+            int CalcDistance(Pixel otherColor) => Math.Abs(color.R - otherColor.R) + Math.Abs(color.G - otherColor.G) + Math.Abs(color.B - otherColor.B);
 
             var closestColor = AllNesColors.OrderBy(CalcDistance).First();
 

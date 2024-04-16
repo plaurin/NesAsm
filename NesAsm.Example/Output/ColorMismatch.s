@@ -84,17 +84,14 @@
 
 
 ; Palette 0
-.byte 0F, 0D, 0D, 0D
-
-; Palette 1
 .byte 0F, 03, 05, 01
 
-; Palette 2
+; Palette 1
 .byte 0F, 33, 31, 36
 
-; Palette 3
+; Palette 2
 .byte 0F, 1C, 0A, 08
 
-; Palette 4
+; Palette 3
 .byte 0F, 2D, 3A, 28
 

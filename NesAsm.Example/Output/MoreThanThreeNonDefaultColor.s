@@ -24,8 +24,5 @@
 
 
 ; Palette 0
-.byte 0F, 0D, 0D, 0D
-
-; Palette 1
 .byte 0F, 05, 22, 29
 

@@ -124,32 +124,29 @@
 .byte 0, 0, 0, 0, 0, 0, 0, 0
 
 ; Palette 0
-.byte 0F, 0D, 0D, 0D
+.byte 0F, 01, 0F, 0F
 
 ; Palette 1
-.byte 0F, 01, 0D, 0D
+.byte 0F, 12, 0F, 0F
 
 ; Palette 2
-.byte 0F, 12, 0D, 0D
+.byte 0F, 03, 0F, 0F
 
 ; Palette 3
-.byte 0F, 03, 0D, 0D
+.byte 0F, 23, 0F, 0F
 
 ; Palette 4
-.byte 0F, 23, 0D, 0D
+.byte 0F, 20, 0F, 0F
 
 ; Palette 5
-.byte 0F, 20, 0D, 0D
+.byte 19, 0F, 0F, 0F
 
 ; Palette 6
-.byte 19, 0F, 0D, 0D
+.byte 0F, 39, 0F, 0F
 
 ; Palette 7
-.byte 0F, 39, 0D, 0D
+.byte 0F, 11, 0F, 0F
 
 ; Palette 8
-.byte 0F, 11, 0D, 0D
-
-; Palette 9
-.byte 0F, 15, 0D, 0D
+.byte 0F, 15, 0F, 0F
 

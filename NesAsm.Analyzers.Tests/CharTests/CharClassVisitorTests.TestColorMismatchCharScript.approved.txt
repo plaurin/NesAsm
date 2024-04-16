@@ -1,5 +1,4 @@
 ﻿- Main diagnostics:
-..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): info NA1002: Png image contains 5 different color palettes
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 59, 2, 164 is not a valid NES color (using Mesen color palette), use the closest color RGB 59, 0, 164 instead (position x: 13, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 110, 2, 64 is not a valid NES color (using Mesen color palette), use the closest color RGB 110, 0, 64 instead (position x: 15, y: 5)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 0, 44, 136 is not a valid NES color (using Mesen color palette), use the closest color RGB 0, 42, 136 instead (position x: 12, y: 4)
@@ -14,7 +13,6 @@
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): info NA1002: Png image contains 5 different color palettes
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 59, 2, 164 is not a valid NES color (using Mesen color palette), use the closest color RGB 59, 0, 164 instead (position x: 13, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 110, 2, 64 is not a valid NES color (using Mesen color palette), use the closest color RGB 110, 0, 64 instead (position x: 15, y: 5)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 0, 44, 136 is not a valid NES color (using Mesen color palette), use the closest color RGB 0, 42, 136 instead (position x: 12, y: 4)
@@ -27,7 +25,6 @@
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 79, 81, 79 is not a valid NES color (using Mesen color palette), use the closest color RGB 79, 79, 79 instead (position x: 41, y: 1)
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): info NA1002: Png image contains 5 different color palettes
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 59, 2, 164 is not a valid NES color (using Mesen color palette), use the closest color RGB 59, 0, 164 instead (position x: 13, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 110, 2, 64 is not a valid NES color (using Mesen color palette), use the closest color RGB 110, 0, 64 instead (position x: 15, y: 5)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1003: Color RGB 0, 44, 136 is not a valid NES color (using Mesen color palette), use the closest color RGB 0, 42, 136 instead (position x: 12, y: 4)
@@ -129,18 +126,15 @@
 
 
 ; Palette 0
-.byte 0F, 0D, 0D, 0D
-
-; Palette 1
 .byte 0F, 03, 05, 01
 
-; Palette 2
+; Palette 1
 .byte 0F, 33, 31, 36
 
-; Palette 3
+; Palette 2
 .byte 0F, 1C, 0A, 08
 
-; Palette 4
+; Palette 3
 .byte 0F, 2D, 3A, 28
 
 

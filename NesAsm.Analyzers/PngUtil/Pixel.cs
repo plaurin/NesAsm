@@ -33,6 +33,8 @@ public readonly struct Pixel
 
     public static Pixel Empty = new();
 
+    public bool IsEmpty => this == Empty;
+
     /// <summary>
     /// Create a new <see cref="Pixel"/>.
     /// </summary>
