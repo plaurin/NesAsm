@@ -47,6 +47,11 @@ public static class CharClassVisitor
 
     internal static void Process(string filename, CharVisitorContext context)
     {
+        // TODO Output .scope CharScript{name}
+        // TODO Output .segment "CHARS" then tiles data
+        // TODO Output .segment "CODE" then palette: and color palette data
+        // TODO Output .endscope
+
         var writer = context.Writer;
 
         var image = Png.Open(filename);
@@ -58,38 +63,9 @@ public static class CharClassVisitor
             return;
         }
 
-        var tiles = new List<TileData>();
-        var colorPalettes = new ColorPalettes();
-
-        var lastTile = 0;
-
-        // Generate palette for each tile
-        for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
-        {
-            var tileData = CreateTileData(image, tileIndex, colorPalettes, context);
-            tiles.Add(tileData);
-
-            if (!tileData.Palette.IsEmpty)
-                lastTile = tileIndex;
-        }
-
-        // Generate tiles data
-        for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
-        {
-            writer.WriteComment($"Tile {tileIndex}");
-            tiles[tileIndex].WriteData(writer);
-        }
-
-        // TODO Transparent color
-        // TODO Split sprite tiles and background tiles + palettes
-        // Generate palettes data
-        colorPalettes.WriteData(writer);
-
-        // NES only support 4 non empty color palettes at a time, could be a problem if more
-        if (colorPalettes.NonEmptyCount > 4)
-        {
-            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
-        }
+        ProcessTileSegment(image, "Sprite", 0, context);
+        
+        ProcessTileSegment(image, "Background", 16 * 16, context);
 
         // Warn if using colors that doesn't match exactly NES colors palette (from Mesen)
         if (context.MismatchColors.Any())
@@ -100,6 +76,45 @@ public static class CharClassVisitor
                 var expected = $"{expectedColor.R}, {expectedColor.G}, {expectedColor.B}";
                 context.ReportDiagnostic(CharDiagnostics.ColorMismatch, context.Location, actual, expected, x, y);
             }
+        }
+    }
+
+    private static void ProcessTileSegment(Png image, string tileSegment, int startingTileIndex, CharVisitorContext context)
+    {
+        var writer = context.Writer;
+
+        var tiles = new List<TileData>();
+        var colorPalettes = new ColorPalettes();
+
+        var lastTile = 0;
+
+        // Generate 256 tile data
+        for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
+        {
+            var tileData = CreateTileData(image, tileIndex + startingTileIndex, colorPalettes, context);
+            tiles.Add(tileData);
+
+            if (!tileData.Palette.IsEmpty)
+                lastTile = tileIndex;
+        }
+
+        // TODO Don't output sprite or background if only empty tiles
+        // Output tiles data
+        for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
+        {
+            writer.WriteComment($"{tileSegment} Tile {tileIndex}");
+            tiles[tileIndex].WriteData(writer);
+        }
+
+        // TODO Transparent color
+        // TODO First color always transparent 0F?
+        // Output palettes data
+        colorPalettes.WriteData(tileSegment, writer);
+
+        // NES only support 4 non empty color palettes at a time, could be a problem if more
+        if (colorPalettes.NonEmptyCount > 4)
+        {
+            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
         }
     }
 
@@ -205,12 +220,12 @@ public static class CharClassVisitor
             return palette;
         }
 
-        internal void WriteData(AsmWriter writer)
+        internal void WriteData(string segment, AsmWriter writer)
         {
             var index = 0;
             foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
-                writer.WriteComment($"Palette {index++}");
+                writer.WriteComment($"{segment} Palette {index++}");
                 writer.WritePaletteColorsChars(palette.NesColors);
             }
         }

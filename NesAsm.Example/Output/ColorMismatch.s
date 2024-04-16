@@ -1,9 +1,9 @@
 ; Auto generated code using the NesAsm project
-; Tile 0
+; Sprite Tile 0
 .byte 0, 0, 0, 0, 0, 0, 0, 0
 .byte 0, 0, 0, 0, 0, 0, 0, 0
 
-; Tile 1
+; Sprite Tile 1
 .byte %00001000
 .byte %00001100
 .byte %00001100
@@ -23,7 +23,7 @@
 .byte %00000000
 
 
-; Tile 2
+; Sprite Tile 2
 .byte %00010000
 .byte %00110000
 .byte %00110000
@@ -43,7 +43,7 @@
 .byte %00000000
 
 
-; Tile 3
+; Sprite Tile 3
 .byte %00011000
 .byte %00011000
 .byte %00011000
@@ -63,7 +63,7 @@
 .byte %00011000
 
 
-; Tile 4
+; Sprite Tile 4
 .byte %00011000
 .byte %00111100
 .byte %00000000
@@ -83,15 +83,19 @@
 .byte %00011000
 
 
-; Palette 0
+; Sprite Palette 0
 .byte 0F, 03, 05, 01
 
-; Palette 1
+; Sprite Palette 1
 .byte 0F, 33, 31, 36
 
-; Palette 2
+; Sprite Palette 2
 .byte 0F, 1C, 0A, 08
 
-; Palette 3
+; Sprite Palette 3
 .byte 0F, 2D, 3A, 28
+
+; Background Tile 0
+.byte 0, 0, 0, 0, 0, 0, 0, 0
+.byte 0, 0, 0, 0, 0, 0, 0, 0
 

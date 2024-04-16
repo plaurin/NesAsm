@@ -52,7 +52,7 @@ internal static class CharDiagnostics
     /// NA1004: Color RGB {0} is not a valid NES color (using Mesen color palette), use the closest color RGB {1} instead
     /// </summary>
     internal static DiagnosticDescriptor ColorMismatch = new(
-        "NA1003",
+        "NA1004",
         "Color mismatch",
         "Color RGB {0} is not a valid NES color (using Mesen color palette), use the closest color RGB {1} instead (position x: {2}, y: {3})",
         "Todo",
