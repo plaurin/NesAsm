@@ -20,13 +20,14 @@ public static class CharClassVisitor
                 {
                     var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
 
-                    var sourceFilePath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
-                    var sourceFolderPath = Path.GetDirectoryName(sourceFilePath);
-                    var charFilePath = Path.Combine(sourceFolderPath, filepath);
+                    var sourceFilepath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
+                    var sourceFolderPath = Path.GetDirectoryName(sourceFilepath);
+                    var charFilepath = Path.Combine(sourceFolderPath, filepath);
 
+                    var className = classDeclarationSyntax.Identifier.ToString();
                     var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
 
-                    Process(charFilePath, charVisitorContext);
+                    Process(className, charFilepath, charVisitorContext);
 
                     return;
                 }
@@ -34,27 +35,22 @@ public static class CharClassVisitor
         }
     }
 
-    internal static string Process(string filename, VisitorContext context)
+    internal static string Process(string className, string imageFilename, VisitorContext context)
     {
         var writer = new AsmWriter();
 
         var charVisitorContext = new CharVisitorContext(context, Location.None);
 
-        Process(filename, charVisitorContext);
+        Process(className, imageFilename, charVisitorContext);
 
         return writer.ToString();
     }
 
-    internal static void Process(string filename, CharVisitorContext context)
+    internal static void Process(string className, string imageFilename, CharVisitorContext context)
     {
-        // TODO Output .scope CharScript{name}
-        // TODO Output .segment "CHARS" then tiles data
-        // TODO Output .segment "CODE" then palette: and color palette data
-        // TODO Output .endscope
-
         var writer = context.Writer;
 
-        var image = Png.Open(filename);
+        var image = Png.Open(imageFilename);
 
         // Image should have specific size
         if (image.Width != 143 || image.Height != 287)
@@ -63,9 +59,13 @@ public static class CharClassVisitor
             return;
         }
 
+        writer.StartClassScope(className);
+
         ProcessTileSegment(image, "Sprite", 0, context);
         
         ProcessTileSegment(image, "Background", 16 * 16, context);
+
+        writer.EndClassScope();
 
         // Warn if using colors that doesn't match exactly NES colors palette (from Mesen)
         if (context.MismatchColors.Any())
@@ -98,6 +98,8 @@ public static class CharClassVisitor
                 lastTile = tileIndex;
         }
 
+        writer.StartCharsSegment();
+
         // TODO Don't output sprite or background if only empty tiles
         // Output tiles data
         for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
@@ -105,6 +107,10 @@ public static class CharClassVisitor
             writer.WriteComment($"{tileSegment} Tile {tileIndex}");
             tiles[tileIndex].WriteData(writer);
         }
+
+        writer.StartCodeSegment();
+
+        writer.WriteVariableLabel($"{tileSegment.ToLowerInvariant()}_palettes");
 
         // TODO Transparent color
         // TODO First color always transparent 0F?
