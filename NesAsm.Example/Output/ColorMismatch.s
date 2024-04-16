@@ -1,211 +1,100 @@
 ; Auto generated code using the NesAsm project
 ; Tile 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-
-
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-
+.byte 0, 0, 0, 0, 0, 0, 0, 0
+.byte 0, 0, 0, 0, 0, 0, 0, 0
 
 ; Tile 1
-.byte 8
-.byte 12
-.byte 12
-.byte 252
-.byte 252
-.byte 12
-.byte 12
-.byte 8
+.byte %00001000
+.byte %00001100
+.byte %00001100
+.byte %11111100
+.byte %11111100
+.byte %00001100
+.byte %00001100
+.byte %00001000
 
-
-.byte 0
-.byte 0
-.byte 2
-.byte 243
-.byte 243
-.byte 2
-.byte 0
-.byte 0
+.byte %00000000
+.byte %00000000
+.byte %00000010
+.byte %11110011
+.byte %11110011
+.byte %00000010
+.byte %00000000
+.byte %00000000
 
 
 ; Tile 2
-.byte 16
-.byte 48
-.byte 48
-.byte 63
-.byte 63
-.byte 48
-.byte 48
-.byte 16
+.byte %00010000
+.byte %00110000
+.byte %00110000
+.byte %00111111
+.byte %00111111
+.byte %00110000
+.byte %00110000
+.byte %00010000
 
-
-.byte 0
-.byte 0
-.byte 64
-.byte 207
-.byte 207
-.byte 64
-.byte 0
-.byte 0
+.byte %00000000
+.byte %00000000
+.byte %01000000
+.byte %11001111
+.byte %11001111
+.byte %01000000
+.byte %00000000
+.byte %00000000
 
 
 ; Tile 3
-.byte 24
-.byte 24
-.byte 24
-.byte 24
-.byte 0
-.byte 0
-.byte 60
-.byte 24
+.byte %00011000
+.byte %00011000
+.byte %00011000
+.byte %00011000
+.byte %00000000
+.byte %00000000
+.byte %00111100
+.byte %00011000
 
-
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-.byte 255
-.byte 126
-.byte 60
-.byte 24
+.byte %00000000
+.byte %00000000
+.byte %00000000
+.byte %00000000
+.byte %11111111
+.byte %01111110
+.byte %00111100
+.byte %00011000
 
 
 ; Tile 4
-.byte 24
-.byte 60
-.byte 0
-.byte 0
-.byte 24
-.byte 24
-.byte 24
-.byte 24
+.byte %00011000
+.byte %00111100
+.byte %00000000
+.byte %00000000
+.byte %00011000
+.byte %00011000
+.byte %00011000
+.byte %00011000
 
-
-.byte 0
-.byte 0
-.byte 126
-.byte 255
-.byte 24
-.byte 24
-.byte 24
-.byte 24
+.byte %00000000
+.byte %00000000
+.byte %01111110
+.byte %11111111
+.byte %00011000
+.byte %00011000
+.byte %00011000
+.byte %00011000
 
 
 ; Palette 0
-.byte 15
-.byte 13
-.byte 13
-.byte 13
-
-.byte 15
-.byte 13
-.byte 13
-.byte 13
-
-.byte 15
-.byte 13
-.byte 13
-.byte 13
-
-.byte 15
-.byte 13
-.byte 13
-.byte 13
+.byte 0F, 0D, 0D, 0D
 
 ; Palette 1
-.byte 15
-.byte 3
-.byte 5
-.byte 1
-
-.byte 15
-.byte 3
-.byte 5
-.byte 1
-
-.byte 15
-.byte 3
-.byte 5
-.byte 1
-
-.byte 15
-.byte 3
-.byte 5
-.byte 1
+.byte 0F, 03, 05, 01
 
 ; Palette 2
-.byte 15
-.byte 51
-.byte 49
-.byte 54
-
-.byte 15
-.byte 51
-.byte 49
-.byte 54
-
-.byte 15
-.byte 51
-.byte 49
-.byte 54
-
-.byte 15
-.byte 51
-.byte 49
-.byte 54
+.byte 0F, 33, 31, 36
 
 ; Palette 3
-.byte 15
-.byte 28
-.byte 10
-.byte 8
-
-.byte 15
-.byte 28
-.byte 10
-.byte 8
-
-.byte 15
-.byte 28
-.byte 10
-.byte 8
-
-.byte 15
-.byte 28
-.byte 10
-.byte 8
+.byte 0F, 1C, 0A, 08
 
 ; Palette 4
-.byte 15
-.byte 45
-.byte 58
-.byte 40
-
-.byte 15
-.byte 45
-.byte 58
-.byte 40
-
-.byte 15
-.byte 45
-.byte 58
-.byte 40
-
-.byte 15
-.byte 45
-.byte 58
-.byte 40
+.byte 0F, 2D, 3A, 28
 

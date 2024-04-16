@@ -80,6 +80,8 @@ public static class CharClassVisitor
             tiles[tileIndex].WriteData(writer);
         }
 
+        // TODO Transparent color
+        // TODO Split sprite tiles and background tiles + palettes
         // Generate palettes data
         colorPalettes.WriteData(writer);
 
@@ -175,8 +177,9 @@ public static class CharClassVisitor
                 highBytes.Add(highByte);
             }
 
-            writer.WriteChars(lowBytes.ToArray());
-            writer.WriteChars(highBytes.ToArray());
+            writer.Write8CharBytes(lowBytes.ToArray());
+            writer.Write8CharBytes(highBytes.ToArray());
+            writer.WriteEmptyLine();
         }
     }
 
@@ -209,10 +212,7 @@ public static class CharClassVisitor
             foreach (var palette in palettes)
             {
                 writer.WriteComment($"Palette {index++}");
-                for (var i = 0; i < palette.Colors.Length; i++)
-                {
-                    writer.WriteChars(palette.NesColors);
-                }
+                writer.WritePaletteColorsChars(palette.NesColors);
             }
         }
 

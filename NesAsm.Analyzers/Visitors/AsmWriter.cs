@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 
 namespace NesAsm.Analyzers.Visitors;
@@ -121,6 +122,29 @@ internal class AsmWriter
 
             if (++i % 8 == 0) WriteEmptyLine();
         }
+
+        WriteEmptyLine();
+    }
+
+    public void Write8CharBytes(byte[] charBytes)
+    {
+        if (charBytes.All(b => b == 0))
+        {
+            _sb.AppendLine($"{CurrentIndentation}.byte 0, 0, 0, 0, 0, 0, 0, 0");
+        }
+        else
+        {
+            foreach (var charByte in charBytes)
+            {
+                _sb.AppendLine($"{CurrentIndentation}.byte %{Convert.ToString(charByte, 2).PadLeft(8, '0')}");
+            }
+            WriteEmptyLine();
+        }
+    }
+
+    public void WritePaletteColorsChars(byte[] charBytes)
+    {
+        _sb.AppendLine($"{CurrentIndentation}.byte {string.Join(", ", charBytes.Select(cb => $"{cb:X2}"))}");
 
         WriteEmptyLine();
     }
