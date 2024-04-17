@@ -59,12 +59,12 @@ public static class CharClassVisitor
             return;
         }
 
+        var (spriteTiles, spritePalettes) = GetTilesAndPalettes(image, 0, context);
+        var (backgroundTiles, backgroundPalettes) = GetTilesAndPalettes(image, 256, context);
+
         writer.StartClassScope(className);
 
-        ProcessTileSegment(image, "Sprite", 0, context);
-        
-        // TODO if at least 1 background tile is not empty, need to output all sprite tiles even if empty
-        ProcessTileSegment(image, "Background", 16 * 16, context);
+        OutputCharData(spriteTiles, backgroundTiles, spritePalettes, backgroundPalettes, context);
 
         writer.EndClassScope();
 
@@ -80,54 +80,73 @@ public static class CharClassVisitor
         }
     }
 
-    private static void ProcessTileSegment(Png image, string tileSegment, int startingTileIndex, CharVisitorContext context)
+    private static void OutputCharData(
+        IEnumerable<TileData> spriteTiles,
+        IEnumerable<TileData> backgroundTiles,
+        ColorPalettes spritePalettes,
+        ColorPalettes backgroundPalettes,
+        CharVisitorContext context)
     {
         var writer = context.Writer;
 
+        writer.StartCharsSegment();
+
+        // Output tiles data
+        // TODO if at least 1 background tile is not empty, need to output all sprite tiles even if empty
+        foreach (var tile in spriteTiles)
+        {
+            writer.WriteComment($"Sprite Tile {tile.Index}");
+            tile.WriteData(writer);
+        }
+
+        foreach (var tile in backgroundTiles)
+        {
+            writer.WriteComment($"Background Tile {tile.Index}");
+            tile.WriteData(writer);
+        }
+
+        // Output palettes data
+        // TODO Transparent color
+        // TODO First color always transparent 0F?
+        writer.StartCodeSegment();
+
+        if (spritePalettes.NonEmptyCount > 0)
+        {
+            writer.WriteVariableLabel($"sprite_palettes");
+            spritePalettes.WriteData("Sprite", writer);
+        }
+
+        if (backgroundPalettes.NonEmptyCount > 0)
+        {
+            writer.WriteVariableLabel($"background_palettes");
+            backgroundPalettes.WriteData("Background", writer);
+        }
+    }
+
+    private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex, CharVisitorContext context)
+    {
         var tiles = new List<TileData>();
-        var colorPalettes = new ColorPalettes();
+        var palettes = new ColorPalettes();
 
         var lastTile = -1;
 
         // Generate 256 TileData
         for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
         {
-            var tileData = CreateTileData(image, tileIndex + startingTileIndex, colorPalettes, context);
+            var tileData = CreateTileData(image, tileIndex + startingTileIndex, palettes, context);
             tiles.Add(tileData);
 
             if (!tileData.Palette.IsEmpty)
                 lastTile = tileIndex;
         }
 
-        if (lastTile != -1)
+        // NES only support 4 non empty color palettes at a time, could be a problem if more
+        if (palettes.NonEmptyCount > 4)
         {
-            writer.StartCharsSegment();
-
-            // Output tiles data
-            for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
-            {
-                writer.WriteComment($"{tileSegment} Tile {tileIndex}");
-                tiles[tileIndex].WriteData(writer);
-            }
+            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, palettes.NonEmptyCount);
         }
 
-        if (colorPalettes.NonEmptyCount > 0)
-        {
-            writer.StartCodeSegment();
-
-            writer.WriteVariableLabel($"{tileSegment.ToLowerInvariant()}_palettes");
-
-            // TODO Transparent color
-            // TODO First color always transparent 0F?
-            // Output palettes data
-            colorPalettes.WriteData(tileSegment, writer);
-
-            // NES only support 4 non empty color palettes at a time, could be a problem if more
-            if (colorPalettes.NonEmptyCount > 4)
-            {
-                context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
-            }
-        }
+        return (tiles.Take(lastTile + 1), palettes);
     }
 
     private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, CharVisitorContext context)
@@ -156,23 +175,26 @@ public static class CharClassVisitor
 
         var colorPalette = colorPalettes.GetFromColors(colors);
 
-        return new TileData(pixels.ToArray(), colorPalette);
+        return new TileData(pixels.ToArray(), colorPalette, tileIndex);
     }
 
     public class TileData
     {
-        public TileData(Pixel[] pixels, ColorPalette palette)
+        public TileData(Pixel[] pixels, ColorPalette palette, int index)
         {
             if (pixels.Length != 64)
                 throw new ArgumentException("pixels must be 64 length", nameof(pixels));
 
             Pixels = pixels;
             Palette = palette;
+            Index = index;
         }
 
         public Pixel[] Pixels { get; }
 
         public ColorPalette Palette { get; }
+        
+        public int Index { get; }
 
         internal void WriteData(AsmWriter writer)
         {

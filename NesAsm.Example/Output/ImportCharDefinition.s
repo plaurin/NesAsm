@@ -127,21 +127,7 @@
 
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
-.segment "CODE"
-
-sprite_palettes:
-  ; Sprite Palette 0
-  .byte 0F, 20, 0F, 0F
-
-  ; Sprite Palette 1
-  .byte 0F, 11, 0F, 0F
-
-  ; Sprite Palette 2
-  .byte 0F, 15, 0F, 0F
-
-.segment "CHARS"
-
-  ; Background Tile 0
+  ; Background Tile 256
   .byte %01010101
   .byte %10101010
   .byte %01010101
@@ -154,6 +140,16 @@ sprite_palettes:
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
 .segment "CODE"
+
+sprite_palettes:
+  ; Sprite Palette 0
+  .byte 0F, 20, 0F, 0F
+
+  ; Sprite Palette 1
+  .byte 0F, 11, 0F, 0F
+
+  ; Sprite Palette 2
+  .byte 0F, 15, 0F, 0F
 
 background_palettes:
   ; Background Palette 0
