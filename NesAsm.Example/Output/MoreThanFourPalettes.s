@@ -157,14 +157,5 @@ sprite_palettes:
   ; Sprite Palette 8
   .byte 0F, 15, 0F, 0F
 
-.segment "CHARS"
-
-  ; Background Tile 0
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-.segment "CODE"
-
-background_palettes:
 .endscope
 

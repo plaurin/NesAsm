@@ -63,6 +63,7 @@ public static class CharClassVisitor
 
         ProcessTileSegment(image, "Sprite", 0, context);
         
+        // TODO if at least 1 background tile is not empty, need to output all sprite tiles even if empty
         ProcessTileSegment(image, "Background", 16 * 16, context);
 
         writer.EndClassScope();
@@ -86,9 +87,9 @@ public static class CharClassVisitor
         var tiles = new List<TileData>();
         var colorPalettes = new ColorPalettes();
 
-        var lastTile = 0;
+        var lastTile = -1;
 
-        // Generate 256 tile data
+        // Generate 256 TileData
         for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
         {
             var tileData = CreateTileData(image, tileIndex + startingTileIndex, colorPalettes, context);
@@ -98,29 +99,34 @@ public static class CharClassVisitor
                 lastTile = tileIndex;
         }
 
-        writer.StartCharsSegment();
-
-        // TODO Don't output sprite or background if only empty tiles
-        // Output tiles data
-        for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
+        if (lastTile != -1)
         {
-            writer.WriteComment($"{tileSegment} Tile {tileIndex}");
-            tiles[tileIndex].WriteData(writer);
+            writer.StartCharsSegment();
+
+            // Output tiles data
+            for (int tileIndex = 0; tileIndex <= lastTile; tileIndex++)
+            {
+                writer.WriteComment($"{tileSegment} Tile {tileIndex}");
+                tiles[tileIndex].WriteData(writer);
+            }
         }
 
-        writer.StartCodeSegment();
-
-        writer.WriteVariableLabel($"{tileSegment.ToLowerInvariant()}_palettes");
-
-        // TODO Transparent color
-        // TODO First color always transparent 0F?
-        // Output palettes data
-        colorPalettes.WriteData(tileSegment, writer);
-
-        // NES only support 4 non empty color palettes at a time, could be a problem if more
-        if (colorPalettes.NonEmptyCount > 4)
+        if (colorPalettes.NonEmptyCount > 0)
         {
-            context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
+            writer.StartCodeSegment();
+
+            writer.WriteVariableLabel($"{tileSegment.ToLowerInvariant()}_palettes");
+
+            // TODO Transparent color
+            // TODO First color always transparent 0F?
+            // Output palettes data
+            colorPalettes.WriteData(tileSegment, writer);
+
+            // NES only support 4 non empty color palettes at a time, could be a problem if more
+            if (colorPalettes.NonEmptyCount > 4)
+            {
+                context.ReportDiagnostic(CharDiagnostics.MoreThanFourColorPalettes, context.Location, colorPalettes.NonEmptyCount);
+            }
         }
     }
 

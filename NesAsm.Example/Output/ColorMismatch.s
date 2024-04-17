@@ -102,14 +102,5 @@ sprite_palettes:
   ; Sprite Palette 3
   .byte 0F, 2D, 3A, 28
 
-.segment "CHARS"
-
-  ; Background Tile 0
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-.segment "CODE"
-
-background_palettes:
 .endscope
 
