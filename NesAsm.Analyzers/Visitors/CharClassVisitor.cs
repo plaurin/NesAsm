@@ -108,7 +108,6 @@ public static class CharClassVisitor
             writer.WriteEmptyLine();
         }
 
-        // TODO Test only background tiles
         foreach (var tile in backgroundTiles)
         {
             writer.WriteComment($"Background Tile {tile.Index}");

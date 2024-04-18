@@ -35,6 +35,12 @@ public class CharClassVisitorTests
         TestScript("ColorMismatch.cs");
     }
 
+    [Fact]
+    public void TestBackgroundOnlyCharScript()
+    {
+        TestScript("BackgroundOnly.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new CharGenerator();
