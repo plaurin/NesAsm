@@ -277,7 +277,7 @@
 
 background_palettes:
   ; Background Palette 0
-  .byte 20, 0F, 0F, 0F
+  .byte $20, $0F, $0F, $0F
 
 .endscope
 

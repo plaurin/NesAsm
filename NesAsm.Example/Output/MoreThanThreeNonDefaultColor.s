@@ -31,7 +31,7 @@
 
 sprite_palettes:
   ; Sprite Palette 0
-  .byte 0F, 05, 22, 29
+  .byte $0F, $05, $22, $29
 
 .endscope
 

@@ -146,7 +146,7 @@ internal class AsmWriter
 
     public void WritePaletteColorsChars(byte[] charBytes)
     {
-        _sb.AppendLine($"{CurrentIndentation}.byte {string.Join(", ", charBytes.Select(cb => $"{cb:X2}"))}");
+        _sb.AppendLine($"{CurrentIndentation}.byte {string.Join(", ", charBytes.Select(cb => $"${cb:X2}"))}");
 
         WriteEmptyLine();
     }

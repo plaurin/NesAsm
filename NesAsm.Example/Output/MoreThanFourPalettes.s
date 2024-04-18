@@ -131,31 +131,31 @@
 
 sprite_palettes:
   ; Sprite Palette 0
-  .byte 0F, 01, 0F, 0F
+  .byte $0F, $01, $0F, $0F
 
   ; Sprite Palette 1
-  .byte 0F, 12, 0F, 0F
+  .byte $0F, $12, $0F, $0F
 
   ; Sprite Palette 2
-  .byte 0F, 03, 0F, 0F
+  .byte $0F, $03, $0F, $0F
 
   ; Sprite Palette 3
-  .byte 0F, 23, 0F, 0F
+  .byte $0F, $23, $0F, $0F
 
   ; Sprite Palette 4
-  .byte 0F, 20, 0F, 0F
+  .byte $0F, $20, $0F, $0F
 
   ; Sprite Palette 5
-  .byte 19, 0F, 0F, 0F
+  .byte $19, $0F, $0F, $0F
 
   ; Sprite Palette 6
-  .byte 0F, 39, 0F, 0F
+  .byte $0F, $39, $0F, $0F
 
   ; Sprite Palette 7
-  .byte 0F, 11, 0F, 0F
+  .byte $0F, $11, $0F, $0F
 
   ; Sprite Palette 8
-  .byte 0F, 15, 0F, 0F
+  .byte $0F, $15, $0F, $0F
 
 .endscope
 

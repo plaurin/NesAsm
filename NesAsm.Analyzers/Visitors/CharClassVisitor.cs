@@ -218,6 +218,7 @@ public static class CharClassVisitor
                 {
                     var color = Pixels[i + j * 8];
 
+                    // TODO Fix B
                     byte colorIndex = Palette!.GetColorIndex(color);
 
                     if (colorIndex == 255)
