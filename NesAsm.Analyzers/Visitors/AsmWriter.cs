@@ -72,7 +72,9 @@ internal class AsmWriter
 
     public void Write(string value) => _sb.Append(value);
 
-    public void WriteEmptyLine() => _sb.AppendLine("");
+    public void WriteLineWithIndentation(string value) => _sb.AppendLine($"{CurrentIndentation}{value}");
+
+    public void WriteEmptyLine() => _sb.AppendLine();
 
     public void IncludeFile(string filepath) => _sb.AppendLine($".include \"{filepath}\"");
 

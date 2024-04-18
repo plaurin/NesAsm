@@ -92,13 +92,23 @@ public static class CharClassVisitor
         writer.StartCharsSegment();
 
         // Output tiles data
-        // TODO if at least 1 background tile is not empty, need to output all sprite tiles even if empty
         foreach (var tile in spriteTiles)
         {
             writer.WriteComment($"Sprite Tile {tile.Index}");
             tile.WriteData(writer);
         }
 
+        // If at least 1 background tile is not empty, need to output all sprite tiles even if empty
+        if (backgroundTiles.Any())
+        {
+            writer.WriteComment($"Sprite Tiles {spriteTiles.Count()} to 255 are empty");
+            for (var i = spriteTiles.Count(); i < 256; i++)
+                writer.WriteLineWithIndentation(".byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0");
+            
+            writer.WriteEmptyLine();
+        }
+
+        // TODO Test only background tiles
         foreach (var tile in backgroundTiles)
         {
             writer.WriteComment($"Background Tile {tile.Index}");
