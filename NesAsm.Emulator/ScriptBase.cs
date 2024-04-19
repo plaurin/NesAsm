@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Emulator;
 
-public abstract partial class ScriptBase
+public abstract partial class ScriptBase : FileBasedReference
 {
     private readonly NESEmulator _emulator;
 

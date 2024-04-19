@@ -17,6 +17,8 @@
 
 .include "PPU.s"
 
+.include "Game1Char.s"
+
 .segment "CODE"
 
 RightButtonPalette = $20A
@@ -429,4 +431,3 @@ palettes:
 .byte 0
 
 
-.include "Game1Char.s"

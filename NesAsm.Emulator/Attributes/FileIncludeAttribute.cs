@@ -1,7 +1,7 @@
 ﻿namespace NesAsm.Emulator.Attributes;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class FileIncludeAttribute<T> : Attribute where T : ScriptBase
+public class FileIncludeAttribute<T> : Attribute where T : FileBasedReference
 {
     public FileIncludeAttribute()
     {

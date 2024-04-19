@@ -8,7 +8,7 @@ namespace NesAsm.Example;
 [StartupSegment()]
 [FileInclude<Controller>]
 [FileInclude<PPU>]
-[PostFileInclude("Game1Char.s")] // TODO use FileInclude instead
+[FileInclude<Game1Char>]
 public class Game1C : ScriptBase
 {
     public Game1C(NESEmulator emulator) : base(emulator)
