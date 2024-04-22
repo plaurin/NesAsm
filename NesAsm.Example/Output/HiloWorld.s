@@ -32,7 +32,7 @@ nmi:
 
 @spriteLoop:
 
-  lda hiloWorldSprites, x
+  lda hilo_world_sprites, x
   sta $2004
   inx
 
@@ -42,7 +42,7 @@ nmi:
 
 .segment "CODE"
 
-hiloWorldSprites:
+hilo_world_sprites:
   .byte 0
   .byte 0
   .byte 0

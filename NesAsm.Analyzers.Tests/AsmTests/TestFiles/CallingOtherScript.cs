@@ -22,5 +22,6 @@ internal class CallingOtherScript : ScriptBase
     public void MyProcC()
     {
         LDA(MultiProcScript.Data);
+        LDA(MultiProcScript.SpritePalettes, X);
     }
 }

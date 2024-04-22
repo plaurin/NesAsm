@@ -15,6 +15,7 @@
 
   .proc myProcC
     lda MultiProcScript::Data
+    lda MultiProcScript::sprite_palettes, x
 
     rts
   .endproc

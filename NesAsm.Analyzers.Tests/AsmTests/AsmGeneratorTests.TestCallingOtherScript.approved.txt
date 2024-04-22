@@ -27,6 +27,7 @@
 
   .proc myProcC
     lda MultiProcScript::Data
+    lda MultiProcScript::sprite_palettes, x
 
     rts
   .endproc
@@ -42,6 +43,23 @@
 .scope MultiProcScript
 
   Data = $FF
+.segment "CODE"
+
+sprite_palettes:
+  .byte 15
+  .byte 32
+  .byte 15
+  .byte 15
+  .byte 15
+  .byte 17
+  .byte 15
+  .byte 15
+
+  .byte 15
+  .byte 21
+  .byte 15
+  .byte 15
+
   .proc procA
     lda #10
 

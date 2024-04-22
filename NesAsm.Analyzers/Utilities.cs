@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Text;
 
 namespace NesAsm.Analyzers;
 
@@ -8,7 +9,14 @@ public static class Utilities
 {
     public static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
     public static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
-    public static string GetLabelName(string fieldName) => $"{char.ToLowerInvariant(fieldName[0])}{fieldName.Substring(1)}";
+    public static string GetLabelName(string fieldName)
+    {
+        var parts = fieldName.Split('.');
+        parts[parts.Length - 1] = ToSnakeCase(parts[parts.Length - 1]);
+
+        return string.Join("::", parts);
+    }
+
     public static string GetConstName(string constName) => constName;
 
     public static string ConvertOperandToNumericText(string operand)
@@ -38,5 +46,35 @@ public static class Utilities
         if (ushort.TryParse(operand, out var _)) return operand;
 
         throw new InvalidOperationException($"Expected parameter of type byte or ushort but found {operand}");
+    }
+
+    // https://stackoverflow.com/questions/63055621/how-to-convert-camel-case-to-snake-case-with-two-capitals-next-to-each-other
+    public static string ToSnakeCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+
+        var sb = new StringBuilder();
+        sb.Append(char.ToLower(input[0]));
+
+        for (var i = 1; i < input.Length; i++)
+        {
+            var currentChar = input[i];
+            var previousChar = input[i - 1];
+
+            if (char.IsUpper(currentChar))
+            {
+                if (previousChar != ' ' && !char.IsUpper(previousChar) && previousChar != '_')
+                {
+                    sb.Append('_');
+                }
+                sb.Append(char.ToLower(currentChar));
+            }
+            else
+            {
+                sb.Append(currentChar);
+            }
+        }
+
+        return sb.ToString();
     }
 }

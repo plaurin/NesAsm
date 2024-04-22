@@ -46,7 +46,7 @@ FaceY = $228
 
   ldx #0
 @loop1_on_X:
-  lda game1Char.SpritePalettes, x
+  lda Game1Char::sprite_palettes, x
 
   ; Write palette data to PPUDATA $2007 PPU_DATA
   sta PPU::PPU_DATA
@@ -60,7 +60,7 @@ FaceY = $228
 
   ldx #0
 @loop2_on_X:
-  lda controllerSprites, x
+  lda controller_sprites, x
   sta $200, x
 
   inx
@@ -335,7 +335,7 @@ rti
 
 .segment "CODE"
 
-controllerSprites:
+controller_sprites:
 .byte 0
 .byte 0
 .byte 0

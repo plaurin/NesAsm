@@ -42,7 +42,7 @@
 
 @spriteLoop:
 
-  lda controllerSprites, x
+  lda controller_sprites, x
   sta $200, x
   inx
 
@@ -273,7 +273,7 @@ rti
 
 .segment "CODE"
 
-controllerSprites:
+controller_sprites:
 .byte 0
 .byte 0
 .byte 0
