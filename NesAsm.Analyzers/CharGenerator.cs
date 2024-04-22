@@ -91,16 +91,22 @@ public class CharGenerator : IIncrementalGenerator
 
         try
         {
-            var writer = new AsmWriter();
+            var asmWriter = new AsmWriter();
+            var csWriter = new CsWriter();
 
-            CharClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
+            CharClassVisitor.Visit(node, new VisitorContext(context, compilation, asmWriter, csWriter));
 
-            var source = writer.ToString();
-
+            // Asm file output
+            var source = asmWriter.ToString();
             context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
 {source}
 */");
             File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
+
+            // Cs file output
+            var csSource = csWriter.ToString();
+            context.AddSource($"Sharp.{node.Identifier}.cs", csSource);
+            File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.csharp", csSource);
         }
         catch (Exception ex)
         {

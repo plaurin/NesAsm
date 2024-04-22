@@ -1,0 +1,15 @@
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class ColorMismatch : CharDefinition
+{
+    public static byte[] SpritePalettes = [
+        0x0F, 0x03, 0x05, 0x01, // Palette 0
+        0x0F, 0x33, 0x31, 0x36, // Palette 1
+        0x0F, 0x1C, 0x0A, 0x08, // Palette 2
+        0x0F, 0x2D, 0x3A, 0x28, // Palette 3
+    ];
+
+}

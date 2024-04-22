@@ -42,7 +42,7 @@ public class Game1C : ScriptBase
 
         for (X = 0; X < 32; X++)
         {
-            LDA(Palettes, X);
+            LDA(Game1Char.SpritePalettes, X);
 
             // Write palette data to PPUDATA $2007 PPU_DATA
             STA(PPU.PPU_DATA);
@@ -343,45 +343,5 @@ public class Game1C : ScriptBase
         10,  // Tile 10
         2,   // Palette 5
         100, // X position - Left
-    ];
-
-    // TODO Use palettes from Game1Char
-    [RomData]
-    private readonly byte[] Palettes = [
-        // Background palettes
-        0x0F,
-        0x20,
-        0x21,
-        0x22,
-        0x0F,
-        0x00,
-        0x00,
-        0x00,
-        0x0F,
-        0x00,
-        0x00,
-        0x00,
-        0x0F,
-        0x00,
-        0x00,
-        0x00,
-
-        // Sprite palettes
-        0x0F,
-        0x20,
-        0x27,
-        0x31,
-        0x0F,
-        0x29,
-        0x00,
-        0x00,
-        0x0F,
-        0x16,
-        0x00,
-        0x00,
-        0x0F,
-        0x12,
-        0x00,
-        0x00,
     ];
 }

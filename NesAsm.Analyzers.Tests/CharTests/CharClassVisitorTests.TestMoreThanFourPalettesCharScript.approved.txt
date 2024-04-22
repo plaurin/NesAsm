@@ -1,14 +1,14 @@
 ﻿- Main diagnostics:
 ..\..\..\CharTests\TestFiles\MoreThanFourPalettes.cs(6,2): info NA1002: Png image contains 9 different color palettes
-- SyntaxTrees Count: 2
+- SyntaxTrees Count: 3
 - Output diagnostics:
-- RunResult.GeneratedTrees Count: 1
+- RunResult.GeneratedTrees Count: 2
 - RunResults diagnostics:
 ..\..\..\CharTests\TestFiles\MoreThanFourPalettes.cs(6,2): info NA1002: Png image contains 9 different color palettes
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
 ..\..\..\CharTests\TestFiles\MoreThanFourPalettes.cs(6,2): info NA1002: Png image contains 9 different color palettes
-- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].GeneratedSources Count: 2
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.MoreThanFourPalettes.cs
 - RunResult[0].GeneratedSources[0].SourceText:
@@ -176,3 +176,26 @@ sprite_palettes:
 
 
 */
+- RunResult[0].GeneratedSources[1].HintName: Sharp.MoreThanFourPalettes.cs
+- RunResult[0].GeneratedSources[1].SourceText:
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class MoreThanFourPalettes : CharDefinition
+{
+    public static byte[] SpritePalettes = [
+        0x0F, 0x01, 0x0F, 0x0F, // Palette 0
+        0x0F, 0x12, 0x0F, 0x0F, // Palette 1
+        0x0F, 0x03, 0x0F, 0x0F, // Palette 2
+        0x0F, 0x23, 0x0F, 0x0F, // Palette 3
+        0x0F, 0x20, 0x0F, 0x0F, // Palette 4
+        0x19, 0x0F, 0x0F, 0x0F, // Palette 5
+        0x0F, 0x39, 0x0F, 0x0F, // Palette 6
+        0x0F, 0x11, 0x0F, 0x0F, // Palette 7
+        0x0F, 0x15, 0x0F, 0x0F, // Palette 8
+    ];
+
+}
+

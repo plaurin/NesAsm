@@ -1,0 +1,12 @@
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class MoreThanThreeNonDefaultColor : CharDefinition
+{
+    public static byte[] SpritePalettes = [
+        0x0F, 0x05, 0x22, 0x29, // Palette 0
+    ];
+
+}

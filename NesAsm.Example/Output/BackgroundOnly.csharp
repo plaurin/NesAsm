@@ -1,0 +1,11 @@
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class BackgroundOnly : CharDefinition
+{
+    public static byte[] BackgroundPalettes = [
+        0x20, 0x0F, 0x0F, 0x0F, // Palette 0
+    ];
+}

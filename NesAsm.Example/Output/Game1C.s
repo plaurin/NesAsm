@@ -46,7 +46,7 @@ FaceY = $228
 
   ldx #0
 @loop1_on_X:
-  lda palettes, x
+  lda game1Char.SpritePalettes, x
 
   ; Write palette data to PPUDATA $2007 PPU_DATA
   sta PPU::PPU_DATA
@@ -389,45 +389,5 @@ controllerSprites:
 .byte 10
 .byte 2
 .byte 100
-
-
-.segment "CODE"
-
-palettes:
-.byte 15
-.byte 32
-.byte 33
-.byte 34
-.byte 15
-.byte 0
-.byte 0
-.byte 0
-
-.byte 15
-.byte 0
-.byte 0
-.byte 0
-.byte 15
-.byte 0
-.byte 0
-.byte 0
-
-.byte 15
-.byte 32
-.byte 39
-.byte 49
-.byte 15
-.byte 41
-.byte 0
-.byte 0
-
-.byte 15
-.byte 22
-.byte 0
-.byte 0
-.byte 15
-.byte 18
-.byte 0
-.byte 0
 
 

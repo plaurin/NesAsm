@@ -9,9 +9,9 @@
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 0, 84, 0 is not a valid NES color (using Mesen color palette), use the closest color RGB 0, 82, 0 instead (position x: 33, y: 5)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 51, 55, 0 is not a valid NES color (using Mesen color palette), use the closest color RGB 51, 53, 0 instead (position x: 31, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 79, 81, 79 is not a valid NES color (using Mesen color palette), use the closest color RGB 79, 79, 79 instead (position x: 41, y: 1)
-- SyntaxTrees Count: 2
+- SyntaxTrees Count: 3
 - Output diagnostics:
-- RunResult.GeneratedTrees Count: 1
+- RunResult.GeneratedTrees Count: 2
 - RunResults diagnostics:
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 59, 2, 164 is not a valid NES color (using Mesen color palette), use the closest color RGB 59, 0, 164 instead (position x: 13, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 110, 2, 64 is not a valid NES color (using Mesen color palette), use the closest color RGB 110, 0, 64 instead (position x: 15, y: 5)
@@ -35,7 +35,7 @@
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 0, 84, 0 is not a valid NES color (using Mesen color palette), use the closest color RGB 0, 82, 0 instead (position x: 33, y: 5)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 51, 55, 0 is not a valid NES color (using Mesen color palette), use the closest color RGB 51, 53, 0 instead (position x: 31, y: 7)
 ..\..\..\CharTests\TestFiles\ColorMismatch.cs(6,2): warning NA1004: Color RGB 79, 81, 79 is not a valid NES color (using Mesen color palette), use the closest color RGB 79, 79, 79 instead (position x: 41, y: 1)
-- RunResult[0].GeneratedSources Count: 1
+- RunResult[0].GeneratedSources Count: 2
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.ColorMismatch.cs
 - RunResult[0].GeneratedSources[0].SourceText:
@@ -148,3 +148,21 @@ sprite_palettes:
 
 
 */
+- RunResult[0].GeneratedSources[1].HintName: Sharp.ColorMismatch.cs
+- RunResult[0].GeneratedSources[1].SourceText:
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class ColorMismatch : CharDefinition
+{
+    public static byte[] SpritePalettes = [
+        0x0F, 0x03, 0x05, 0x01, // Palette 0
+        0x0F, 0x33, 0x31, 0x36, // Palette 1
+        0x0F, 0x1C, 0x0A, 0x08, // Palette 2
+        0x0F, 0x2D, 0x3A, 0x28, // Palette 3
+    ];
+
+}
+

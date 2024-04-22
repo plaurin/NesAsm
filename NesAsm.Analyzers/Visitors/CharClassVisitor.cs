@@ -24,10 +24,13 @@ public static class CharClassVisitor
                     var sourceFolderPath = Path.GetDirectoryName(sourceFilepath);
                     var charFilepath = Path.Combine(sourceFolderPath, filepath);
 
+                    var classNamespace = classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
+                    classNamespace ??= classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
+
                     var className = classDeclarationSyntax.Identifier.ToString();
                     var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
 
-                    Process(className, charFilepath, charVisitorContext);
+                    Process(className, classNamespace, charFilepath, charVisitorContext);
 
                     return;
                 }
@@ -35,18 +38,7 @@ public static class CharClassVisitor
         }
     }
 
-    internal static string Process(string className, string imageFilename, VisitorContext context)
-    {
-        var writer = new AsmWriter();
-
-        var charVisitorContext = new CharVisitorContext(context, Location.None);
-
-        Process(className, imageFilename, charVisitorContext);
-
-        return writer.ToString();
-    }
-
-    internal static void Process(string className, string imageFilename, CharVisitorContext context)
+    internal static void Process(string className, string? classNamespace, string imageFilename, CharVisitorContext context)
     {
         var writer = context.Writer;
 
@@ -77,6 +69,17 @@ public static class CharClassVisitor
                 var expected = $"{expectedColor.R}, {expectedColor.G}, {expectedColor.B}";
                 context.ReportDiagnostic(CharDiagnostics.ColorMismatch, context.Location, actual, expected, x, y);
             }
+        }
+
+        // Now output the partial cs file with image data to be referenced in the scripts
+        if (context.CsWriter == null)
+        {
+            context.ReportDiagnostic(CharDiagnostics.InternalAnalyzerFailure, context.Location, "CsWriter is null!");
+        }
+        else
+        {
+            // TODO Test when class is not partial
+            OutputCharCSharp(className, classNamespace, spriteTiles, backgroundTiles, spritePalettes, backgroundPalettes, context);
         }
     }
 
@@ -122,14 +125,63 @@ public static class CharClassVisitor
         if (spritePalettes.NonEmptyCount > 0)
         {
             writer.WriteVariableLabel($"sprite_palettes");
-            spritePalettes.WriteData("Sprite", writer);
+            spritePalettes.WriteAsm("Sprite", writer);
         }
 
         if (backgroundPalettes.NonEmptyCount > 0)
         {
             writer.WriteVariableLabel($"background_palettes");
-            backgroundPalettes.WriteData("Background", writer);
+            backgroundPalettes.WriteAsm("Background", writer);
         }
+    }
+
+    private static void OutputCharCSharp(
+        string className,
+        string? classNamespace,
+        IEnumerable<TileData> spriteTiles,
+        IEnumerable<TileData> backgroundTiles,
+        ColorPalettes spritePalettes,
+        ColorPalettes backgroundPalettes, 
+        CharVisitorContext context)
+    {
+        var csWriter = context.CsWriter!;
+
+        csWriter.WriteLineWithIndentation("using NesAsm.Emulator;");
+        csWriter.WriteEmptyLine();
+
+        if (classNamespace != null)
+        {
+            csWriter.WriteLineWithIndentation($"namespace {classNamespace};");
+            csWriter.WriteEmptyLine();
+        }
+
+        csWriter.WriteLineWithIndentation($"public partial class {className} : CharDefinition");
+        csWriter.WriteStartBlock();
+
+        if (spritePalettes.NonEmptyCount > 0)
+        {
+            csWriter.WriteLineWithIndentation($"public static byte[] SpritePalettes = [");
+
+            csWriter.IncreaseIndentation();
+            spritePalettes.WriteCSharp(csWriter);
+            csWriter.DecreaseIndentation();
+
+            csWriter.WriteLineWithIndentation($"];");
+            csWriter.WriteEmptyLine();
+        }
+
+        if (backgroundPalettes.NonEmptyCount > 0)
+        {
+            csWriter.WriteLineWithIndentation($"public static byte[] BackgroundPalettes = [");
+            
+            csWriter.IncreaseIndentation();
+            backgroundPalettes.WriteCSharp(csWriter);
+            csWriter.DecreaseIndentation();
+            
+            csWriter.WriteLineWithIndentation($"];");
+        }
+
+        csWriter.WriteEndBlock();
     }
 
     private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex, CharVisitorContext context)
@@ -264,13 +316,23 @@ public static class CharClassVisitor
             return palette;
         }
 
-        internal void WriteData(string segment, AsmWriter writer)
+        internal void WriteAsm(string segment, AsmWriter writer)
         {
             var index = 0;
             foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
                 writer.WriteComment($"{segment} Palette {index++}");
                 writer.WritePaletteColorsChars(palette.NesColors);
+            }
+        }
+
+        internal void WriteCSharp(CsWriter writer)
+        {
+            var index = 0;
+            foreach (var palette in palettes.Where(p => !p.IsEmpty))
+            {
+                writer.WritePaletteColorsData(palette.NesColors);
+                writer.WriteEndOfLineComment($"Palette {index++}");
             }
         }
 
