@@ -274,7 +274,6 @@
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
 
   ; Background Tile 256
-  .byte %01010101
   .byte %10101010
   .byte %01010101
   .byte %10101010
@@ -282,6 +281,7 @@
   .byte %10101010
   .byte %01010101
   .byte %10101010
+  .byte %01010101
 
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
@@ -289,7 +289,7 @@
 
 background_palettes:
   ; Background Palette 0
-  .byte $20, $0F, $0F, $0F
+  .byte $0F, $20, $0F, $0F
 
 .endscope
 
@@ -305,7 +305,7 @@ namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
 public partial class BackgroundOnly : CharDefinition
 {
     public static byte[] BackgroundPalettes = [
-        0x20, 0x0F, 0x0F, 0x0F, // Palette 0
+        0x0F, 0x20, 0x0F, 0x0F, // Palette 0
     ];
 }
 

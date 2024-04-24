@@ -225,7 +225,7 @@ public static class CharClassVisitor
                 pixels.Add(nesColor);
             }
 
-        var colors = pixels.Distinct().ToArray();
+        var colors = new[] { Pixel.Empty }.Concat(pixels).Distinct().ToArray();
 
         // Warning if more than 3 non default color
         if (colors.Length > 4)
@@ -421,14 +421,14 @@ public static class CharClassVisitor
             new(), // new(0, 0, 0),
         };
 
-        private readonly Pixel[] _colors = new Pixel[4];
+        private readonly Pixel[] _colors = new Pixel[4];// { Pixel.Empty, AllNesColors[15], AllNesColors[15], AllNesColors[15] };
 
         public ColorPalette(Pixel[] colors)
         {
             colors.CopyTo(_colors, 0);
         }
 
-        public bool IsEmpty => _colors[0].R == 0 && _colors[0].G == 0 && _colors[0].B == 0 && _colors[1] == Pixel.Empty && _colors[2] == Pixel.Empty && _colors[3] == Pixel.Empty;
+        public bool IsEmpty => _colors[0] == Pixel.Empty && _colors[1] == Pixel.Empty && _colors[2] == Pixel.Empty && _colors[3] == Pixel.Empty;
 
         public byte GetColorIndex(Pixel color)
         {

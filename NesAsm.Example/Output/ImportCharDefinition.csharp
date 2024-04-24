@@ -6,7 +6,7 @@ namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
 public partial class ImportCharDefinition : CharDefinition
 {
     public static byte[] BackgroundPalettes = [
-        0x20, 0x0F, 0x0F, 0x0F, // Palette 0
+        0x0F, 0x20, 0x0F, 0x0F, // Palette 0
     ];
     public static byte[] SpritePalettes = [
         0x0F, 0x20, 0x0F, 0x0F, // Palette 0

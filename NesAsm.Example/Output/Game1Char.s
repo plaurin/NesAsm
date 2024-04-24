@@ -80,14 +80,14 @@
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
   ; Sprite Tile 7
-  .byte %00000111
-  .byte %00000011
-  .byte %00111101
-  .byte %00000011
-  .byte %00000011
-  .byte %00111101
-  .byte %00000011
-  .byte %00000111
+  .byte %11111000
+  .byte %11111100
+  .byte %11000010
+  .byte %11111100
+  .byte %11111100
+  .byte %11000010
+  .byte %11111100
+  .byte %11111000
 
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
@@ -375,7 +375,6 @@
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
 
   ; Background Tile 256
-  .byte %01010101
   .byte %10101010
   .byte %01010101
   .byte %10101010
@@ -383,6 +382,7 @@
   .byte %10101010
   .byte %01010101
   .byte %10101010
+  .byte %01010101
 
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
@@ -390,7 +390,7 @@
 
 background_palettes:
   ; Background Palette 0
-  .byte $20, $0F, $0F, $0F
+  .byte $0F, $20, $0F, $0F
 
 sprite_palettes:
   ; Sprite Palette 0

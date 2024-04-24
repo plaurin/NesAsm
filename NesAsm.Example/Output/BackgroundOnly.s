@@ -262,7 +262,6 @@
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
 
   ; Background Tile 256
-  .byte %01010101
   .byte %10101010
   .byte %01010101
   .byte %10101010
@@ -270,6 +269,7 @@
   .byte %10101010
   .byte %01010101
   .byte %10101010
+  .byte %01010101
 
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
@@ -277,7 +277,7 @@
 
 background_palettes:
   ; Background Palette 0
-  .byte $20, $0F, $0F, $0F
+  .byte $0F, $20, $0F, $0F
 
 .endscope
 
