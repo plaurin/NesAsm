@@ -388,6 +388,10 @@
 
 .segment "CODE"
 
+background_palettes:
+  ; Background Palette 0
+  .byte $20, $0F, $0F, $0F
+
 sprite_palettes:
   ; Sprite Palette 0
   .byte $0F, $20, $0F, $0F
@@ -397,10 +401,6 @@ sprite_palettes:
 
   ; Sprite Palette 2
   .byte $0F, $15, $0F, $0F
-
-background_palettes:
-  ; Background Palette 0
-  .byte $20, $0F, $0F, $0F
 
 .endscope
 

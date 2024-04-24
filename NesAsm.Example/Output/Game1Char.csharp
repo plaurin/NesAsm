@@ -5,13 +5,13 @@ namespace NesAsm.Example;
 
 public partial class Game1Char : CharDefinition
 {
+    public static byte[] BackgroundPalettes = [
+        0x20, 0x0F, 0x0F, 0x0F, // Palette 0
+    ];
     public static byte[] SpritePalettes = [
         0x0F, 0x20, 0x0F, 0x0F, // Palette 0
         0x0F, 0x11, 0x0F, 0x0F, // Palette 1
         0x0F, 0x15, 0x0F, 0x0F, // Palette 2
     ];
 
-    public static byte[] BackgroundPalettes = [
-        0x20, 0x0F, 0x0F, 0x0F, // Palette 0
-    ];
 }

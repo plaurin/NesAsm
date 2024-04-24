@@ -122,16 +122,16 @@ public static class CharClassVisitor
         // TODO First color always transparent 0F?
         writer.StartCodeSegment();
 
-        if (spritePalettes.NonEmptyCount > 0)
-        {
-            writer.WriteVariableLabel($"sprite_palettes");
-            spritePalettes.WriteAsm("Sprite", writer);
-        }
-
         if (backgroundPalettes.NonEmptyCount > 0)
         {
             writer.WriteVariableLabel($"background_palettes");
             backgroundPalettes.WriteAsm("Background", writer);
+        }
+
+        if (spritePalettes.NonEmptyCount > 0)
+        {
+            writer.WriteVariableLabel($"sprite_palettes");
+            spritePalettes.WriteAsm("Sprite", writer);
         }
     }
 
@@ -158,6 +158,17 @@ public static class CharClassVisitor
         csWriter.WriteLineWithIndentation($"public partial class {className} : CharDefinition");
         csWriter.WriteStartBlock();
 
+        if (backgroundPalettes.NonEmptyCount > 0)
+        {
+            csWriter.WriteLineWithIndentation($"public static byte[] BackgroundPalettes = [");
+
+            csWriter.IncreaseIndentation();
+            backgroundPalettes.WriteCSharp(csWriter);
+            csWriter.DecreaseIndentation();
+
+            csWriter.WriteLineWithIndentation($"];");
+        }
+
         if (spritePalettes.NonEmptyCount > 0)
         {
             csWriter.WriteLineWithIndentation($"public static byte[] SpritePalettes = [");
@@ -168,17 +179,6 @@ public static class CharClassVisitor
 
             csWriter.WriteLineWithIndentation($"];");
             csWriter.WriteEmptyLine();
-        }
-
-        if (backgroundPalettes.NonEmptyCount > 0)
-        {
-            csWriter.WriteLineWithIndentation($"public static byte[] BackgroundPalettes = [");
-            
-            csWriter.IncreaseIndentation();
-            backgroundPalettes.WriteCSharp(csWriter);
-            csWriter.DecreaseIndentation();
-            
-            csWriter.WriteLineWithIndentation($"];");
         }
 
         csWriter.WriteEndBlock();
