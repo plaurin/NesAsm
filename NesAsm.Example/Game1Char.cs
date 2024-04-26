@@ -10,6 +10,7 @@ public partial class Game1Char : CharDefinition
     // [ImportPalettes("game1.png", "Palettes")]
     // private readonly byte[] Palettes;
 
+    // TODO Output const to be used in csharp too!
     public const byte RightTile = 1;
     public const byte LeftTile = 2;
     public const byte DownTile = 3;

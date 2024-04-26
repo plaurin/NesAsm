@@ -1,6 +1,11 @@
 ; Auto generated code using the NesAsm project
 .scope ImportCharDefinition
 
+.segment "CODE"
+
+  RightTile = 1
+  LeftTile = 2
+
 .segment "CHARS"
 
   ; Sprite Tile 0

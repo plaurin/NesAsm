@@ -18,6 +18,14 @@ public static class CharClassVisitor
             {
                 if (attribute.Name.ToString() == "ImportChar")
                 {
+                    var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
+
+                    // Only visit member if we are sure we have an ImportChar attribute
+                    foreach (var member in classDeclarationSyntax.Members)
+                    {
+                        CharMemberVisitor.Visit(member, charVisitorContext);
+                    }
+
                     var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
 
                     var sourceFilepath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
@@ -28,7 +36,6 @@ public static class CharClassVisitor
                     classNamespace ??= classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
 
                     var className = classDeclarationSyntax.Identifier.ToString();
-                    var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
 
                     Process(className, classNamespace, charFilepath, charVisitorContext);
 
@@ -56,6 +63,8 @@ public static class CharClassVisitor
 
         writer.StartClassScope(className);
 
+        OutputCharConsts(context);
+
         OutputCharData(spriteTiles, backgroundTiles, spritePalettes, backgroundPalettes, context);
 
         writer.EndClassScope();
@@ -80,6 +89,23 @@ public static class CharClassVisitor
         {
             // TODO Test when class is not partial
             OutputCharCSharp(className, classNamespace, spriteTiles, backgroundTiles, spritePalettes, backgroundPalettes, context);
+        }
+    }
+
+    private static void OutputCharConsts(CharVisitorContext context)
+    {
+        var writer = context.Writer;
+
+        if (context.Consts.Any())
+        {
+            writer.StartCodeSegment();
+
+            foreach (var (name, _, asmValue) in context.Consts)
+            {
+                writer.WriteConstant(name, asmValue);
+            }
+
+            writer.WriteEmptyLine();
         }
     }
 
