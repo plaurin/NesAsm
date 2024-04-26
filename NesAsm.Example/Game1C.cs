@@ -42,7 +42,7 @@ public class Game1C : ScriptBase
 
         for (X = 0; X < 32; X++)
         {
-            LDA(Game1Char.SpritePalettes, X);
+            LDA(Game1Char.BackgroundPalettes, X);
 
             // Write palette data to PPUDATA $2007 PPU_DATA
             STA(PPU.PPU_DATA);
@@ -329,19 +329,19 @@ public class Game1C : ScriptBase
         // A
         30,  // Y position - Top
         8,   // Tile 8
-        1,   // Palette 4
+        0,   // Palette 4
         90,  // X position - Left
 
         // Face
         80,  // Y position - Top
         9,   // Tile 9
-        3,   // Palette 6
+        2,   // Palette 6
         80,  // X position - Left
 
         // Heart
         80,  // Y position - Top
         10,  // Tile 10
-        2,   // Palette 5
+        3,   // Palette 7
         100, // X position - Left
     ];
 }

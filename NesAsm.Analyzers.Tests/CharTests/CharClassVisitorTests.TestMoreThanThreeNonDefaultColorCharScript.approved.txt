@@ -48,6 +48,15 @@ sprite_palettes:
   ; Sprite Palette 0
   .byte $0F, $05, $22, $29
 
+  ; Sprite Palette 1
+  .byte $00, $00, $00, $00
+
+  ; Sprite Palette 2
+  .byte $00, $00, $00, $00
+
+  ; Sprite Palette 3
+  .byte $00, $00, $00, $00
+
 .endscope
 
 

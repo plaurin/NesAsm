@@ -324,6 +324,13 @@ public static class CharClassVisitor
                 writer.WriteComment($"{segment} Palette {index++}");
                 writer.WritePaletteColorsChars(palette.NesColors);
             }
+
+            // Fill at least 4 palettes with empty colors
+            for (int i = index; i < 4; i++)
+            {
+                writer.WriteComment($"{segment} Palette {index++}");
+                writer.WritePaletteColorsChars(new byte[4]);
+            }
         }
 
         internal void WriteCSharp(CsWriter writer)
@@ -421,7 +428,7 @@ public static class CharClassVisitor
             new(), // new(0, 0, 0),
         };
 
-        private readonly Pixel[] _colors = new Pixel[4];// { Pixel.Empty, AllNesColors[15], AllNesColors[15], AllNesColors[15] };
+        private readonly Pixel[] _colors = new Pixel[4];
 
         public ColorPalette(Pixel[] colors)
         {

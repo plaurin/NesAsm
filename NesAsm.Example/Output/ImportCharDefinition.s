@@ -392,6 +392,15 @@ background_palettes:
   ; Background Palette 0
   .byte $0F, $20, $0F, $0F
 
+  ; Background Palette 1
+  .byte $00, $00, $00, $00
+
+  ; Background Palette 2
+  .byte $00, $00, $00, $00
+
+  ; Background Palette 3
+  .byte $00, $00, $00, $00
+
 sprite_palettes:
   ; Sprite Palette 0
   .byte $0F, $20, $0F, $0F
@@ -401,6 +410,9 @@ sprite_palettes:
 
   ; Sprite Palette 2
   .byte $0F, $15, $0F, $0F
+
+  ; Sprite Palette 3
+  .byte $00, $00, $00, $00
 
 .endscope
 
