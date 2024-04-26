@@ -418,13 +418,13 @@ sprite_palettes:
   .byte $0F, $20, $0F, $0F
 
   ; Sprite Palette 1
-  .byte $0F, $11, $0F, $0F
+  .byte $0F, $29, $0F, $0F
 
   ; Sprite Palette 2
-  .byte $0F, $15, $0F, $0F
+  .byte $0F, $12, $0F, $0F
 
   ; Sprite Palette 3
-  .byte $00, $00, $00, $00
+  .byte $0F, $16, $0F, $0F
 
 .endscope
 
@@ -441,11 +441,15 @@ public partial class ImportCharDefinition : CharDefinition
 {
     public static byte[] BackgroundPalettes = [
         0x0F, 0x20, 0x0F, 0x0F, // Palette 0
+        0x00, 0x00, 0x00, 0x00, // Palette 1
+        0x00, 0x00, 0x00, 0x00, // Palette 2
+        0x00, 0x00, 0x00, 0x00, // Palette 3
     ];
     public static byte[] SpritePalettes = [
         0x0F, 0x20, 0x0F, 0x0F, // Palette 0
-        0x0F, 0x11, 0x0F, 0x0F, // Palette 1
-        0x0F, 0x15, 0x0F, 0x0F, // Palette 2
+        0x0F, 0x29, 0x0F, 0x0F, // Palette 1
+        0x0F, 0x12, 0x0F, 0x0F, // Palette 2
+        0x0F, 0x16, 0x0F, 0x0F, // Palette 3
     ];
 
 }

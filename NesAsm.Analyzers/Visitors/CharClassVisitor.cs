@@ -119,7 +119,6 @@ public static class CharClassVisitor
 
         // Output palettes data
         // TODO Transparent color
-        // TODO First color always transparent 0F?
         writer.StartCodeSegment();
 
         if (backgroundPalettes.NonEmptyCount > 0)
@@ -270,7 +269,6 @@ public static class CharClassVisitor
                 {
                     var color = Pixels[i + j * 8];
 
-                    // TODO Fix B
                     byte colorIndex = Palette!.GetColorIndex(color);
 
                     if (colorIndex == 255)
@@ -339,6 +337,13 @@ public static class CharClassVisitor
             foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
                 writer.WritePaletteColorsData(palette.NesColors);
+                writer.WriteEndOfLineComment($"Palette {index++}");
+            }
+
+            // Fill at least 4 palettes with empty colors
+            for (int i = index; i < 4; i++)
+            {
+                writer.WritePaletteColorsData(new byte[4]);
                 writer.WriteEndOfLineComment($"Palette {index++}");
             }
         }

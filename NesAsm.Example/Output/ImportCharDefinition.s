@@ -406,13 +406,13 @@ sprite_palettes:
   .byte $0F, $20, $0F, $0F
 
   ; Sprite Palette 1
-  .byte $0F, $11, $0F, $0F
+  .byte $0F, $29, $0F, $0F
 
   ; Sprite Palette 2
-  .byte $0F, $15, $0F, $0F
+  .byte $0F, $12, $0F, $0F
 
   ; Sprite Palette 3
-  .byte $00, $00, $00, $00
+  .byte $0F, $16, $0F, $0F
 
 .endscope
 

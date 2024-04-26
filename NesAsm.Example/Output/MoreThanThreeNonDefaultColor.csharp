@@ -7,6 +7,9 @@ public partial class MoreThanThreeNonDefaultColor : CharDefinition
 {
     public static byte[] SpritePalettes = [
         0x0F, 0x05, 0x22, 0x29, // Palette 0
+        0x00, 0x00, 0x00, 0x00, // Palette 1
+        0x00, 0x00, 0x00, 0x00, // Palette 2
+        0x00, 0x00, 0x00, 0x00, // Palette 3
     ];
 
 }
