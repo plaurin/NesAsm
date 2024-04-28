@@ -1,19 +1,6 @@
 ; Auto generated code using the NesAsm project
 .scope Game1Char
 
-.segment "CODE"
-
-  RightTile = 1
-  LeftTile = 2
-  DownTile = 3
-  UpTile = 4
-  StartTile = 5
-  SelectTile = 6
-  BTile = 7
-  ATile = 8
-  FaceTile = 9
-  HearthTile = 10
-
 .segment "CHARS"
 
   ; Sprite Tile 0

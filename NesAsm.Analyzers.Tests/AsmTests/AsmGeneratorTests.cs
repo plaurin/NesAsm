@@ -74,6 +74,12 @@ public class AsmGeneratorTests
     }
 
     [Fact]
+    public void TestDataGeneratorScript()
+    {
+        TestScript("DataGeneratorScript.cs");
+    }
+
+    [Fact]
     public void TestAllInstructionsScript()
     {
         TestScript("AllInstructionsScript.cs");
