@@ -60,7 +60,7 @@ FaceY = $228
 
   ldx #0
 @loop2_on_X:
-  lda controller_sprites, x
+  lda empty_sprites1, x
   sta $200, x
 
   inx
@@ -335,59 +335,97 @@ rti
 
 .segment "CODE"
 
-controller_sprites:
-.byte 0
-.byte 0
-.byte 0
-.byte 0
+empty_sprites1:
 .byte 0
 .byte 0
 .byte 0
 .byte 0
 
+.segment "CODE"
+
+empty_sprites2:
+.byte 0
+.byte 0
+.byte 0
+.byte 0
+
+.segment "CODE"
+
+right_sprite:
 .byte 30
 .byte 1
 .byte 0
 .byte 50
+
+.segment "CODE"
+
+left_sprite:
 .byte 30
 .byte 2
 .byte 0
 .byte 30
 
+.segment "CODE"
+
+down_sprite:
 .byte 40
 .byte 3
 .byte 0
 .byte 40
+
+.segment "CODE"
+
+up_sprite:
 .byte 20
 .byte 4
 .byte 0
 .byte 40
 
+.segment "CODE"
+
+start_sprite:
 .byte 30
 .byte 5
 .byte 0
 .byte 70
+
+.segment "CODE"
+
+select_sprite:
 .byte 30
 .byte 6
 .byte 0
 .byte 60
 
+.segment "CODE"
+
+bsprite:
 .byte 30
 .byte 7
 .byte 0
 .byte 80
+
+.segment "CODE"
+
+asprite:
 .byte 30
 .byte 8
 .byte 0
 .byte 90
 
+.segment "CODE"
+
+face_sprite:
 .byte 80
 .byte 9
 .byte 2
 .byte 80
+
+.segment "CODE"
+
+heart_sprite:
 .byte 80
 .byte 10
 .byte 3
 .byte 100
-
 

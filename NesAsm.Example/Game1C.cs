@@ -52,7 +52,7 @@ public class Game1C : ScriptBase
 
         for (X = 0; X < 48; X++)
         {
-            LDA(ControllerSprites, X);
+            LDA(EmptySprites1, X);
             STA(0x200, X);
         }
 
@@ -279,69 +279,38 @@ public class Game1C : ScriptBase
     }
 
     [RomData]
-    private readonly byte[] ControllerSprites = [
-        // Empty sprites
-        0, 0, 0, 0,
-        0, 0, 0, 0,
+    private readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
 
-        // Right
-        30,  // Y position - Top
-        1,   // Tile 1
-        0,   // Palette 4
-        50,  // X position - Left
+    [RomData]
+    private readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);
 
-        // Left
-        30,  // Y position - Top
-        2,   // Tile 2
-        0,   // Palette 4
-        30,  // X position - Left
+    [RomData]
+    private readonly byte[] RightSprite = GenerateSpriteData(x: 50, y: 30, tileIndex: 1, paletteIndex: 0);
 
-        // Down
-        40,  // Y position - Top
-        3,   // Tile 3
-        0,   // Palette 4
-        40,  // X position - Left
+    [RomData]
+    private readonly byte[] LeftSprite = GenerateSpriteData(x: 30, y: 30, tileIndex: 2, paletteIndex: 0);
 
-        // Up
-        20,  // Y position - Top
-        4,   // Tile 4
-        0,   // Palette 4
-        40,  // X position - Left
+    [RomData]
+    private readonly byte[] DownSprite = GenerateSpriteData(x: 40, y: 40, tileIndex: 3, paletteIndex: 0);
 
-        // Start
-        30,  // Y position - Top
-        5,   // Tile 5
-        0,   // Palette 4
-        70,  // X position - Left
+    [RomData]
+    private readonly byte[] UpSprite = GenerateSpriteData(x: 40, y: 20, tileIndex: 4, paletteIndex: 0);
 
-        // Select
-        30,  // Y position - Top
-        6,   // Tile 6
-        0,   // Palette 4
-        60,  // X position - Left
+    [RomData]
+    private readonly byte[] StartSprite = GenerateSpriteData(x: 70, y: 30, tileIndex: 5, paletteIndex: 0);
 
-        // B
-        30,  // Y position - Top
-        7,   // Tile 7
-        0,   // Palette 4
-        80,  // X position - Left
+    [RomData]
+    private readonly byte[] SelectSprite = GenerateSpriteData(x: 60, y: 30, tileIndex: 6, paletteIndex: 0);
 
-        // A
-        30,  // Y position - Top
-        8,   // Tile 8
-        0,   // Palette 4
-        90,  // X position - Left
+    [RomData]
+    private readonly byte[] BSprite = GenerateSpriteData(x: 80, y: 30, tileIndex: 7, paletteIndex: 0);
 
-        // Face
-        80,  // Y position - Top
-        9,   // Tile 9
-        2,   // Palette 6
-        80,  // X position - Left
+    [RomData]
+    private readonly byte[] ASprite = GenerateSpriteData(x: 90, y: 30, tileIndex: 8, paletteIndex: 0);
 
-        // Heart
-        80,  // Y position - Top
-        10,  // Tile 10
-        3,   // Palette 7
-        100, // X position - Left
-    ];
+    [RomData]
+    private readonly byte[] FaceSprite = GenerateSpriteData(x: 80, y: 80, tileIndex: 9, paletteIndex: 2);
+
+    [RomData]
+    private readonly byte[] HeartSprite = GenerateSpriteData(x: 100, y: 80, tileIndex: 10, paletteIndex: 3);
 }
