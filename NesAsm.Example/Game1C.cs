@@ -27,6 +27,8 @@ public class Game1C : ScriptBase
     private const ushort FaceX = 0x22B;
     private const ushort FaceY = 0x228;
 
+    private const ushort FrameCounter = 0x30;
+
     public void Main()
     {
         // Read the PPUSTATUS register $2002 PPU_STATUS
@@ -66,10 +68,10 @@ public class Game1C : ScriptBase
             MoveFace();
 
             // Wait for VBlank
-            LDA(0x30);
+            LDA(FrameCounter);
 
             WaitForVBlank:
-            CMP(0x30);
+            CMP(FrameCounter);
             if (BEQ()) goto WaitForVBlank;
         }
     }
@@ -190,7 +192,7 @@ public class Game1C : ScriptBase
         STA(PPU.OAM_DMA);
 
         // Increment frame counter
-        INC(0x30);
+        INC(FrameCounter);
     }
 
     public void Reset()

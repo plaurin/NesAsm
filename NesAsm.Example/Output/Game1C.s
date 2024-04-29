@@ -31,6 +31,7 @@ BButtonPalette = $222
 AButtonPalette = $226
 FaceX = $22B
 FaceY = $228
+FrameCounter = $30
 .proc main
   ; Read the PPUSTATUS register $2002 PPU_STATUS
   lda PPU::PPU_STATUS
@@ -76,10 +77,10 @@ FaceY = $228
   jsr moveFace
 
   ; Wait for VBlank
-  lda $30
+  lda FrameCounter
 
 @WaitForVBlank:
-  cmp $30
+  cmp FrameCounter
   beq @WaitForVBlank
   jmp @endless_loop
 
@@ -239,7 +240,7 @@ lda #$02
 sta PPU::OAM_DMA
 
 ; Increment frame counter
-inc $30
+inc FrameCounter
 rti
 
 .proc reset

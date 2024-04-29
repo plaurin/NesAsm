@@ -7,9 +7,6 @@ namespace NesAsm.Example;
 // TODO ImportChar without grid 128x256
 public partial class Game1Char : CharDefinition
 {
-    // [ImportPalettes("game1.png", "Palettes")]
-    // private readonly byte[] Palettes;
-
     public const byte RightTile = 1;
     public const byte LeftTile = 2;
     public const byte DownTile = 3;
