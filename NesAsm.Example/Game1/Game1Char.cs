@@ -1,7 +1,7 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
 
-namespace NesAsm.Example;
+namespace NesAsm.Example.Game1;
 
 [ImportChar("game1.png")]
 // TODO ImportChar without grid 128x256

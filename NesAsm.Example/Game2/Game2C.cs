@@ -1,7 +1,8 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using NesAsm.Example.Game1;
 
-namespace NesAsm.Example;
+namespace NesAsm.Example.Game2;
 
 [HeaderSegment()]
 [VectorsSegment()]
@@ -9,9 +10,9 @@ namespace NesAsm.Example;
 [FileInclude<Controller>]
 [FileInclude<PPU>]
 [FileInclude<Game1Char>]
-public class Game1C : ScriptBase
+public class Game2C : ScriptBase
 {
-    public Game1C(NESEmulator emulator) : base(emulator)
+    public Game2C(NESEmulator emulator) : base(emulator)
     {
     }
 
@@ -199,7 +200,7 @@ public class Game1C : ScriptBase
     {
         SEI();
         CLD();
-        
+
         LDXi(0b_0100_0000);
         STX(0x4017);
 
@@ -254,14 +255,14 @@ public class Game1C : ScriptBase
         // 0x2000 PPU_CTRL
         STA(PPU.PPU_CTRL);
 
-        Jump<Game1C>(s => s.Main());
+        Jump<Game2C>(s => s.Main());
     }
 
     public void ResetPalettes()
     {
         // 0x2002 PPU_STATUS
         BIT(PPU.PPU_STATUS);
-        
+
         LDAi(0x3f);
         // 0x2006 PPU_ADDR
         STA(PPU.PPU_ADDR);

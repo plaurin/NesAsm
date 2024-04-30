@@ -2,6 +2,9 @@
 using System;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
+using System.IO;
+using System.Xml.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace NesAsm.Analyzers;
 
@@ -76,5 +79,19 @@ public static class Utilities
         }
 
         return sb.ToString();
+    }
+
+    [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
+    internal static string GetOutputFolder(string nodeFilePath)
+    {
+        var relativePath = Path.GetDirectoryName(nodeFilePath)
+            .Replace("..", string.Empty)
+            .Replace(@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example", string.Empty)
+            .TrimStart('\\');
+
+        var fullPath = $@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{relativePath}";
+        Directory.CreateDirectory(fullPath);
+
+        return fullPath;
     }
 }

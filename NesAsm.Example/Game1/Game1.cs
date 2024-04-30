@@ -1,7 +1,7 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
 
-namespace NesAsm.Example;
+namespace NesAsm.Example.Game1;
 
 [HeaderSegment()]
 [VectorsSegment()]
@@ -192,7 +192,7 @@ public class Game1 : ScriptBase
     {
         SEI();
         CLD();
-        
+
         LDXi(0b_0100_0000);
         STX(0x4017);
 
@@ -235,7 +235,7 @@ public class Game1 : ScriptBase
         // To Main
 
         // Enable Sprites & Background
-        LDAi(0b_0001_1000); 
+        LDAi(0b_0001_1000);
         STA(PPUMASK);
 
         // Enable NMI
@@ -248,7 +248,7 @@ public class Game1 : ScriptBase
     public void ResetPalettes()
     {
         BIT(0x2002);
-        
+
         LDAi(0x3f);
         STA(0x2006);
         LDAi(0x00);
@@ -267,8 +267,14 @@ public class Game1 : ScriptBase
     [RomData]
     private byte[] ControllerSprites = [
         // Empty sprites
-        0, 0, 0, 0,
-        0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
 
         // Right
         30,  // Y position - Top
@@ -373,8 +379,22 @@ public class Game1 : ScriptBase
     [CharData]
     private byte[] Characters = [
         // First tile is empty
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
 
         // Right
         0b_00001000,

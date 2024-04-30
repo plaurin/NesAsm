@@ -1,6 +1,6 @@
 ﻿using ApprovalTests.Reporters;
 
-namespace NesAsm.Analyzers.Tests;
+namespace NesAsm.Analyzers.Tests.AsmTests;
 
 [UseReporter(typeof(VisualStudioReporter))]
 public class AsmGeneratorTests
@@ -10,7 +10,7 @@ public class AsmGeneratorTests
     {
         var generator = new AsmGenerator();
 
-        GeneratorTestUtilities.TestGenerator(generator, $@"..\..\..\..\NesAsm.Example\HiloWorld.cs");
+        GeneratorTestUtilities.TestGenerator(generator, $@"..\..\..\..\NesAsm.Example\HiloWorld\HiloWorld.cs");
     }
 
     [Fact]

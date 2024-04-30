@@ -1,7 +1,7 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
 
-namespace NesAsm.Example;
+namespace NesAsm.Example.HiloWorld;
 
 [PostFileInclude("wrapper-no-nmi.s")]
 public class HiloWorld : ScriptBase
@@ -52,8 +52,14 @@ public class HiloWorld : ScriptBase
     [RomData]
     private byte[] HiloWorldSprites = [
         // Empty sprites
-        0, 0, 0, 0,
-        0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
 
         // H
         30,  // Y position - Top
@@ -152,8 +158,22 @@ public class HiloWorld : ScriptBase
     [CharData]
     private byte[] Characters = [
         // First tile is empty
-        0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
 
         // H
         0b_11000011,

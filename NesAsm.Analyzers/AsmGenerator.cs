@@ -84,7 +84,10 @@ public class AsmGenerator : IIncrementalGenerator
             context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
 {source}
 */");
-            File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
+
+            var fullPath = Utilities.GetOutputFolder(node.SyntaxTree.FilePath);
+
+            File.WriteAllText($"{Path.Combine(fullPath, node.Identifier.Text)}.s", source);
         }
         catch (Exception ex)
         {
