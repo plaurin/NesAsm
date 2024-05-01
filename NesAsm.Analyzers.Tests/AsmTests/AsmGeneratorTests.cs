@@ -64,7 +64,7 @@ public class AsmGeneratorTests
     [Fact]
     public void TestCallingOtherScript()
     {
-        TestScript("CallingOtherScript.cs", "MultiProcScript.cs");
+        TestScript("CallingOtherScript.cs", "MultiProcScript.cs", @"..\UpFolderScript.cs", @"SubFolder\SubFolderScript.cs");
     }
 
     [Fact]

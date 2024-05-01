@@ -13,11 +13,11 @@
 
 .segment "STARTUP"
 
-.include "Controller.s"
+.include "../Controller.s"
 
-.include "PPU.s"
+.include "../PPU.s"
 
-.include "Game1Char.s"
+.include "../Game1/Game1Char.s"
 
 .segment "CODE"
 

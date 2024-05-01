@@ -7,9 +7,9 @@ namespace NesAsm.Example.Game2;
 [HeaderSegment()]
 [VectorsSegment()]
 [StartupSegment()]
-[FileInclude<Controller>]
-[FileInclude<PPU>]
-[FileInclude<Game1Char>]
+[FileInclude<Controller>("..")]
+[FileInclude<PPU>("..")]
+[FileInclude<Game1Char>("../Game1")]
 public class Game2C : ScriptBase
 {
     public Game2C(NESEmulator emulator) : base(emulator)

@@ -1,6 +1,10 @@
 ; Auto generated code using the NesAsm project
 .include "MultiProcScript.s"
 
+.include "../UpFolderScript.s"
+
+.include "SubFolder/SubFolderScript.s"
+
 .scope CallingOtherScript
 
   .proc main
@@ -16,6 +20,9 @@
   .proc myProcC
     lda MultiProcScript::Data
     lda MultiProcScript::sprite_palettes, x
+
+    jsr UpFolderScript::procU
+    jsr SubFolderScript::procS
 
     rts
   .endproc

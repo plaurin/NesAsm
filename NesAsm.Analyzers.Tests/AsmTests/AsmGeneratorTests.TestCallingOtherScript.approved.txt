@@ -1,17 +1,21 @@
 ﻿- Main diagnostics:
-- SyntaxTrees Count: 4
+- SyntaxTrees Count: 8
 - Output diagnostics:
-- RunResult.GeneratedTrees Count: 2
+- RunResult.GeneratedTrees Count: 4
 - RunResults diagnostics:
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-- RunResult[0].GeneratedSources Count: 2
+- RunResult[0].GeneratedSources Count: 4
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.CallingOtherScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
 /* Generator Asm code in file Asm.CallingOtherScript.s
 ; Auto generated code using the NesAsm project
 .include "MultiProcScript.s"
+
+.include "../UpFolderScript.s"
+
+.include "SubFolder/SubFolderScript.s"
 
 .scope CallingOtherScript
 
@@ -28,6 +32,9 @@
   .proc myProcC
     lda MultiProcScript::Data
     lda MultiProcScript::sprite_palettes, x
+
+    jsr UpFolderScript::procU
+    jsr SubFolderScript::procS
 
     rts
   .endproc
@@ -74,6 +81,38 @@ sprite_palettes:
 
   .proc procC
     lda #30
+
+    rts
+  .endproc
+
+.endscope
+
+
+*/
+- RunResult[0].GeneratedSources[2].HintName: Asm.UpFolderScript.cs
+- RunResult[0].GeneratedSources[2].SourceText:
+/* Generator Asm code in file Asm.UpFolderScript.s
+; Auto generated code using the NesAsm project
+.scope UpFolderScript
+
+  .proc procU
+    ldx #25
+
+    rts
+  .endproc
+
+.endscope
+
+
+*/
+- RunResult[0].GeneratedSources[3].HintName: Asm.SubFolderScript.cs
+- RunResult[0].GeneratedSources[3].SourceText:
+/* Generator Asm code in file Asm.SubFolderScript.s
+; Auto generated code using the NesAsm project
+.scope SubFolderScript
+
+  .proc procS
+    ldx #25
 
     rts
   .endproc
