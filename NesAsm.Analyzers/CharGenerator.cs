@@ -12,13 +12,21 @@ public class CharGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var outputFolder = context.AnalyzerConfigOptionsProvider
+                 .Select((options, _) =>
+                 {
+                     options.GlobalOptions.TryGetValue("nesasm_output", out var outputFolder);
+
+                     return outputFolder;
+                 });
+
         var classProviders = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s),
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx))
             .Combine(context.CompilationProvider);
 
-        context.RegisterSourceOutput(classProviders, Generate);
+        context.RegisterSourceOutput(classProviders.Combine(outputFolder), Generate);
     }
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
@@ -84,10 +92,13 @@ public class CharGenerator : IIncrementalGenerator
     }
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
-    private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
+    private void Generate(SourceProductionContext context, ((ClassDeclarationSyntax, Compilation), string? OutputPath) tuple)
     {
-        var (node, compilation) = tuple;
+        var ((node, compilation), outputPath) = tuple;
         if (node == null) return;
+
+        // TODO fix .editorconfig
+        //outputPath ??= "Output";
 
         try
         {
@@ -96,7 +107,8 @@ public class CharGenerator : IIncrementalGenerator
 
             CharClassVisitor.Visit(node, new VisitorContext(context, compilation, asmWriter, csWriter));
 
-            var fullPath = Utilities.GetOutputFolder(node.SyntaxTree.FilePath);
+            var fullPath = Utilities.GetOutputFolder(Environment.CurrentDirectory, node.SyntaxTree.FilePath, outputPath);
+            Directory.CreateDirectory(fullPath);
 
             // Asm file output
             var source = asmWriter.ToString();
@@ -105,14 +117,11 @@ public class CharGenerator : IIncrementalGenerator
 */");
             File.WriteAllText($"{Path.Combine(fullPath, node.Identifier.Text)}.s", source);
 
-            //File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.s", source);
-
             // Cs file output
             var csSource = csWriter.ToString();
             context.AddSource($"Sharp.{node.Identifier}.cs", csSource);
 
             File.WriteAllText($"{Path.Combine(fullPath, node.Identifier.Text)}.csharp", csSource);
-            //File.WriteAllText($@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{node.Identifier}.csharp", csSource);
         }
         catch (Exception ex)
         {

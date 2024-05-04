@@ -13,13 +13,21 @@ public class AsmGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        var outputFolder = context.AnalyzerConfigOptionsProvider
+                 .Select((options, _) =>
+                 {
+                     options.GlobalOptions.TryGetValue("nesasm_output", out var outputFolder);
+
+                     return outputFolder;
+                 });
+
         var classProviders = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (s, _) => IsSyntaxTargetForGeneration(s), 
                 transform: static (ctx, _) => GetSemanticTargetForGeneration(ctx)) 
             .Combine(context.CompilationProvider);
 
-        context.RegisterSourceOutput(classProviders, Generate);
+        context.RegisterSourceOutput(classProviders.Combine(outputFolder), Generate);
     }
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node)
@@ -68,13 +76,19 @@ public class AsmGenerator : IIncrementalGenerator
     }
 
     [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
-    private void Generate(SourceProductionContext context, (ClassDeclarationSyntax, Compilation) tuple)
+    private void Generate(SourceProductionContext context, ((ClassDeclarationSyntax, Compilation), string? OutputPath) tuple)
     {
-        var (node, compilation) = tuple;
+        var ((node, compilation), outputPath) = tuple;
         if (node == null) return;
+
+        // TODO fix .editorconfig
+        //outputPath ??= "Output";
 
         try
         {
+            var fullPath = Utilities.GetOutputFolder(Environment.CurrentDirectory, node.SyntaxTree.FilePath, outputPath);
+            Directory.CreateDirectory(fullPath);
+
             var writer = new AsmWriter();
 
             ClassVisitor.Visit(node, new VisitorContext(context, compilation, writer));
@@ -84,8 +98,6 @@ public class AsmGenerator : IIncrementalGenerator
             context.AddSource($"Asm.{node.Identifier}.cs", $@"/* Generator Asm code in file Asm.{node.Identifier}.s
 {source}
 */");
-
-            var fullPath = Utilities.GetOutputFolder(node.SyntaxTree.FilePath);
 
             File.WriteAllText($"{Path.Combine(fullPath, node.Identifier.Text)}.s", source);
         }

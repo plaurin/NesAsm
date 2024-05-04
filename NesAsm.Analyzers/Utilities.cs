@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Xml.Linq;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace NesAsm.Analyzers;
 
@@ -81,17 +82,22 @@ public static class Utilities
         return sb.ToString();
     }
 
-    [SuppressMessage("MicrosoftCodeAnalysisCorrectness", "RS1035:Do not use APIs banned for analyzers", Justification = "<Pending>")]
-    internal static string GetOutputFolder(string nodeFilePath)
+    public static string GetOutputFolder(string currentFolder, string nodeFilePath, string? outputPath)
     {
-        var relativePath = Path.GetDirectoryName(nodeFilePath)
-            .Replace("..", string.Empty)
-            .Replace(@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example", string.Empty)
-            .TrimStart('\\');
+        outputPath ??= string.Empty;
 
-        var fullPath = $@"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Example\Output\{relativePath}";
-        Directory.CreateDirectory(fullPath);
+        if (Path.IsPathRooted(nodeFilePath))
+        {
+            return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(nodeFilePath)!, outputPath));
+        }
+        else
+        {
+            var nodeFolder = Path.GetDirectoryName(nodeFilePath);
+            var upPath = string.Join("\\", nodeFolder.Split('\\').TakeWhile(x => x == ".."));
+            var subPath = (nodeFolder != "" && upPath != "") ? nodeFolder.Replace(upPath, string.Empty).TrimStart('\\').TrimEnd('\\') : nodeFolder;
 
-        return fullPath;
+            var result = Path.GetFullPath(Path.Combine(currentFolder, upPath, outputPath, subPath));
+            return result;
+        }
     }
 }

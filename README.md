@@ -54,8 +54,8 @@ The goal of NesAsm is to make writing games for the NES accessible to more peopl
 - [TBD] Use the emulator PPU output to validate current palettes, OAM, pattern, attribute or name tables
 
 ## Include graphics
-- [InProgress] Use .png file for graphics
-- [InProgress] Create palette from imported .png file
+- Use .png file for graphics
+- Create palette from imported .png file
 - [TBD] Map tiles and meta tiles from imported .png file
 
 # How does it works
