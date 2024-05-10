@@ -47,6 +47,23 @@ public class AsmGenerator : IIncrementalGenerator
                     }
                 }
             }
+
+            if (classDeclarationSyntax.AttributeLists.Any())
+            {
+                foreach (var attributeList in classDeclarationSyntax.AttributeLists)
+                {
+                    foreach (var attribute in attributeList.Attributes)
+                    {
+                        if (attribute.Name is IdentifierNameSyntax identifier)
+                        {
+                            if (identifier.Identifier.Text == "Script")
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return false;
@@ -55,6 +72,11 @@ public class AsmGenerator : IIncrementalGenerator
     private static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
     {
         var classDeclarationSyntax = (ClassDeclarationSyntax)context.Node;
+
+        if (classDeclarationSyntax.AttributeLists.Any(al => al.Attributes.Any(a => a.Name.ToFullString() == "Script")))
+        {
+            return classDeclarationSyntax;
+        }
 
         foreach (var type in classDeclarationSyntax.BaseList.Types)
         {

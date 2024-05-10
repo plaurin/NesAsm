@@ -1,12 +1,13 @@
-﻿using NesAsm.Emulator;
-using NesAsm.Emulator.Attributes;
+﻿using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
+[Script]
 [PostFileInclude("wrapper.s")]
-internal class SimpleScript : ScriptBase
+internal class SimpleScript
 {
-    public SimpleScript(NESEmulator emulator) : base(emulator)
+    public SimpleScript()
     {
     }
 
