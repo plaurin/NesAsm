@@ -9,21 +9,21 @@ public abstract partial class ScriptBase : FileBasedReference
         _emulator = emulator;
     }
 
-    protected void Call<T>(Action<T> action) where T : ScriptBase
+    protected void Call<T>(Action<T> action) where T : FileBasedReference
     {
         var ctor = typeof(T).GetConstructors().First();
         var instance = (T)ctor.Invoke(new[] { _emulator });
         action.Invoke(instance);
     }
 
-    protected void Macro<T>(Action<T> action) where T : ScriptBase
+    protected void Macro<T>(Action<T> action) where T : FileBasedReference
     {
         var ctor = typeof(T).GetConstructors().First();
         var instance = (T)ctor.Invoke(new[] { _emulator });
         action.Invoke(instance);
     }
 
-    protected void Jump<T>(Action<T> action) where T : ScriptBase
+    protected void Jump<T>(Action<T> action) where T : FileBasedReference
     {
         var ctor = typeof(T).GetConstructors().First();
         var instance = (T)ctor.Invoke(new[] { _emulator });

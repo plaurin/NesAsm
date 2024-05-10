@@ -563,10 +563,15 @@ internal class MethodVisitor
                     case "ANDi": context.Writer.WriteOpCodeImmediate("and", resolvedOperand); break;
                     default:
                         {
-                            var callingProc = context.AllMethods.SingleOrDefault(m => operation == m);
-                            if (callingProc != null)
+                            var methodInfo = context.TypeCache.GetMethod(operation, context.AllMethods);
+                            if (methodInfo != null)
                             {
-                                context.Writer.WriteJSROpCode(null, Utilities.GetProcName(operation));
+                                if (methodInfo.IsProc)
+                                    context.Writer.WriteJSROpCode(null, Utilities.GetProcName(operation));
+                                else if (methodInfo.IsNoReturnProc)
+                                    context.Writer.WriteJMPOpCode(null, Utilities.GetProcName(operation));
+                                else if (methodInfo.IsMacro)
+                                    context.Writer.WriteCallMacro(null, operation, new[] { resolvedOperand });
                                 break;
                             }
 

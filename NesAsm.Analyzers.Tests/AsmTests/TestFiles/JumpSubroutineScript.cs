@@ -1,13 +1,12 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class JumpSubroutineScript : ScriptBase
+[Script]
+internal class JumpSubroutineScript : FileBasedReference
 {
-    public JumpSubroutineScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void ProcA()
     {
         ProcB();
@@ -18,15 +17,19 @@ internal class JumpSubroutineScript : ScriptBase
     {
         LDAi(1);
 
-        Jump<JumpSubroutineScript>(s => s.ProcC());
+        ProcC();
     }
 
-    public void ProcC()
+    [NoReturnProc]
+    public static void ProcC()
     {
         LDAi(2);
+
+        JumpInsideProc();
     }
 
-    public void JumpInsideProc()
+    [NoReturnProc]
+    public static void JumpInsideProc()
     {
         loop:
 

@@ -9,6 +9,8 @@ internal static class ClassVisitor
     {
         var classVisitorContext = new ClassVisitorContext(context, GetAllClassMethods(classDeclarationSyntax));
 
+        context.TypeCache.Scan(classDeclarationSyntax);
+
         ProcessClassAttributes(classDeclarationSyntax, classVisitorContext);
 
         if (classVisitorContext.IsStartupClass)

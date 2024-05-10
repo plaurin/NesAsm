@@ -1,14 +1,12 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class MultiProcScript : ScriptBase
+[Script]
+internal class MultiProcScript : FileBasedReference
 {
-    public MultiProcScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public static readonly byte Data = 0xFF;
 
     [RomData]
