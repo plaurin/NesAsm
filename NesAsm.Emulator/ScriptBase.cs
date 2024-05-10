@@ -16,6 +16,13 @@ public abstract partial class ScriptBase : FileBasedReference
         action.Invoke(instance);
     }
 
+    protected void Macro<T>(Action<T> action) where T : ScriptBase
+    {
+        var ctor = typeof(T).GetConstructors().First();
+        var instance = (T)ctor.Invoke(new[] { _emulator });
+        action.Invoke(instance);
+    }
+
     protected void Jump<T>(Action<T> action) where T : ScriptBase
     {
         var ctor = typeof(T).GetConstructors().First();
@@ -31,6 +38,7 @@ public abstract partial class ScriptBase : FileBasedReference
     protected void LDXi(byte value) => _emulator.LDXi(value);
     protected void LDYi(byte value) => _emulator.LDYi(value);
 
+    protected void LDA(int address) => _emulator.LDA((byte)address);
     protected void LDA(byte address) => _emulator.LDA(address);
     protected void LDX(byte address) => _emulator.LDX(address);
     protected void LDY(byte address) => _emulator.LDY(address);

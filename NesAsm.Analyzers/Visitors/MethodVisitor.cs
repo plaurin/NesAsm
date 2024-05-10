@@ -11,7 +11,7 @@ namespace NesAsm.Analyzers.Visitors;
 internal class MethodVisitor
 {
     private static readonly Regex opPattern = new("\\s*(?'Operation'\\w+)[((](?'Operand'\\d{0,3}|0x[A-Fa-f0-9__]{1,4}|0b[0-1__]*[0-1])[))];", RegexOptions.Compiled);
-    private static readonly Regex opXPattern = new("\\s*((?'JumpType'Call|Jump)<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
+    private static readonly Regex opXPattern = new("\\s*((?'JumpType'Call|Jump|Macro)<(?'Script'\\w+)>.+\\.)?(?'Operation'\\w+)\\s*[((](?'Operands'.*)[))];", RegexOptions.Compiled);
     private static readonly Regex opReturnPattern = new("\\s*var ((?'ReturnValue'\\w+)|([((](?'ReturnValues'.+)[))]))\\s*=\\s*(?'Operation'\\w+)[((](?'Operands'.*)[))];", RegexOptions.Compiled);
 
     private static readonly Regex commentPattern = new("//(?'Comment'.+)", RegexOptions.Compiled);
@@ -182,6 +182,8 @@ internal class MethodVisitor
                         writer.WriteJSROpCode(callingScope, Utilities.GetProcName(operation));
                     else if (jumpType == "Jump")
                         writer.WriteJMPOpCode(callingScope, Utilities.GetProcName(operation));
+                    else if (jumpType == "Macro")
+                        writer.WriteCallMacro(callingScope, operation, operands.ToArray());
                     else
                         context.ReportDiagnostic(Diagnostics.InvalidJumpTypeNotSupported, location, jumpType);
 
@@ -211,8 +213,19 @@ internal class MethodVisitor
                     }
                     else
                     {
-                        context.ReportDiagnostic(Diagnostics.UnsupportedParameterType2, location, operand);
-                        continue;
+                        try
+                        {
+                            var value = Convert.ToInt32(operand, 16);
+                            writer.WriteOpCodeImmediate("lda", (byte)(value % 256));
+                            writer.WriteOpCode("sta", index++);
+                            writer.WriteOpCodeImmediate("lda", (byte)(value / 256));
+                            writer.WriteOpCode("sta", index++);
+                        }
+                        catch (FormatException)
+                        {
+                            context.ReportDiagnostic(Diagnostics.UnsupportedParameterType2, location, operand);
+                            continue;
+                        }
                     }
                 }
 

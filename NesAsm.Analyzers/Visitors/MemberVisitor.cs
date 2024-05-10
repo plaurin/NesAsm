@@ -14,9 +14,15 @@ internal class MemberVisitor
         if (memberDeclarationSyntax is MethodDeclarationSyntax method)
         {
             var isNmi = method.Identifier.ValueText.ToLowerInvariant() == "nmi";
+            var isMacro = method.AttributeLists.Any(att => att.Attributes.Any(a => a.Name.ToString() == "Macro"));
 
             if (isNmi)
                 writer.StartNmi();
+            else if (isMacro)
+            {
+                var paramNames = method.ParameterList.Parameters.Select(p => p.Identifier.ValueText).ToArray();
+                writer.StartMacro(Utilities.GetMacroName(method), paramNames);
+            }
             else
                 writer.StartProc(Utilities.GetProcName(method));
 
@@ -24,6 +30,8 @@ internal class MemberVisitor
 
             if (isNmi)
                 writer.EndNmi();
+            else if (isMacro)
+                writer.EndMacro();
             else
                 writer.EndProc();
         }

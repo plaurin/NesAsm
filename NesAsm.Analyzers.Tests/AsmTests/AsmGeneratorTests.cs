@@ -103,6 +103,18 @@ public class AsmGeneratorTests
         TestScript("SelectionStatementsScript.cs");
     }
 
+    [Fact]
+    public void TestMacroScript()
+    {
+        TestScript("MacroScript.cs");
+    }
+
+    [Fact]
+    public void TestCallingOtherMacroScript()
+    {
+        TestScript("CallingOtherMacroScript.cs", "MacroScript.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new AsmGenerator();
