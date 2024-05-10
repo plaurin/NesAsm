@@ -1,6 +1,5 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
-using NesAsm.Example.Game1;
 
 namespace NesAsm.Example.Game2;
 
@@ -9,7 +8,7 @@ namespace NesAsm.Example.Game2;
 [StartupSegment()]
 [FileInclude<Controller>("..")]
 [FileInclude<PPU>("..")]
-[FileInclude<Game1Char>("../Game1")]
+[FileInclude<Game2Char>()]
 public class Game2C : ScriptBase
 {
     public Game2C(NESEmulator emulator) : base(emulator)
@@ -45,19 +44,20 @@ public class Game2C : ScriptBase
 
         for (X = 0; X < 32; X++)
         {
-            LDA(Game1Char.BackgroundPalettes, X);
+            LDA(Game2Char.BackgroundPalettes, X);
 
             // Write palette data to PPUDATA $2007 PPU_DATA
             STA(PPU.PPU_DATA);
         }
 
         // Transfert sprite data into $200-$2ff memory range
-
         for (X = 0; X < 48; X++)
         {
             LDA(EmptySprites1, X);
             STA(0x200, X);
         }
+
+        // Draw backgound
 
         // Main game loop
         while (true)
