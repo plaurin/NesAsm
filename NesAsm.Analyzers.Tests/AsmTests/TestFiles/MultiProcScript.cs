@@ -35,6 +35,7 @@ internal class MultiProcScript : FileBasedReference
         LDAi(20);
     }
 
+    [NoReturnProc]
     public static void ProcC()
     {
         LDAi(30);

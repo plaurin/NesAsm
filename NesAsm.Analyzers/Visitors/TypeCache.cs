@@ -19,6 +19,11 @@ internal class TypeCache
 
     public void Scan(ClassDeclarationSyntax classDeclarationSyntax)
     {
+        if (_typeCache.ContainsKey(classDeclarationSyntax.Identifier.Text))
+        {
+            return;
+        }
+
         var methods = new List<MethodInfo>();
 
         foreach (var member in classDeclarationSyntax.Members)
@@ -57,15 +62,45 @@ internal class TypeCache
 
         if (classTypeSymbol != null)
         {
-            var methods = classTypeSymbol.GetMembers().OfType<IMethodSymbol>();
+            if (_typeCache.ContainsKey(classTypeSymbol.Name))
+            {
+                return;
+            }
 
-            var macros = methods
-                .Where(m => m.MethodKind != MethodKind.Constructor)
-                .Where(m => m.GetAttributes().Any(a => a.AttributeClass?.Name == "MacroAttribute"))
-                .Select(m => m.Name)
-                .ToList();
+            var methods = new List<MethodInfo>();
 
-            _typeCache.Add(classTypeSymbol.Name, macros.Select(m => new MethodInfo { Name = m, IsMacro = true }).ToArray());
+            foreach (var member in classTypeSymbol.GetMembers())
+            {
+                if (member is IMethodSymbol method)
+                {
+                    var methodInfo = new MethodInfo { Name = method.Name };
+
+                    foreach (var attribute in method.GetAttributes())
+                    {
+                        //foreach (var attribute in attributeList.Attributes)
+                        {
+                            if (attribute.AttributeClass?.Name == "MacroAttribute")
+                                methodInfo.IsMacro = true;
+                            else if (attribute.AttributeClass?.Name == "NoReturnProcAttribute")
+                                methodInfo.IsNoReturnProc = true;
+                        }
+                    }
+
+                    if (!(methodInfo.IsNoReturnProc || methodInfo.IsMacro))
+                        methodInfo.IsProc = true;
+
+                    methods.Add(methodInfo);
+                }
+            }
+            //var methods = classTypeSymbol.GetMembers().OfType<IMethodSymbol>();
+
+            //var macros = methods
+            //    .Where(m => m.MethodKind != MethodKind.Constructor)
+            //    .Where(m => m.GetAttributes().Any(a => a.AttributeClass?.Name == "MacroAttribute"))
+            //    .Select(m => m.Name)
+            //    .ToList();
+
+            _typeCache.Add(classTypeSymbol.Name, methods.ToArray());
         }
     }
 
@@ -84,6 +119,22 @@ internal class TypeCache
         }
 
         throw new InvalidOperationException($"Method {operation} not found");
+    }
+
+    internal MethodInfo GetMethod(string className, string methodName)
+    {
+        if (_typeCache.TryGetValue(className, out var methods))
+        {
+            var result = methods.FirstOrDefault(m => m.Name == methodName);
+            if (result != null)
+            {
+                return result;
+            }
+
+            throw new InvalidOperationException($"Method {methodName} not found");
+        }
+
+        throw new InvalidOperationException($"Class {className} not found");
     }
 }
 

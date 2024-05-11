@@ -44,7 +44,14 @@ internal class MethodVisitor
             var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
             var location = statement != null ? statement.GetLocation() : Location.None;
 
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                writer.WriteEmptyLine();
+                continue;
+            }
+
             if (TryHandleIf(statement, line, context)) continue;
+            if (TryHandleInvocation(statement, line, context)) continue;
 
             var match = commentPattern.Match(line);
             if (match.Success)
@@ -255,12 +262,6 @@ internal class MethodVisitor
             {
                 var operand = line.Trim().Substring(7).TrimEnd(';').Trim();
                 StoreData(new[] { operand }, line, writer);
-                continue;
-            }
-
-            if (string.IsNullOrWhiteSpace(line))
-            {
-                writer.WriteEmptyLine();
                 continue;
             }
 
@@ -501,6 +502,42 @@ internal class MethodVisitor
             context.Writer.WriteLabel(ifExitData.LabelName);
 
             return true;
+        }
+
+        return false;
+    }
+
+    private static bool TryHandleInvocation(StatementSyntax? statementSyntax, string line, MethodVisitorContext context)
+    {
+        if (statementSyntax is ExpressionStatementSyntax expressionStatement)
+        {
+            if (expressionStatement.Expression is InvocationExpressionSyntax invocationExpression)
+            {
+                if (invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpression)
+                {
+                    if (memberAccessExpression.Expression is IdentifierNameSyntax identifierName)
+                    {
+                        context.TypeCache.Scan(statementSyntax.SyntaxTree, identifierName);
+
+                        var className = identifierName.Identifier.ValueText;
+                        var methodName = memberAccessExpression.Name.Identifier.ValueText;
+
+                        var methodInfo = context.TypeCache.GetMethod(className, methodName);
+
+                        if (methodInfo != null)
+                        {
+                            if (methodInfo.IsProc)
+                                context.Writer.WriteJSROpCode(className, Utilities.GetProcName(methodInfo.Name));
+                            else if (methodInfo.IsNoReturnProc)
+                                context.Writer.WriteJMPOpCode(className, Utilities.GetProcName(methodInfo.Name));
+                            else if (methodInfo.IsMacro)
+                                context.Writer.WriteCallMacro(className, Utilities.GetProcName(methodInfo.Name), new string[] { /*resolvedOperand*/ }); // TODO Add support for parameters
+
+                            return true;
+                        }
+                    }
+                }
+            }
         }
 
         return false;

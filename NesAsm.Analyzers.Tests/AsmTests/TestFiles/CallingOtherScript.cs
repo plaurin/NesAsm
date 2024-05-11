@@ -1,25 +1,23 @@
 ﻿using NesAsm.Analyzers.Tests.AsmTests.TestFiles.SubFolder;
 using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [FileInclude<MultiProcScript>]
 [FileInclude<UpFolderScript>("..")]
 [FileInclude<SubFolderScript>("SubFolder")]
-internal class CallingOtherScript : ScriptBase
+[Script]
+internal class CallingOtherScript : FileBasedReference
 {
-    public CallingOtherScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
-        Call<MultiProcScript>(s => s.ProcB());
+        MultiProcScript.ProcB();
 
         MyProcC();
 
-        Jump<MultiProcScript>(s => s.ProcC());
+        MultiProcScript.ProcC();
     }
 
     public void MyProcC()
@@ -27,7 +25,7 @@ internal class CallingOtherScript : ScriptBase
         LDA(MultiProcScript.Data);
         LDA(MultiProcScript.SpritePalettes, X);
 
-        Call<UpFolderScript>(s => s.ProcU());
-        Call<SubFolderScript>(s => s.ProcS());
+        UpFolderScript.ProcU();
+        SubFolderScript.ProcS();
     }
 }

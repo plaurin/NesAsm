@@ -56,8 +56,6 @@ internal static class ClassVisitor
             {
                 if (attribute.Name is GenericNameSyntax genericNameSyntax && genericNameSyntax.Identifier.Text == "FileInclude")
                 {
-                    context.TypeCache.Scan(attribute.SyntaxTree, genericNameSyntax.TypeArgumentList.Arguments.First());
-
                     var filepath = genericNameSyntax.TypeArgumentList.Arguments.ToString().Trim('"');
                     var relativePath = (attribute.ArgumentList?.Arguments!.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.ValueText;
                     context.AddPreScriptReference(filepath, relativePath);
