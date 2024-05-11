@@ -3,12 +3,9 @@ using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class CharScript : ScriptBase
+[Script]
+internal class CharScript : FileBasedReference
 {
-    public CharScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
     }

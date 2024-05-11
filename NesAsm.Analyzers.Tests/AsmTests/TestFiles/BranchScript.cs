@@ -1,13 +1,12 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class BranchScript : ScriptBase
+[Script]
+internal class BranchScript : FileBasedReference
 {
-    public BranchScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         LDXi(0);
