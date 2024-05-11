@@ -1,14 +1,12 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class GeneratorDataScript : ScriptBase
+[Script]
+internal class DataGeneratorScript : FileBasedReference
 {
-    public GeneratorDataScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         for (X = 0; X < 20; X++)

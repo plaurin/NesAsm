@@ -1,14 +1,12 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class DataScript : ScriptBase
+[Script]
+internal class DataScript : FileBasedReference
 {
-    public DataScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     private readonly ushort JOYPAD1 = 0x4016;
     private readonly ushort JOYPAD2 = 0x4017;
 

@@ -50,6 +50,8 @@ public static class NESEmulatorStatic
     public static void LDX(byte address) => _x = _memory[address];
     public static void LDY(byte address) => _y = _memory[address];
 
+    public static void STA(ushort baseAddress, Register register) { /* TODO */ }
+
     // Absolute Mode Store instructions
     public static void STA(ushort address) => _memory[address] = _a;
     public static void STX(ushort address) => _memory[address] = _x;

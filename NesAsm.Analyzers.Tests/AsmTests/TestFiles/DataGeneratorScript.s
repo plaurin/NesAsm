@@ -1,5 +1,5 @@
 ; Auto generated code using the NesAsm project
-.scope GeneratorDataScript
+.scope DataGeneratorScript
 
   .proc main
 

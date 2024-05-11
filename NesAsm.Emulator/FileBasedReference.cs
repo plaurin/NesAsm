@@ -1,8 +1,12 @@
 ﻿namespace NesAsm.Emulator;
 using static NesAsm.Emulator.NESEmulatorStatic;
 
-public abstract class FileBasedReference // TODO Rename Script in the end
+public abstract partial class FileBasedReference // TODO Rename Script in the end
 {
+    protected static Register A = new();
+    protected static Register X = new();
+    protected static Register Y = new();
+
     protected static void LDAa(byte argumentValue) => LDAi(argumentValue);
     protected static void LDXa(byte argumentValue) => LDXi(argumentValue);
     protected static void LDYa(byte argumentValue) => LDYi(argumentValue);

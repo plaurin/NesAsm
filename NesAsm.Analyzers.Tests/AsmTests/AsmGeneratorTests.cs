@@ -32,9 +32,9 @@ public class AsmGeneratorTests
     }
 
     [Fact]
-    public void TestCharsScript()
+    public void TestCharScript()
     {
-        TestScript("CharsScript.cs");
+        TestScript("CharScript.cs");
     }
 
     [Fact]
