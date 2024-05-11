@@ -1,13 +1,12 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class SubroutineResultsScript : ScriptBase
+[Script]
+internal class SubroutineResultsScript : FileBasedReference
 {
-    public SubroutineResultsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         // Argument of the method could not be used after calling a subroutine with return values

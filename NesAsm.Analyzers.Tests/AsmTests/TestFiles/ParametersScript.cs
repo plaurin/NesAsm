@@ -1,13 +1,12 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class ParametersScript : ScriptBase
+[Script]
+internal class ParametersScript : FileBasedReference
 {
-    public ParametersScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         ProcB(25, 1000, true);

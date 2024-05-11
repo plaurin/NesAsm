@@ -1,22 +1,22 @@
 ﻿- Main diagnostics:
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(28,34): error NA0001: Type long is not supported for method parameters
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(30,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(35,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(39,23): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(27,34): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(29,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(34,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(38,23): error NA0001: Type long is not supported for method parameters
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(28,34): error NA0001: Type long is not supported for method parameters
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(30,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(35,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(39,23): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(27,34): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(29,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(34,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(38,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(28,34): error NA0001: Type long is not supported for method parameters
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(30,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(35,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
-..\..\..\AsmTests\TestFiles\ParametersScript.cs(39,23): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(27,34): error NA0001: Type long is not supported for method parameters
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(29,9): error NA0004: Parameter type LDAa not supported (should be byte or bool)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(34,9): error NA0003: OpCode STA not supported to use parameters (should only be LDAa, LDXa or LDYa)
+..\..\..\AsmTests\TestFiles\ParametersScript.cs(38,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.ParametersScript.cs

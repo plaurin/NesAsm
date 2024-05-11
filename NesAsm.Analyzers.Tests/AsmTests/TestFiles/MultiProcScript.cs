@@ -25,17 +25,17 @@ internal class MultiProcScript : FileBasedReference
         0x0F, // Palette 2
     ];
 
-    public void ProcA()
+    public static void ProcA()
     {
         LDAi(10);
     }
 
-    public void ProcB()
+    public static void ProcB()
     {
         LDAi(20);
     }
 
-    public void ProcC()
+    public static void ProcC()
     {
         LDAi(30);
     }
