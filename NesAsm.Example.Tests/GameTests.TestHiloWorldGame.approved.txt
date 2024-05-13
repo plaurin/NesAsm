@@ -297,3 +297,7 @@ palettes:
 .include "wrapper-no-nmi.s"
 
 */
+- RunResult[1].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[1] diagnostics:
+- RunResult[1].GeneratedSources Count: 0
+- RunResult[1].Exception: 

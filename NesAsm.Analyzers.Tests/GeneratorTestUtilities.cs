@@ -8,7 +8,7 @@ using System.Text;
 
 namespace NesAsm.Analyzers.Tests;
 
-internal class GeneratorTestUtilities
+public class GeneratorTestUtilities
 {
     public static void TestGenerator(ISourceGenerator generator, string sourcePath) => TestGenerator(generator, new[] { sourcePath });
 
@@ -20,12 +20,10 @@ internal class GeneratorTestUtilities
         TestGenerator(driver, sourcePaths);
     }
 
-    public static void TestGenerator(IIncrementalGenerator generator, string sourcePath) => TestGenerator(generator, new[] { sourcePath });
-
-    public static void TestGenerator(IIncrementalGenerator generator, string[] sourcePaths)
+    public static void TestGenerator(string[] sourcePaths, params IIncrementalGenerator[] generators)
     {
         // Create the driver that will control the generation, passing in our generator
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(generators);
 
         TestGenerator(driver, sourcePaths);
     }
