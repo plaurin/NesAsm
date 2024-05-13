@@ -8,7 +8,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 internal class MacroScript : FileBasedReference
 {
     [Macro]
-    public void MacroNoParam()
+    public static void MacroNoParam()
     {
         MacroWithParams(5, 10, 0x4000);
     }

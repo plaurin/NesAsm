@@ -2,11 +2,11 @@
 .scope MacroScript
 
   .macro MacroNoParam 
-    macroWithParams 5, 10, $4000
+    MacroWithParams 5, 10, $4000
   .endmacro
 
   .macro MacroWithParams a, b, c
-    macroOneParam (c + b * $20 + a)
+    MacroOneParam (c + b * $20 + a)
   .endmacro
 
   .macro MacroOneParam a

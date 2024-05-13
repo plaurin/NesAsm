@@ -25,7 +25,10 @@ public static class Utilities
 
     public static string GetConstName(string constName) => constName;
 
-    public static string GetMacroName(MethodDeclarationSyntax method) => method.Identifier.ValueText;
+    public static string GetMacroName(MethodDeclarationSyntax method) => GetMacroName(method.Identifier.ValueText);
+
+    public static string GetMacroName(string macroName) => macroName;
+
 
     public static string ConvertOperandToNumericText(string operand)
     {

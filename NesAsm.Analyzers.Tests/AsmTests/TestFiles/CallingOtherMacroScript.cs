@@ -4,14 +4,11 @@ using NesAsm.Emulator.Attributes;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [FileInclude<MacroScript>]
-internal class CallingOtherMacroScript : ScriptBase
+[Script]
+internal class CallingOtherMacroScript : FileBasedReference
 {
-    public CallingOtherMacroScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
-        Macro<MacroScript>(s => s.MacroNoParam());
+        MacroScript.MacroNoParam();
     }
 }

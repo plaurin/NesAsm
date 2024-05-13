@@ -4,7 +4,7 @@
 .scope CallingOtherMacroScript
 
   .proc main
-    MacroScript::MacroNoParam )
+    MacroScript::MacroNoParam 
 
     rts
   .endproc

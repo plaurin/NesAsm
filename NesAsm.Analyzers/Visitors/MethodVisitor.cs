@@ -537,7 +537,7 @@ internal class MethodVisitor
                             else if (methodInfo.IsNoReturnProc)
                                 context.Writer.WriteJMPOpCode(className, Utilities.GetProcName(methodInfo.Name));
                             else if (methodInfo.IsMacro)
-                                context.Writer.WriteCallMacro(className, Utilities.GetProcName(methodInfo.Name), new string[] { /*resolvedOperand*/ }); // TODO Add support for parameters
+                                context.Writer.WriteCallMacro(className, Utilities.GetMacroName(methodInfo.Name), new string[] { /*resolvedOperand*/ }); // TODO Add support for parameters
 
                             return true;
                         }
@@ -588,7 +588,7 @@ internal class MethodVisitor
 
                             if (arguments.All(a => a != null))
                             {
-                                context.Writer.WriteCallMacro(null, Utilities.GetProcName(methodInfo.Name), arguments);
+                                context.Writer.WriteCallMacro(null, Utilities.GetMacroName(methodInfo.Name), arguments);
                                 return true;
                             }
                         }
