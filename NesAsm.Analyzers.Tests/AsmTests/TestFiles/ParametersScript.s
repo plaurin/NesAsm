@@ -29,6 +29,7 @@
   .endproc
 
   .proc invalidParamType
+    jsr proc
 
     rts
   .endproc
@@ -38,7 +39,7 @@
     rts
   .endproc
 
-  .proc lDAa
+  .proc proc
 
     rts
   .endproc

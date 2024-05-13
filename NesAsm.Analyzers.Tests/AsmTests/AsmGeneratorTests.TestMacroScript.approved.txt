@@ -1,13 +1,10 @@
 ﻿- Main diagnostics:
-..\..\..\AsmTests\TestFiles\MacroScript.cs(21,9): error NA0005: Invalid format (ushort)(c + b * 0x20 + a) for type byte or ushort
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-..\..\..\AsmTests\TestFiles\MacroScript.cs(21,9): error NA0005: Invalid format (ushort)(c + b * 0x20 + a) for type byte or ushort
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-..\..\..\AsmTests\TestFiles\MacroScript.cs(21,9): error NA0005: Invalid format (ushort)(c + b * 0x20 + a) for type byte or ushort
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.MacroScript.cs
@@ -17,10 +14,11 @@
 .scope MacroScript
 
   .macro MacroNoParam 
-    MacroWithParams 5, 10, 0x4000)
+    macroWithParams 5, 10, $4000
   .endmacro
 
   .macro MacroWithParams a, b, c
+    macroOneParam (c + b * $20 + a)
   .endmacro
 
   .macro MacroOneParam a

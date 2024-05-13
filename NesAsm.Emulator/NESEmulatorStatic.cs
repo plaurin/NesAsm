@@ -25,6 +25,20 @@ public static class NESEmulatorStatic
     public static void LDXi(byte value) => _x = value;
     public static void LDYi(byte value) => _y = value;
 
+    // Addressing Mode Load instructions???
+    public static void LDAa(byte argumentValue) => LDAi(argumentValue);
+    public static void LDXa(byte argumentValue) => LDXi(argumentValue);
+    public static void LDYa(byte argumentValue) => LDYi(argumentValue);
+
+    // Not sure? load immediate with bool value?
+    public static void LDAa(bool argumentValue) => LDAi((byte)(argumentValue ? 1 : 0));
+    public static void LDXa(bool argumentValue) => LDXi((byte)(argumentValue ? 1 : 0));
+    public static void LDYa(bool argumentValue) => LDYi((byte)(argumentValue ? 1 : 0));
+
+    // Increase and Decrease Memory instructions
+    public static void INC(ushort address) { throw new NotImplementedException(); }
+    public static void DEC(ushort address) { throw new NotImplementedException(); }
+
     // Increase and Decrease X/Y register instructions
     public static void INX() => _x++;
     public static void INY() => _y++;
@@ -46,6 +60,7 @@ public static class NESEmulatorStatic
     public static void STY(byte address) => _memory[address] = _y;
 
     // Zero Page Load instructions
+    public static void LDA(int address) => LDA((byte)address);
     public static void LDA(byte address) => _a = _memory[address];
     public static void LDX(byte address) => _x = _memory[address];
     public static void LDY(byte address) => _y = _memory[address];
@@ -158,6 +173,8 @@ public static class NESEmulatorStatic
     /// </summary>
     /// <remarks>Rotates the bits of the specified byte by one bit to the left. The new value of bit #0 comes from the Carry flag, and then the old value of bit #7 is used to update the Carry flag.</remarks>
     public static void ROL(ushort address) { var c = _carry; _carry = (_memory[address] & 0x80) > 0; _memory[address] <<= 1; if (c) _memory[address] += 1; }
+
+    public static void ANDi(byte value) { throw new NotImplementedException(); }
 
     public static void JMP(/* Goto Label */) { throw new NotImplementedException(); }
 

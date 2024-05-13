@@ -12,7 +12,10 @@
   .endproc
 
   .proc invalidParsing
+    jsr lDAa
 
+    lda #22
+    sta 0
     jsr lDAa
 
     rts

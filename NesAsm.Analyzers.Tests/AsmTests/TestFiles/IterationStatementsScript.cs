@@ -1,15 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [PostFileInclude("wrapper.s")]
-internal class IterationStatementsScript : ScriptBase
+[Script]
+internal class IterationStatementsScript : FileBasedReference
 {
-    public IterationStatementsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         // for - using X or Y register

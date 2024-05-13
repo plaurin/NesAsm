@@ -1,28 +1,28 @@
 ﻿- Main diagnostics:
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(53,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(58,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(63,9): error NA0014: Loop should only use 1 register
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): error NA0000: ParseOp exception handling failed to match proper message
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(50,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(53,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(58,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(63,9): error NA0014: Loop should only use 1 register
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): error NA0000: ParseOp exception handling failed to match proper message
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(50,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(55,9): error NA0013: Only X or Y register supported for loop variable but found Z
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(60,9): error NA0015: Loop cannot use local variable, remove type declaration int
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(65,9): error NA0014: Loop should only use 1 register
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): warning NA0008: Instruction is not currently supported: do
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(76,9): error NA0005: Invalid format true for type byte or ushort
-..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(52,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(53,9): error NA0013: Only X or Y register supported for loop variable but found Z
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(58,9): error NA0015: Loop cannot use local variable, remove type declaration int
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(63,9): error NA0014: Loop should only use 1 register
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): warning NA0008: Instruction is not currently supported: do
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(74,9): error NA0000: ParseOp exception handling failed to match proper message
+..\..\..\AsmTests\TestFiles\IterationStatementsScript.cs(50,5): error NA0016: Loop not closed, ensure that all for loop block use bracket \{ \}
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
 - RunResult[0].GeneratedSources[0].HintName: Asm.IterationStatementsScript.cs

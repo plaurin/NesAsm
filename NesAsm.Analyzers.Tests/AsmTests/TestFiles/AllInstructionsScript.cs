@@ -1,14 +1,12 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class AllInstructionsScript : ScriptBase
+[Script]
+internal class AllInstructionsScript : FileBasedReference
 {
-    public AllInstructionsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void AllInstructions()
     {
         LDAi(2);

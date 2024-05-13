@@ -26,7 +26,7 @@ internal class ParametersScript : FileBasedReference
 
     public void InvalidParamType(long l)
     {
-        LDAa(l);
+        Proc(l);
     }
 
     public void InvalidOpCodeUsingParameter(byte a)
@@ -34,8 +34,9 @@ internal class ParametersScript : FileBasedReference
         STA(a);
     }
 
+    // Maybe not used anymore
     // Only to force NA0004 in InvalidParamType
-    private void LDAa(long l)
+    private void Proc(long l)
     {
     }
 }

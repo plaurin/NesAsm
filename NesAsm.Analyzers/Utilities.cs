@@ -53,10 +53,11 @@ public static class Utilities
             }
         }
 
+        if (bool.TryParse(operand, out var boolOperand)) return boolOperand ? "1" : "0";
         if (byte.TryParse(operand, out var _)) return operand;
         if (ushort.TryParse(operand, out var _)) return operand;
 
-        throw new InvalidOperationException($"Expected parameter of type byte or ushort but found {operand}");
+        throw new InvalidOperationException($"Expected parameter of type bool, byte or ushort but found {operand}");
     }
 
     // https://stackoverflow.com/questions/63055621/how-to-convert-camel-case-to-snake-case-with-two-capitals-next-to-each-other

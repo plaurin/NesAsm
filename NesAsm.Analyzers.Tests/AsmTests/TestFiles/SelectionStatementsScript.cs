@@ -1,15 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [PostFileInclude("wrapper.s")]
-internal class SelectionStatementsScript : ScriptBase
+[Script]
+internal class SelectionStatementsScript : FileBasedReference
 {
-    public SelectionStatementsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         LDXi(12);

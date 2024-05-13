@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace NesAsm.Analyzers.Visitors;
@@ -261,7 +262,7 @@ internal class MethodVisitor
             if (line.Trim().StartsWith("return"))
             {
                 var operand = line.Trim().Substring(7).TrimEnd(';').Trim();
-                StoreData(new[] { operand }, line, writer);
+                StoreData(new[] { operand }, location, context);
                 continue;
             }
 
@@ -526,6 +527,11 @@ internal class MethodVisitor
 
                         if (methodInfo != null)
                         {
+                            if (methodInfo.IsProc || methodInfo.IsNoReturnProc)
+                            {
+                                StoreData(ConvertArguments(invocationExpression.ArgumentList.Arguments.ToArray(), context), statementSyntax.GetLocation(), context);
+                            }
+
                             if (methodInfo.IsProc)
                                 context.Writer.WriteJSROpCode(className, Utilities.GetProcName(methodInfo.Name));
                             else if (methodInfo.IsNoReturnProc)
@@ -537,25 +543,151 @@ internal class MethodVisitor
                         }
                     }
                 }
+
+                if (invocationExpression.Expression is IdentifierNameSyntax identifierName2)
+                {
+                    var syntaxNode = statementSyntax.Parent;
+                    while (syntaxNode is not ClassDeclarationSyntax)
+                    {
+                        syntaxNode = syntaxNode!.Parent;
+                    }
+                    var currentClass = (syntaxNode as ClassDeclarationSyntax)!.Identifier.ValueText;
+
+                    var model = context.Compilation.GetSemanticModel(identifierName2.SyntaxTree);
+
+                    var memberSymbol = model.GetMemberGroup(identifierName2);
+
+                    var className = memberSymbol[0].ContainingType.Name;
+
+                    if (className != currentClass) return false;
+
+                    var methodName = identifierName2.Identifier.ValueText;
+
+                    var methodInfo = context.TypeCache.GetMethod(className, methodName);
+
+                    if (methodInfo != null)
+                    {
+                        if (methodInfo.IsProc || methodInfo.IsNoReturnProc)
+                        {
+                            StoreData(ConvertArguments(invocationExpression.ArgumentList.Arguments.ToArray(), context), statementSyntax.GetLocation(), context);
+                        }
+
+                        if (methodInfo.IsProc)
+                        {
+                            context.Writer.WriteJSROpCode(null, Utilities.GetProcName(methodInfo.Name));
+                            return true;
+                        }
+                        else if (methodInfo.IsNoReturnProc)
+                        {
+                            context.Writer.WriteJMPOpCode(null, Utilities.GetProcName(methodInfo.Name));
+                            return true;
+                        }
+                        else if (methodInfo.IsMacro)
+                        {
+                            var arguments = ConvertArguments(invocationExpression.ArgumentList.Arguments.ToArray(), context);
+
+                            if (arguments.All(a => a != null))
+                            {
+                                context.Writer.WriteCallMacro(null, Utilities.GetProcName(methodInfo.Name), arguments);
+                                return true;
+                            }
+                        }
+                    }
+                }
             }
         }
 
         return false;
     }
 
-    private static bool StoreData(string[] dataItems, string line, AsmWriter writer)
+    private static string[] ConvertArguments(ArgumentSyntax[] arguments, MethodVisitorContext context)
     {
+        var result = new string[arguments.Length];
+
+        for (int i = 0; i < arguments.Length; i++)
+        {
+            try
+            {
+                var expression = arguments[i].Expression;
+                if (arguments[i].Expression is CastExpressionSyntax castExpression)
+                {
+                    if (castExpression.Expression is ParenthesizedExpressionSyntax parenthesizedExpression)
+                    {
+                        expression = parenthesizedExpression.Expression;
+                    }
+                }
+
+                var text = expression.ToString();
+                foreach (var node in expression.DescendantNodesAndSelf())
+                {
+                    if (node is LiteralExpressionSyntax literalExpression)
+                    {
+                        var newValue = Utilities.ConvertOperandToNumericText(literalExpression.Token.Text);
+
+                        text = text.Substring(0, literalExpression.Token.SpanStart - expression.SpanStart) + newValue + text.Substring(literalExpression.Span.End - expression.SpanStart);
+                    }
+                }
+
+                if (expression is LiteralExpressionSyntax)
+                    result[i] = text;
+                else
+                    result[i] = $"({text})";
+            }
+            catch (InvalidOperationException ex)
+            {
+                var location = arguments[i].GetLocation();
+
+                if (ex.Message.Contains("binary format"))
+                    context.ReportDiagnostic(Diagnostics.InvalidFormat, location, arguments[i].ToString(), "byte with binary format");
+                else if (ex.Message.Contains("byte or ushort"))
+                    context.ReportDiagnostic(Diagnostics.InvalidFormat, location, arguments[i].ToString(), "byte or ushort");
+                else
+                    context.ReportDiagnostic(Diagnostics.InternalAnalyzerFailure, location, "ParseOp exception handling failed to match proper message");
+            }
+        }
+
+        return result;
+    }
+
+    private static bool StoreData(string[] dataItems, Location location, MethodVisitorContext context)
+    {
+        var writer = context.Writer;
         byte index = 0;
         foreach (var data in dataItems)
         {
+            if (data == null) continue;
             if (byte.TryParse(data, out var byteData))
             {
                 writer.WriteOpCodeImmediate("lda", byteData);
                 writer.WriteOpCode("sta", index++);
             }
+            else if (bool.TryParse(data, out var boolData))
+            {
+                writer.WriteOpCodeImmediate("lda", (byte)(boolData ? 1 : 0));
+                writer.WriteOpCode("sta", index++);
+            }
+            else if (ushort.TryParse(data, out var ushortData))
+            {
+                writer.WriteOpCodeImmediate("lda", (byte)(ushortData % 256));
+                writer.WriteOpCode("sta", index++);
+                writer.WriteOpCodeImmediate("lda", (byte)(ushortData / 256));
+                writer.WriteOpCode("sta", index++);
+            }
             else
             {
-                throw new InvalidOperationException($"Operand {data} not supported for parameter (should be byte, ushort or bool) in {line}");
+                try
+                {
+                    var value = Convert.ToInt32(data, 16);
+                    writer.WriteOpCodeImmediate("lda", (byte)(value % 256));
+                    writer.WriteOpCode("sta", index++);
+                    writer.WriteOpCodeImmediate("lda", (byte)(value / 256));
+                    writer.WriteOpCode("sta", index++);
+                }
+                catch (FormatException)
+                {
+                    context.ReportDiagnostic(Diagnostics.UnsupportedParameterType2, location, data);
+                    continue;
+                }
             }
         }
 

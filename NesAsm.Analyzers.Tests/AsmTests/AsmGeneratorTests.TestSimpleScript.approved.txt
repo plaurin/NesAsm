@@ -1,15 +1,15 @@
 ﻿- Main diagnostics:
-..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,14): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
 ..\..\..\AsmTests\TestFiles\SimpleScript.cs(31,23): error NA0001: Type long is not supported for method parameters
 - SyntaxTrees Count: 2
 - Output diagnostics:
 - RunResult.GeneratedTrees Count: 1
 - RunResults diagnostics:
-..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,14): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
 ..\..\..\AsmTests\TestFiles\SimpleScript.cs(31,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
 - RunResult[0] diagnostics:
-..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,9): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
+..\..\..\AsmTests\TestFiles\SimpleScript.cs(25,14): error NA0005: Invalid format 0b_101010101010 for type byte with binary format
 ..\..\..\AsmTests\TestFiles\SimpleScript.cs(31,23): error NA0001: Type long is not supported for method parameters
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
@@ -30,7 +30,10 @@
   .endproc
 
   .proc invalidParsing
+    jsr lDAa
 
+    lda #22
+    sta 0
     jsr lDAa
 
     rts
