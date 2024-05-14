@@ -42,7 +42,7 @@ internal class MethodVisitor
         var lines = method.Body.ToString().Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
         foreach (var line in lines)
         {
-            var statement = method.Body.Statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
+            var statement = GetLineStatement(method.Body.Statements, line);
             var location = statement != null ? statement.GetLocation() : Location.None;
 
             if (string.IsNullOrWhiteSpace(line))
@@ -304,6 +304,30 @@ internal class MethodVisitor
         }
     }
 
+    private static StatementSyntax? GetLineStatement(SyntaxList<StatementSyntax> statements, string line)
+    {
+        var statement = statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
+        if (statement is WhileStatementSyntax whileStatement)
+        {
+            if (whileStatement.Statement is BlockSyntax block)
+            {
+                statement = block.Statements.FirstOrDefault(s => s.ToString().Trim().Contains(line.Trim()));
+            }
+        }
+        else if (statement is LabeledStatementSyntax labeledStatement)
+        {
+            if (!line.Contains(labeledStatement.Identifier.ValueText))
+            {
+                if (labeledStatement.Statement is ExpressionStatementSyntax)
+                {
+                    statement = labeledStatement.Statement;
+                }
+            }
+        }
+
+        return statement;
+    }
+
     private static readonly Regex forPattern = new("\\s*for \\(((?'VarType'\\w+) )?(?'Register'\\w+)? = (?'Init'\\d+); (?'Register2'\\w+) (?'Condition'[<|>|<=|>=]) (?'ConditionValue'\\d+); (?'Register3'\\w+)(?'Increment'.+)\\)", RegexOptions.Compiled);
 
     private static bool TryHandleFor(string line, Location location, MethodVisitorContext context)
@@ -518,12 +542,22 @@ internal class MethodVisitor
                 {
                     if (memberAccessExpression.Expression is IdentifierNameSyntax identifierName)
                     {
+                        var syntaxNode = statementSyntax.Parent;
+                        while (syntaxNode is not ClassDeclarationSyntax)
+                        {
+                            syntaxNode = syntaxNode!.Parent;
+                        }
+                        var currentClass = (syntaxNode as ClassDeclarationSyntax)!.Identifier.ValueText;
+
                         context.TypeCache.Scan(statementSyntax.SyntaxTree, identifierName);
 
                         var className = identifierName.Identifier.ValueText;
                         var methodName = memberAccessExpression.Name.Identifier.ValueText;
 
                         var methodInfo = context.TypeCache.GetMethod(className, methodName);
+
+                        // We don't want to use scope if we are in the same class
+                        if (className == currentClass) className = null;
 
                         if (methodInfo != null)
                         {
@@ -559,6 +593,7 @@ internal class MethodVisitor
 
                     var className = memberSymbol[0].ContainingType.Name;
 
+                    // Temp until we handle everything here
                     if (className != currentClass) return false;
 
                     var methodName = identifierName2.Identifier.ValueText;

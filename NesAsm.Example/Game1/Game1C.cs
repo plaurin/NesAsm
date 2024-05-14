@@ -1,5 +1,6 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example.Game1;
 
@@ -9,12 +10,9 @@ namespace NesAsm.Example.Game1;
 [FileInclude<Controller>("..")]
 [FileInclude<PPU>("..")]
 [FileInclude<Game1Char>]
-public class Game1C : ScriptBase
+[Script]
+public class Game1C : FileBasedReference
 {
-    public Game1C(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     private const ushort RightButtonPalette = 0x20A;
     private const ushort LeftButtonPalette = 0x20E;
     private const ushort DownButtonPalette = 0x212;
@@ -29,7 +27,8 @@ public class Game1C : ScriptBase
 
     private const ushort FrameCounter = 0x30;
 
-    public void Main()
+    [NoReturnProc]
+    public static void Main()
     {
         // Read the PPUSTATUS register $2002 PPU_STATUS
         LDA(PPU.PPU_STATUS);
@@ -61,7 +60,7 @@ public class Game1C : ScriptBase
         // Main game loop
         while (true)
         {
-            Call<Controller>(s => s.ReadControllerOne());
+            Controller.ReadControllerOne();
 
             UpdateController();
 
@@ -76,7 +75,7 @@ public class Game1C : ScriptBase
         }
     }
 
-    public void UpdateController()
+    public static void UpdateController()
     {
         // ## Update button palette
         // Init palette to zero
@@ -149,7 +148,7 @@ public class Game1C : ScriptBase
         }
     }
 
-    public void MoveFace()
+    public static void MoveFace()
     {
         // Move right
         LDA(Controller.Down1);
@@ -254,7 +253,7 @@ public class Game1C : ScriptBase
         // 0x2000 PPU_CTRL
         STA(PPU.PPU_CTRL);
 
-        Jump<Game1C>(s => s.Main());
+        Game1C.Main();
     }
 
     public void ResetPalettes()
@@ -281,7 +280,7 @@ public class Game1C : ScriptBase
     }
 
     [RomData]
-    private readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
+    private static readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
 
     [RomData]
     private readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);

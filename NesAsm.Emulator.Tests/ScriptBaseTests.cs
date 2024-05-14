@@ -1,23 +1,21 @@
 ﻿namespace NesAsm.Emulator.Tests;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 public class ScriptBaseTests
 {
     [Fact]
     public void TestBasicScriptInheritance()
     {
-        var emulator = new NESEmulator();
-        var script = new ScriptOne(emulator);
+        ScriptOne.MainProc();
 
-        script.Main();
-
-        Assert.Equal(123, emulator.A);
-        Assert.Equal(132, emulator.X);
-        Assert.Equal(144, emulator.Y);
+        Assert.Equal(123, NESEmulatorStatic.A);
+        Assert.Equal(132, NESEmulatorStatic.X);
+        Assert.Equal(144, NESEmulatorStatic.Y);
     }
 
-    private class ScriptOne(NESEmulator emulator) : ScriptBase(emulator)
+    private static class ScriptOne
     {
-        public void Main()
+        public static void MainProc()
         {
             LDAi(123);
             LDXi(133);

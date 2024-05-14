@@ -1,13 +1,11 @@
 ﻿using NesAsm.Emulator;
+using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Example;
 
-public class PPU : ScriptBase
+[Script]
+public class PPU : FileBasedReference
 {
-    public PPU(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public const ushort PPU_CTRL = 0x2000;
     public const ushort PPU_MASK = 0x2001;
     public const ushort PPU_STATUS = 0x2002;

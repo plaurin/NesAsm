@@ -1,15 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example.HiloWorld;
 
 [PostFileInclude("wrapper-no-nmi.s")]
-public class HiloWorld : ScriptBase
+[Script]
+public class HiloWorld : FileBasedReference
 {
-    public HiloWorld(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public void Main()
     {
         // Read the PPUSTATUS register $2002
