@@ -1,5 +1,5 @@
 ﻿namespace NesAsm.Emulator;
-public abstract partial class FileBasedReference
+public abstract partial class NesScript
 {
     /// <summary>
     /// PPUCTRL 0x2000

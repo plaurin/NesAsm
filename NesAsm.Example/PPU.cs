@@ -4,7 +4,7 @@ using NesAsm.Emulator.Attributes;
 namespace NesAsm.Example;
 
 [Script]
-public class PPU : FileBasedReference
+public class PPU : NesScript
 {
     public const ushort PPU_CTRL = 0x2000;
     public const ushort PPU_MASK = 0x2001;

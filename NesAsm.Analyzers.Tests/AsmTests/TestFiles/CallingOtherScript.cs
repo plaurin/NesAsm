@@ -9,7 +9,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [FileInclude<UpFolderScript>("..")]
 [FileInclude<SubFolderScript>("SubFolder")]
 [Script]
-internal class CallingOtherScript : FileBasedReference
+internal class CallingOtherScript : NesScript
 {
     public void Main()
     {

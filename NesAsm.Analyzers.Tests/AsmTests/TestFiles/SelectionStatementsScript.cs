@@ -6,7 +6,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [PostFileInclude("wrapper.s")]
 [Script]
-internal class SelectionStatementsScript : FileBasedReference
+internal class SelectionStatementsScript : NesScript
 {
     public void Main()
     {

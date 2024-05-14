@@ -9,7 +9,7 @@ namespace NesAsm.Example.Game1;
 [StartupSegment()]
 [FileInclude<Controller>("..")]
 [Script]
-public class Game1 : FileBasedReference
+public class Game1 : NesScript
 {
     [NoReturnProc]
     public static void Main()

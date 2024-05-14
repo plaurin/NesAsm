@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [Script]
-internal class DataGeneratorScript : FileBasedReference
+internal class DataGeneratorScript : NesScript
 {
     public void Main()
     {
@@ -29,5 +29,5 @@ internal class DataGeneratorScript : FileBasedReference
     private readonly byte[] ChangedArgumentOrder = GenerateSpriteData(paletteIndex: 3, y: 62, tileIndex: 4, x: 63);
 
     [RomData]
-    private readonly byte[] BaseName = FileBasedReference.GenerateSpriteData(x: 74, y: 75, tileIndex: 6, paletteIndex: 0);
+    private readonly byte[] BaseName = NesScript.GenerateSpriteData(x: 74, y: 75, tileIndex: 6, paletteIndex: 0);
 }

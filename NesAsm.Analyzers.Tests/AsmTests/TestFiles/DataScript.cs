@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [Script]
-internal class DataScript : FileBasedReference
+internal class DataScript : NesScript
 {
     private readonly ushort JOYPAD1 = 0x4016;
     private readonly ushort JOYPAD2 = 0x4017;

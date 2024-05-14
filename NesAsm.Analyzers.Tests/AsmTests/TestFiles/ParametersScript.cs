@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [Script]
-internal class ParametersScript : FileBasedReference
+internal class ParametersScript : NesScript
 {
     public void Main()
     {

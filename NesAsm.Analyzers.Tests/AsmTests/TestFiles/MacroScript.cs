@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [Script]
-internal class MacroScript : FileBasedReference
+internal class MacroScript : NesScript
 {
     [Macro]
     public static void MacroNoParam()

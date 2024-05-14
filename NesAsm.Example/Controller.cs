@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Example;
 
 [Script]
-public class Controller : FileBasedReference
+public class Controller : NesScript
 {
     private const ushort JOYPAD1 = 0x4016;
     private const ushort JOYPAD2 = 0x4017;

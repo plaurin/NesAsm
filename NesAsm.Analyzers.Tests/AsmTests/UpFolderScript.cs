@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests;
 
 [Script]
-internal class UpFolderScript : FileBasedReference
+internal class UpFolderScript : NesScript
 {
     public static void ProcU()
     {

@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Emulator;
 
-public abstract class CharDefinition : FileBasedReference
+public abstract class CharDefinition : NesScript
 {
 
 }

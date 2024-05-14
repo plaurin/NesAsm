@@ -5,7 +5,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [Script]
-internal class JumpSubroutineScript : FileBasedReference
+internal class JumpSubroutineScript : NesScript
 {
     public void ProcA()
     {

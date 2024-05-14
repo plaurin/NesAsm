@@ -10,8 +10,8 @@ namespace NesAsm.Example.Game1;
 [FileInclude<Controller>("..")]
 [FileInclude<PPU>("..")]
 [FileInclude<Game1Char>]
-[Script]
-public class Game1C : FileBasedReference
+[Script] // TODO Remove this attribute
+public class Game1C : NesScript
 {
     private const ushort RightButtonPalette = 0x20A;
     private const ushort LeftButtonPalette = 0x20E;

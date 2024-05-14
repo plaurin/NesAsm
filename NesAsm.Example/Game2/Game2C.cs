@@ -11,7 +11,7 @@ namespace NesAsm.Example.Game2;
 [FileInclude<PPU>("..")]
 [FileInclude<Game2Char>()]
 [Script]
-public class Game2C : FileBasedReference
+public class Game2C : NesScript
 {
     private const ushort RightButtonPalette = 0x20A;
     private const ushort LeftButtonPalette = 0x20E;

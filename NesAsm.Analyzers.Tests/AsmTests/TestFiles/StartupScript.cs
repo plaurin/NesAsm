@@ -8,9 +8,9 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [VectorsSegment()]
 [StartupSegment()]
 [Script]
-internal class StartupScript : FileBasedReference
+internal class StartupScript : NesScript
 {
-    public void Main()
+    public void Main() // TODO All mmembers should be static!
     {
         LDA(25);
     }

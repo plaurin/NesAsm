@@ -6,7 +6,7 @@ namespace NesAsm.Example.HiloWorld;
 
 [PostFileInclude("wrapper-no-nmi.s")]
 [Script]
-public class HiloWorld : FileBasedReference
+public class HiloWorld : NesScript
 {
     public void Main()
     {
