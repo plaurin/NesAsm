@@ -6,8 +6,8 @@ namespace NesAsm.Example.Game1;
 [HeaderSegment()]
 [VectorsSegment()]
 [StartupSegment()]
-[FileInclude<Controller>]
-[FileInclude<PPU>]
+[FileInclude<Controller>("..")]
+[FileInclude<PPU>("..")]
 [FileInclude<Game1Char>]
 public class Game1C : ScriptBase
 {

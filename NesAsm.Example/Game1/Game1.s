@@ -13,6 +13,8 @@
 
 .segment "STARTUP"
 
+.include "../Controller.s"
+
 .segment "CODE"
 
 .proc main
@@ -570,4 +572,3 @@ palettes:
 .byte 0
 
 
-.include "Controller.s"

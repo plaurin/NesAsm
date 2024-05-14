@@ -6,6 +6,7 @@ namespace NesAsm.Example.Game1;
 [HeaderSegment()]
 [VectorsSegment()]
 [StartupSegment()]
+[FileInclude<Controller>("..")]
 public class Game1 : ScriptBase
 {
     public Game1(NESEmulator emulator) : base(emulator)

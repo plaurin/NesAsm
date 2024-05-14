@@ -5,7 +5,7 @@
   .byte $01, $00            ; mapper 0, vertical mirroring
 
 .segment "VECTORS"
-  .addr nmi
+  .addr HiloWorld::nmi
   .addr reset
   .addr 0
 
@@ -62,7 +62,7 @@
   bpl @vblankWait2
   jsr ResetPalettes
 start:
-  jsr main
+  jsr HiloWorld::main
   lda #%10000000	; Enable NMI
   sta $2000
   lda #%00011000  ; Enable Sprites & Background
