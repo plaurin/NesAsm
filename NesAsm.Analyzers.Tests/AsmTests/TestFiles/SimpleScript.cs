@@ -4,7 +4,6 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-[Script]
 [PostFileInclude("wrapper.s")]
 internal class SimpleScript : NesScript
 {

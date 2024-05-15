@@ -3,7 +3,6 @@ using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-[Script]
 internal class CharScript : NesScript
 {
     public void Main()

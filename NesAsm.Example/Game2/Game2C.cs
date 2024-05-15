@@ -10,7 +10,6 @@ namespace NesAsm.Example.Game2;
 [FileInclude<Controller>("..")]
 [FileInclude<PPU>("..")]
 [FileInclude<Game2Char>()]
-[Script]
 public class Game2C : NesScript
 {
     private const ushort RightButtonPalette = 0x20A;

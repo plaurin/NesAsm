@@ -4,7 +4,6 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-[Script]
 internal class MultiProcScript : NesScript
 {
     public static readonly byte Data = 0xFF;

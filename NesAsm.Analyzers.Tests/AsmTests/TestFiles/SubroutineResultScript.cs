@@ -1,10 +1,8 @@
 ﻿using NesAsm.Emulator;
-using NesAsm.Emulator.Attributes;
 using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-[Script]
 internal class SubroutineResultScript : NesScript
 {
     public void Main()

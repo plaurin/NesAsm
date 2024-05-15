@@ -8,7 +8,6 @@ namespace NesAsm.Example.Game1;
 [VectorsSegment()]
 [StartupSegment()]
 [FileInclude<Controller>("..")]
-[Script]
 public class Game1 : NesScript
 {
     [NoReturnProc]

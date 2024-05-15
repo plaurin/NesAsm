@@ -1,10 +1,8 @@
 ﻿using NesAsm.Emulator;
-using NesAsm.Emulator.Attributes;
 using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example;
 
-[Script]
 public class Controller : NesScript
 {
     private const ushort JOYPAD1 = 0x4016;

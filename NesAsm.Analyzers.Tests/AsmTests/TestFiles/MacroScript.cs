@@ -4,7 +4,6 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-[Script]
 internal class MacroScript : NesScript
 {
     [Macro]

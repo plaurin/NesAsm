@@ -8,7 +8,6 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [FileInclude<MultiProcScript>]
 [FileInclude<UpFolderScript>("..")]
 [FileInclude<SubFolderScript>("SubFolder")]
-[Script]
 internal class CallingOtherScript : NesScript
 {
     public void Main()

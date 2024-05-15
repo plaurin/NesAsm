@@ -1,9 +1,7 @@
 ﻿using NesAsm.Emulator;
-using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Example;
 
-[Script]
 public class PPU : NesScript
 {
     public const ushort PPU_CTRL = 0x2000;

@@ -7,7 +7,6 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [HeaderSegment(mapper: 2, prgRomBanks: 2)]
 [VectorsSegment()]
 [StartupSegment()]
-[Script]
 internal class StartupScript : NesScript
 {
     public void Main() // TODO All mmembers should be static!
