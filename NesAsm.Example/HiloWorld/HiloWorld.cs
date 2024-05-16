@@ -153,7 +153,7 @@ public class HiloWorld : NesScript
     ];
 
     [CharData]
-    private byte[] Characters = [
+    private static byte[] Characters = [
         // First tile is empty
         0,
         0,

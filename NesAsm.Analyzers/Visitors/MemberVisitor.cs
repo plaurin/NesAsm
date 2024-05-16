@@ -39,7 +39,7 @@ internal class MemberVisitor
             }
             else
             {
-                context.ReportDiagnostic(Diagnostics.MethodNotStatic, method.GetLocation());
+                context.ReportDiagnostic(Diagnostics.MethodNotStatic, method.Identifier.GetLocation());
             }
         }
 
@@ -58,39 +58,47 @@ internal class MemberVisitor
         var charBytes = new List<int>();
         if (fieldType == "byte[]")
         {
-            if (field.Declaration.Variables[0].Initializer.Value is CollectionExpressionSyntax collectionExpression)
+            if (field.Modifiers.Any(m => m.ValueText == "static"))
             {
-                foreach (var element in collectionExpression.Elements)
+                if (field.Declaration.Variables[0].Initializer.Value is CollectionExpressionSyntax collectionExpression)
                 {
-                    charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
-                }
-            }
-            else if (field.Declaration.Variables[0].Initializer.Value is InvocationExpressionSyntax invocationExpression)
-            {
-                if ((invocationExpression.Expression is IdentifierNameSyntax identifierName && identifierName.Identifier.ValueText == "GenerateSpriteData")
-                    || (invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpression && memberAccessExpression.Name.Identifier.ValueText == "GenerateSpriteData"))
-                {
-                    var names = new string[] { "x", "y", "tileIndex", "paletteIndex" };
-                    int argIndex = 0;
-
-                    var args = invocationExpression.ArgumentList.Arguments.ToDictionary(
-                        a => a.NameColon?.Name?.Identifier.Value ?? names[argIndex++],
-                        a => (a.Expression as LiteralExpressionSyntax).Token.Text);
-
-                    void ParseValue(string key)
+                    foreach (var element in collectionExpression.Elements)
                     {
-                        args.TryGetValue(key, out var valueText);
-                        valueText ??= "0";
-                        charBytes.Add(byte.Parse(valueText));
+                        charBytes.Add((int)((element as ExpressionElementSyntax).Expression as LiteralExpressionSyntax).Token.Value);
                     }
-
-                    ParseValue("y");
-                    ParseValue("tileIndex");
-                    ParseValue("paletteIndex");
-                    ParseValue("x");
                 }
+                else if (field.Declaration.Variables[0].Initializer.Value is InvocationExpressionSyntax invocationExpression)
+                {
+                    if ((invocationExpression.Expression is IdentifierNameSyntax identifierName && identifierName.Identifier.ValueText == "GenerateSpriteData")
+                        || (invocationExpression.Expression is MemberAccessExpressionSyntax memberAccessExpression && memberAccessExpression.Name.Identifier.ValueText == "GenerateSpriteData"))
+                    {
+                        var names = new string[] { "x", "y", "tileIndex", "paletteIndex" };
+                        int argIndex = 0;
+
+                        var args = invocationExpression.ArgumentList.Arguments.ToDictionary(
+                            a => a.NameColon?.Name?.Identifier.Value ?? names[argIndex++],
+                            a => (a.Expression as LiteralExpressionSyntax).Token.Text);
+
+                        void ParseValue(string key)
+                        {
+                            args.TryGetValue(key, out var valueText);
+                            valueText ??= "0";
+                            charBytes.Add(byte.Parse(valueText));
+                        }
+
+                        ParseValue("y");
+                        ParseValue("tileIndex");
+                        ParseValue("paletteIndex");
+                        ParseValue("x");
+                    }
+                }
+                // Else should warn we don't know what to do
             }
-            // Else should warn we don't know what to do
+            else
+            {
+                context.ReportDiagnostic(Diagnostics.FieldNotStatic, field.Declaration.Variables.First().Identifier.GetLocation());
+            }
+
         }
         else if (fieldType == "ushort" || fieldType == "byte")
         {

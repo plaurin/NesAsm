@@ -10,7 +10,7 @@ internal class CharScript : NesScript
     }
 
     [CharData]
-    public byte[] Sprite = [
+    public static byte[] Sprite = [
         0b_01000001,
         0b_11000010,
         0b_01000100,

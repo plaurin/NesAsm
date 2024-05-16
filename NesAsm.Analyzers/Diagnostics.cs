@@ -234,4 +234,15 @@ internal static class Diagnostics
         "Todo",
         DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>
+    /// NA0020: All methods in NesScript must be static
+    /// </summary>
+    internal static DiagnosticDescriptor FieldNotStatic = new(
+        "NA0021",
+        "Field not static",
+        "All fields in NesScript must be static",
+        "Todo",
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

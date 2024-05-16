@@ -282,35 +282,35 @@ public class Game1C : NesScript
     private static readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
 
     [RomData]
-    private readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);
+    private static readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);
 
     [RomData]
-    private readonly byte[] RightSprite = GenerateSpriteData(x: 50, y: 30, tileIndex: 1, paletteIndex: 0);
+    private static readonly byte[] RightSprite = GenerateSpriteData(x: 50, y: 30, tileIndex: 1, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] LeftSprite = GenerateSpriteData(x: 30, y: 30, tileIndex: 2, paletteIndex: 0);
+    private static readonly byte[] LeftSprite = GenerateSpriteData(x: 30, y: 30, tileIndex: 2, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] DownSprite = GenerateSpriteData(x: 40, y: 40, tileIndex: 3, paletteIndex: 0);
+    private static readonly byte[] DownSprite = GenerateSpriteData(x: 40, y: 40, tileIndex: 3, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] UpSprite = GenerateSpriteData(x: 40, y: 20, tileIndex: 4, paletteIndex: 0);
+    private static readonly byte[] UpSprite = GenerateSpriteData(x: 40, y: 20, tileIndex: 4, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] StartSprite = GenerateSpriteData(x: 70, y: 30, tileIndex: 5, paletteIndex: 0);
+    private static readonly byte[] StartSprite = GenerateSpriteData(x: 70, y: 30, tileIndex: 5, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] SelectSprite = GenerateSpriteData(x: 60, y: 30, tileIndex: 6, paletteIndex: 0);
+    private static readonly byte[] SelectSprite = GenerateSpriteData(x: 60, y: 30, tileIndex: 6, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] BSprite = GenerateSpriteData(x: 80, y: 30, tileIndex: 7, paletteIndex: 0);
+    private static readonly byte[] BSprite = GenerateSpriteData(x: 80, y: 30, tileIndex: 7, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] ASprite = GenerateSpriteData(x: 90, y: 30, tileIndex: 8, paletteIndex: 0);
+    private static readonly byte[] ASprite = GenerateSpriteData(x: 90, y: 30, tileIndex: 8, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] FaceSprite = GenerateSpriteData(x: 80, y: 80, tileIndex: 9, paletteIndex: 2);
+    private static readonly byte[] FaceSprite = GenerateSpriteData(x: 80, y: 80, tileIndex: 9, paletteIndex: 2);
 
     [RomData]
-    private readonly byte[] HeartSprite = GenerateSpriteData(x: 100, y: 80, tileIndex: 10, paletteIndex: 3);
+    private static readonly byte[] HeartSprite = GenerateSpriteData(x: 100, y: 80, tileIndex: 10, paletteIndex: 3);
 }
