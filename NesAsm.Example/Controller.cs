@@ -1,13 +1,10 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example;
 
-public class Controller : ScriptBase
+public class Controller : NesScript
 {
-    public Controller(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     private const ushort JOYPAD1 = 0x4016;
     private const ushort JOYPAD2 = 0x4017;
 
@@ -30,7 +27,7 @@ public class Controller : ScriptBase
     /// </summary>
     public const byte Pressed1 = 0x21;
 
-    public void ReadControllerOne()
+    public static void ReadControllerOne()
     {
         // Initialize the output memory
         LDAi(1);

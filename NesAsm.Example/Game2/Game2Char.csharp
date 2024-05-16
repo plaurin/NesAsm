@@ -1,0 +1,21 @@
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Example.Game2;
+
+public partial class Game2Char : CharDefinition
+{
+    public static byte[] BackgroundPalettes = [
+        0x0F, 0x17, 0x07, 0x0F, // Palette 0
+        0x0F, 0x0A, 0x07, 0x17, // Palette 1
+        0x0F, 0x16, 0x27, 0x0F, // Palette 2
+        0x00, 0x00, 0x00, 0x00, // Palette 3
+    ];
+    public static byte[] SpritePalettes = [
+        0x0F, 0x20, 0x0F, 0x0F, // Palette 0
+        0x0F, 0x29, 0x0F, 0x0F, // Palette 1
+        0x0F, 0x12, 0x0F, 0x0F, // Palette 2
+        0x0F, 0x16, 0x0F, 0x0F, // Palette 3
+    ];
+
+}

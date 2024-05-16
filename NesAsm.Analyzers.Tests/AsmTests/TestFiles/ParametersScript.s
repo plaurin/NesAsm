@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope ParametersScript
 
-  .proc main
+  .proc start
     lda #25
     sta 0
     lda #232
@@ -29,6 +29,7 @@
   .endproc
 
   .proc invalidParamType
+    jsr proc
 
     rts
   .endproc
@@ -38,7 +39,7 @@
     rts
   .endproc
 
-  .proc lDAa
+  .proc proc
 
     rts
   .endproc

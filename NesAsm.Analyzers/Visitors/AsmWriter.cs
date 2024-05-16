@@ -86,12 +86,12 @@ internal class AsmWriter
 
     public void EndProc()
     {
-        _sb.AppendLine("");
+        WriteEmptyLine();
         _sb.AppendLine($"{CurrentIndentation}rts");
 
         _indentation -= 2;
         _sb.AppendLine($"{CurrentIndentation}.endproc");
-        _sb.AppendLine("");
+        WriteEmptyLine();
     }
 
     public void StartNmi() => _sb.AppendLine($"nmi:");
@@ -99,7 +99,20 @@ internal class AsmWriter
     public void EndNmi()
     {
         _sb.AppendLine($"{CurrentIndentation}rti");
-        _sb.AppendLine($"");
+        WriteEmptyLine();
+    }
+
+    public void StartMacro(string macroName, string[] paramNames)
+    {
+        _sb.AppendLine($"{CurrentIndentation}.macro {macroName} {string.Join(", ", paramNames)}");
+        _indentation += 2;
+    }
+
+    public void EndMacro()
+    {
+        _indentation -= 2;
+        _sb.AppendLine($"{CurrentIndentation}.endmacro");
+        WriteEmptyLine();
     }
 
     public void WriteChars(int[] charBytes)
@@ -169,6 +182,9 @@ internal class AsmWriter
     public void WriteJSROpCode(string? callingScope, string procName) => _sb.AppendLine($"{CurrentIndentation}jsr {GetFullName(callingScope, procName)}");
     public void WriteJMPOpCode(string? callingScope, string procName) => _sb.AppendLine($"{CurrentIndentation}jmp {GetFullName(callingScope, procName)}");
     public void WriteJMPToLabelOpCode(string label) => _sb.AppendLine($"{CurrentIndentation}jmp @{label}");
+
+    public void WriteCallMacro(string? callingScope, string macroName, string[] operands)
+        => _sb.AppendLine($"{CurrentIndentation}{GetFullName(callingScope, macroName)} {string.Join(", ", operands)}");
 
     public void WriteBranchOpCode(string opCode, string label) => _sb.AppendLine($"{CurrentIndentation}{opCode} @{label}");
 

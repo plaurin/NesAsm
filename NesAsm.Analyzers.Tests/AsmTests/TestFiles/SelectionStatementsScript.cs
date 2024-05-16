@@ -1,16 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [PostFileInclude("wrapper.s")]
-internal class SelectionStatementsScript : ScriptBase
+internal class SelectionStatementsScript : NesScript
 {
-    public SelectionStatementsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         LDXi(12);
         LDYi(12);
@@ -31,7 +28,7 @@ internal class SelectionStatementsScript : ScriptBase
         }
     }
 
-    public void InvalidIf()
+    public static void InvalidIf()
     {
     }
 

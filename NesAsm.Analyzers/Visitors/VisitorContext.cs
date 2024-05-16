@@ -10,6 +10,7 @@ internal class VisitorContext
         Compilation = compilation;
         Writer = asmWriter;
         CsWriter = csWriter;
+        TypeCache = new TypeCache(Compilation);
     }
 
     protected VisitorContext(VisitorContext context)
@@ -18,12 +19,14 @@ internal class VisitorContext
         Compilation = context.Compilation;
         Writer = context.Writer;
         CsWriter = context.CsWriter;
+        TypeCache = context.TypeCache;
     }
 
     protected SourceProductionContext Context { get; }
     public Compilation Compilation { get; }
     public AsmWriter Writer { get; }
     public CsWriter? CsWriter { get; }
+    public TypeCache TypeCache { get; }
 
     public void ReportDiagnostic(DiagnosticDescriptor descriptor, Location? location, params object?[]? messageArgs)
     {

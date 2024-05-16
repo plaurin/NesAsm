@@ -47,6 +47,6 @@ public class CharClassVisitorTests
 
         var sourcePaths = filenames.Select(filename => $@"..\..\..\CharTests\TestFiles\{filename}").ToArray();
 
-        GeneratorTestUtilities.TestGenerator(generator, sourcePaths);
+        GeneratorTestUtilities.TestGenerator(sourcePaths, generator);
     }
 }

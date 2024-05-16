@@ -12,7 +12,9 @@ namespace NesAsm.Analyzers;
 public static class Utilities
 {
     public static string GetProcName(MethodDeclarationSyntax method) => GetProcName(method.Identifier.ValueText);
+
     public static string GetProcName(string methodName) => $"{char.ToLowerInvariant(methodName[0])}{methodName.Substring(1)}";
+
     public static string GetLabelName(string fieldName)
     {
         var parts = fieldName.Split('.');
@@ -23,6 +25,11 @@ public static class Utilities
 
     public static string GetConstName(string constName) => constName;
 
+    public static string GetMacroName(MethodDeclarationSyntax method) => GetMacroName(method.Identifier.ValueText);
+
+    public static string GetMacroName(string macroName) => macroName;
+
+
     public static string ConvertOperandToNumericText(string operand)
     {
         if (string.IsNullOrWhiteSpace(operand)) return operand;
@@ -32,6 +39,9 @@ public static class Utilities
         operand = operand.Replace("PPUSTATUS", "0x2002");
         operand = operand.Replace("PPUADDR", "0x2006");
         operand = operand.Replace("PPUDATA", "0x2007");
+
+        if (operand.EndsWith("/ 256")) return $"#.HIBYTE({operand.Replace("/ 256", "").Trim()})";
+        if (operand.EndsWith("% 256")) return $"#.LOBYTE({operand.Replace("% 256", "").Trim()})";
 
         if (operand.Length >= 2)
         {
@@ -46,10 +56,11 @@ public static class Utilities
             }
         }
 
+        if (bool.TryParse(operand, out var boolOperand)) return boolOperand ? "1" : "0";
         if (byte.TryParse(operand, out var _)) return operand;
         if (ushort.TryParse(operand, out var _)) return operand;
 
-        throw new InvalidOperationException($"Expected parameter of type byte or ushort but found {operand}");
+        throw new InvalidOperationException($"Expected parameter of type bool, byte or ushort but found {operand}");
     }
 
     // https://stackoverflow.com/questions/63055621/how-to-convert-camel-case-to-snake-case-with-two-capitals-next-to-each-other

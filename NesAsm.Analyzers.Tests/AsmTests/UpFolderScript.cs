@@ -1,14 +1,11 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests;
 
-internal class UpFolderScript : ScriptBase
+internal class UpFolderScript : NesScript
 {
-    public UpFolderScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void ProcU()
+    public static void ProcU()
     {
         LDXi(25);
     }

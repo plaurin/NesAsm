@@ -1,14 +1,11 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class MultiProcScript : ScriptBase
+internal class MultiProcScript : NesScript
 {
-    public MultiProcScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public static readonly byte Data = 0xFF;
 
     [RomData]
@@ -27,17 +24,18 @@ internal class MultiProcScript : ScriptBase
         0x0F, // Palette 2
     ];
 
-    public void ProcA()
+    public static void ProcA()
     {
         LDAi(10);
     }
 
-    public void ProcB()
+    public static void ProcB()
     {
         LDAi(20);
     }
 
-    public void ProcC()
+    [NoReturnProc]
+    public static void ProcC()
     {
         LDAi(30);
     }

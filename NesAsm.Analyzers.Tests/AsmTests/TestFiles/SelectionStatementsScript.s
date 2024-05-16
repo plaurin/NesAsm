@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope SelectionStatementsScript
 
-  .proc main
+  .proc start
     ldx #12
     ldy #12
 

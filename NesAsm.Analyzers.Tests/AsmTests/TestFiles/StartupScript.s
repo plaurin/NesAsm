@@ -15,7 +15,7 @@
 
 .segment "CODE"
 
-.proc main
+.proc start
   lda 25
 
   rts

@@ -7,13 +7,13 @@
 - RunResult[0] diagnostics:
 - RunResult[0].GeneratedSources Count: 1
 - RunResult[0].Exception: 
-- RunResult[0].GeneratedSources[0].HintName: Asm.GeneratorDataScript.cs
+- RunResult[0].GeneratedSources[0].HintName: Asm.DataGeneratorScript.cs
 - RunResult[0].GeneratedSources[0].SourceText:
-/* Generator Asm code in file Asm.GeneratorDataScript.s
+/* Generator Asm code in file Asm.DataGeneratorScript.s
 ; Auto generated code using the NesAsm project
-.scope GeneratorDataScript
+.scope DataGeneratorScript
 
-  .proc main
+  .proc start
 
     ldx #0
   @loop1_on_X:

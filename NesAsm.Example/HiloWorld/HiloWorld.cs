@@ -1,16 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example.HiloWorld;
 
 [PostFileInclude("wrapper-no-nmi.s")]
-public class HiloWorld : ScriptBase
+public class HiloWorld : NesScript
 {
-    public HiloWorld(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Main()
     {
         // Read the PPUSTATUS register $2002
         LDA(PPUSTATUS);
@@ -34,7 +31,7 @@ public class HiloWorld : ScriptBase
         if (BNE()) goto loop;
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         LDXi(0x00);
         STX(0x2003);
@@ -50,7 +47,7 @@ public class HiloWorld : ScriptBase
     }
 
     [RomData]
-    private byte[] HiloWorldSprites = [
+    private static byte[] HiloWorldSprites = [
         // Empty sprites
         0,
         0,
@@ -117,7 +114,7 @@ public class HiloWorld : ScriptBase
     ];
 
     [RomData]
-    private byte[] Palettes = [
+    private static byte[] Palettes = [
         // Background palettes
         0x0F,
         0x20,
@@ -156,7 +153,7 @@ public class HiloWorld : ScriptBase
     ];
 
     [CharData]
-    private byte[] Characters = [
+    private static byte[] Characters = [
         // First tile is empty
         0,
         0,

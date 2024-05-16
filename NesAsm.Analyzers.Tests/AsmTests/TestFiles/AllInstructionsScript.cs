@@ -1,15 +1,12 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class AllInstructionsScript : ScriptBase
+internal class AllInstructionsScript : NesScript
 {
-    public AllInstructionsScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void AllInstructions()
+    public static void AllInstructions()
     {
         LDAi(2);
         LDXi(3);
@@ -59,5 +56,5 @@ internal class AllInstructionsScript : ScriptBase
     }
 
     [RomData]
-    private readonly byte[] Data = [0, 1, 2, 3, 4];
+    private static readonly byte[] Data = [0, 1, 2, 3, 4];
 }

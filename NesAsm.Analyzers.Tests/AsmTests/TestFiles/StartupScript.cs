@@ -1,18 +1,15 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [HeaderSegment(mapper: 2, prgRomBanks: 2)]
 [VectorsSegment()]
 [StartupSegment()]
-internal class StartupScript : ScriptBase
+internal class StartupScript : NesScript
 {
-    public StartupScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start() // TODO All mmembers should be static!
     {
         LDA(25);
     }

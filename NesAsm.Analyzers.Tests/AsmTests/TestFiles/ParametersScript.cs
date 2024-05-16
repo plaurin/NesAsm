@@ -1,19 +1,16 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class ParametersScript : ScriptBase
+internal class ParametersScript : NesScript
 {
-    public ParametersScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         ProcB(25, 1000, true);
     }
 
-    public void ProcB(byte a, ushort b, bool c)
+    public static void ProcB(byte a, ushort b, bool c)
     {
         LDAa(a);
         STA(0x40);
@@ -25,18 +22,19 @@ internal class ParametersScript : ScriptBase
         STA(0x42);
     }
 
-    public void InvalidParamType(long l)
+    public static void InvalidParamType(long l)
     {
-        LDAa(l);
+        Proc(l);
     }
 
-    public void InvalidOpCodeUsingParameter(byte a)
+    public static void InvalidOpCodeUsingParameter(byte a)
     {
         STA(a);
     }
 
+    // Maybe not used anymore
     // Only to force NA0004 in InvalidParamType
-    private void LDAa(long l)
+    private static void Proc(long l)
     {
     }
 }

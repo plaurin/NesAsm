@@ -1,6 +1,6 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
-using NesAsm.Example.Game1;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example.Game2;
 
@@ -9,13 +9,9 @@ namespace NesAsm.Example.Game2;
 [StartupSegment()]
 [FileInclude<Controller>("..")]
 [FileInclude<PPU>("..")]
-[FileInclude<Game1Char>("../Game1")]
-public class Game2C : ScriptBase
+[FileInclude<Game2Char>()]
+public class Game2C : NesScript
 {
-    public Game2C(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     private const ushort RightButtonPalette = 0x20A;
     private const ushort LeftButtonPalette = 0x20E;
     private const ushort DownButtonPalette = 0x212;
@@ -30,7 +26,8 @@ public class Game2C : ScriptBase
 
     private const ushort FrameCounter = 0x30;
 
-    public void Main()
+    [NoReturnProc]
+    public static void Main()
     {
         // Read the PPUSTATUS register $2002 PPU_STATUS
         LDA(PPU.PPU_STATUS);
@@ -45,24 +42,25 @@ public class Game2C : ScriptBase
 
         for (X = 0; X < 32; X++)
         {
-            LDA(Game1Char.BackgroundPalettes, X);
+            LDA(Game2Char.BackgroundPalettes, X);
 
             // Write palette data to PPUDATA $2007 PPU_DATA
             STA(PPU.PPU_DATA);
         }
 
         // Transfert sprite data into $200-$2ff memory range
-
         for (X = 0; X < 48; X++)
         {
             LDA(EmptySprites1, X);
             STA(0x200, X);
         }
 
+        // Draw backgound
+
         // Main game loop
         while (true)
         {
-            Call<Controller>(s => s.ReadControllerOne());
+            Controller.ReadControllerOne();
 
             UpdateController();
 
@@ -77,7 +75,7 @@ public class Game2C : ScriptBase
         }
     }
 
-    public void UpdateController()
+    public static void UpdateController()
     {
         // ## Update button palette
         // Init palette to zero
@@ -150,7 +148,7 @@ public class Game2C : ScriptBase
         }
     }
 
-    public void MoveFace()
+    public static void MoveFace()
     {
         // Move right
         LDA(Controller.Down1);
@@ -181,7 +179,7 @@ public class Game2C : ScriptBase
         }
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         // Transfer Sprites via OAM
         LDAi(0x00);
@@ -196,7 +194,7 @@ public class Game2C : ScriptBase
         INC(FrameCounter);
     }
 
-    public void Reset()
+    public static void Reset()
     {
         SEI();
         CLD();
@@ -255,10 +253,10 @@ public class Game2C : ScriptBase
         // 0x2000 PPU_CTRL
         STA(PPU.PPU_CTRL);
 
-        Jump<Game2C>(s => s.Main());
+        Main();
     }
 
-    public void ResetPalettes()
+    public static void ResetPalettes()
     {
         // 0x2002 PPU_STATUS
         BIT(PPU.PPU_STATUS);
@@ -282,38 +280,38 @@ public class Game2C : ScriptBase
     }
 
     [RomData]
-    private readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
+    private static readonly byte[] EmptySprites1 = GenerateSpriteData(0, 0, 0, 0);
 
     [RomData]
-    private readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);
+    private static readonly byte[] EmptySprites2 = GenerateSpriteData(0, 0, 0, 0);
 
     [RomData]
-    private readonly byte[] RightSprite = GenerateSpriteData(x: 50, y: 30, tileIndex: 1, paletteIndex: 0);
+    private static readonly byte[] RightSprite = GenerateSpriteData(x: 50, y: 30, tileIndex: 1, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] LeftSprite = GenerateSpriteData(x: 30, y: 30, tileIndex: 2, paletteIndex: 0);
+    private static readonly byte[] LeftSprite = GenerateSpriteData(x: 30, y: 30, tileIndex: 2, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] DownSprite = GenerateSpriteData(x: 40, y: 40, tileIndex: 3, paletteIndex: 0);
+    private static readonly byte[] DownSprite = GenerateSpriteData(x: 40, y: 40, tileIndex: 3, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] UpSprite = GenerateSpriteData(x: 40, y: 20, tileIndex: 4, paletteIndex: 0);
+    private static readonly byte[] UpSprite = GenerateSpriteData(x: 40, y: 20, tileIndex: 4, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] StartSprite = GenerateSpriteData(x: 70, y: 30, tileIndex: 5, paletteIndex: 0);
+    private static readonly byte[] StartSprite = GenerateSpriteData(x: 70, y: 30, tileIndex: 5, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] SelectSprite = GenerateSpriteData(x: 60, y: 30, tileIndex: 6, paletteIndex: 0);
+    private static readonly byte[] SelectSprite = GenerateSpriteData(x: 60, y: 30, tileIndex: 6, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] BSprite = GenerateSpriteData(x: 80, y: 30, tileIndex: 7, paletteIndex: 0);
+    private static readonly byte[] BSprite = GenerateSpriteData(x: 80, y: 30, tileIndex: 7, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] ASprite = GenerateSpriteData(x: 90, y: 30, tileIndex: 8, paletteIndex: 0);
+    private static readonly byte[] ASprite = GenerateSpriteData(x: 90, y: 30, tileIndex: 8, paletteIndex: 0);
 
     [RomData]
-    private readonly byte[] FaceSprite = GenerateSpriteData(x: 80, y: 80, tileIndex: 9, paletteIndex: 2);
+    private static readonly byte[] FaceSprite = GenerateSpriteData(x: 80, y: 80, tileIndex: 9, paletteIndex: 2);
 
     [RomData]
-    private readonly byte[] HeartSprite = GenerateSpriteData(x: 100, y: 80, tileIndex: 10, paletteIndex: 3);
+    private static readonly byte[] HeartSprite = GenerateSpriteData(x: 100, y: 80, tileIndex: 10, paletteIndex: 3);
 }

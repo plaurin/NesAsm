@@ -1,18 +1,17 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example.Game1;
 
 [HeaderSegment()]
 [VectorsSegment()]
 [StartupSegment()]
-public class Game1 : ScriptBase
+[FileInclude<Controller>("..")]
+public class Game1 : NesScript
 {
-    public Game1(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    [NoReturnProc]
+    public static void Main()
     {
         // Read the PPUSTATUS register $2002
         LDA(PPUSTATUS);
@@ -50,7 +49,7 @@ public class Game1 : ScriptBase
         // Main game loop
         endless_loop:
 
-        Call<Controller>(s => s.ReadControllerOne());
+        Controller.ReadControllerOne();
 
         UpdateController();
 
@@ -66,7 +65,7 @@ public class Game1 : ScriptBase
         goto endless_loop;
     }
 
-    public void UpdateController()
+    public static void UpdateController()
     {
         // ## Update button palette
         // Init palette to zero
@@ -143,7 +142,7 @@ public class Game1 : ScriptBase
         LDAi(0);
     }
 
-    public void MoveFace()
+    public static void MoveFace()
     {
         // Move right
         LDA(0x21);
@@ -173,7 +172,7 @@ public class Game1 : ScriptBase
         LDA(0);
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         // Transfer Sprites via OAM
         LDAi(0x00);
@@ -188,7 +187,7 @@ public class Game1 : ScriptBase
         INC(0x30);
     }
 
-    public void Reset()
+    public static void Reset()
     {
         SEI();
         CLD();
@@ -242,10 +241,10 @@ public class Game1 : ScriptBase
         LDAi(0b_1000_0000);
         STA(PPUCTRL);
 
-        Jump<Game1>(s => s.Main());
+        Main();
     }
 
-    public void ResetPalettes()
+    public static void ResetPalettes()
     {
         BIT(0x2002);
 
@@ -265,7 +264,7 @@ public class Game1 : ScriptBase
     }
 
     [RomData]
-    private byte[] ControllerSprites = [
+    private static byte[] ControllerSprites = [
         // Empty sprites
         0,
         0,
@@ -338,7 +337,7 @@ public class Game1 : ScriptBase
     ];
 
     [RomData]
-    private byte[] Palettes = [
+    private static byte[] Palettes = [
         // Background palettes
         0x0F,
         0x20,
@@ -377,7 +376,7 @@ public class Game1 : ScriptBase
     ];
 
     [CharData]
-    private byte[] Characters = [
+    private static byte[] Characters = [
         // First tile is empty
         0,
         0,

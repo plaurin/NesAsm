@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope BranchScript
 
-  .proc main
+  .proc start
     ldx #0
 
   @loop:

@@ -14,12 +14,12 @@ public class AsmGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var outputFolder = context.AnalyzerConfigOptionsProvider
-                 .Select((options, _) =>
-                 {
-                     options.GlobalOptions.TryGetValue("nesasm_output", out var outputFolder);
+            .Select((options, _) =>
+            {
+                options.GlobalOptions.TryGetValue("nesasm_output", out var outputFolder);
 
-                     return outputFolder;
-                 });
+                return outputFolder;
+            });
 
         var classProviders = context.SyntaxProvider
             .CreateSyntaxProvider(
@@ -40,7 +40,7 @@ public class AsmGenerator : IIncrementalGenerator
                 {
                     if (type.Type is IdentifierNameSyntax identifier)
                     {
-                        if (identifier.Identifier.Text == "ScriptBase")
+                        if (identifier.Identifier.Text == "NesScript")
                         {
                             return true;
                         }
@@ -65,7 +65,7 @@ public class AsmGenerator : IIncrementalGenerator
             }
 
             var fullName = typeSymbol.ToDisplayString();
-            if (fullName == "NesAsm.Emulator.ScriptBase")
+            if (fullName == "NesAsm.Emulator.NesScript")
             {
                 return classDeclarationSyntax;
             }

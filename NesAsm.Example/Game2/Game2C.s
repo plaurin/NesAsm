@@ -17,7 +17,7 @@
 
 .include "../PPU.s"
 
-.include "../Game1/Game1Char.s"
+.include "Game2Char.s"
 
 .segment "CODE"
 
@@ -47,7 +47,7 @@ FrameCounter = $30
 
   ldx #0
 @loop1_on_X:
-  lda Game1Char::background_palettes, x
+  lda Game2Char::background_palettes, x
 
   ; Write palette data to PPUDATA $2007 PPU_DATA
   sta PPU::PPU_DATA
@@ -58,7 +58,6 @@ FrameCounter = $30
 
   ; Transfert sprite data into $200-$2ff memory range
 
-
   ldx #0
 @loop2_on_X:
   lda empty_sprites1, x
@@ -67,6 +66,8 @@ FrameCounter = $30
   inx
   cpx #48
   bne @loop2_on_X
+
+  ; Draw backgound
 
   ; Main game loop
 @endless_loop:
