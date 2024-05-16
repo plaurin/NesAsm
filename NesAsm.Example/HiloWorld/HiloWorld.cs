@@ -7,7 +7,7 @@ namespace NesAsm.Example.HiloWorld;
 [PostFileInclude("wrapper-no-nmi.s")]
 public class HiloWorld : NesScript
 {
-    public void Main()
+    public static void Main()
     {
         // Read the PPUSTATUS register $2002
         LDA(PPUSTATUS);
@@ -31,7 +31,7 @@ public class HiloWorld : NesScript
         if (BNE()) goto loop;
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         LDXi(0x00);
         STX(0x2003);
@@ -47,7 +47,7 @@ public class HiloWorld : NesScript
     }
 
     [RomData]
-    private byte[] HiloWorldSprites = [
+    private static byte[] HiloWorldSprites = [
         // Empty sprites
         0,
         0,
@@ -114,7 +114,7 @@ public class HiloWorld : NesScript
     ];
 
     [RomData]
-    private byte[] Palettes = [
+    private static byte[] Palettes = [
         // Background palettes
         0x0F,
         0x20,

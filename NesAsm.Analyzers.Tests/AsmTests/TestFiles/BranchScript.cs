@@ -5,7 +5,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class BranchScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         LDXi(0);
 

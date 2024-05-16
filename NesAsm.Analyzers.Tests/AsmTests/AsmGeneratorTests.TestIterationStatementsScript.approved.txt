@@ -31,7 +31,7 @@
 ; Auto generated code using the NesAsm project
 .scope IterationStatementsScript
 
-  .proc main
+  .proc start
     ; for - using X or Y register
 
     ldx #0

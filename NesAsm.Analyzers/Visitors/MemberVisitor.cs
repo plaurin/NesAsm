@@ -13,27 +13,34 @@ internal class MemberVisitor
 
         if (memberDeclarationSyntax is MethodDeclarationSyntax method)
         {
-            var isNmi = method.Identifier.ValueText.ToLowerInvariant() == "nmi";
-            var isMacro = method.AttributeLists.Any(att => att.Attributes.Any(a => a.Name.ToString() == "Macro"));
-
-            if (isNmi)
-                writer.StartNmi();
-            else if (isMacro)
+            if (method.Modifiers.Any(m => m.ValueText == "static"))
             {
-                var paramNames = method.ParameterList.Parameters.Select(p => p.Identifier.ValueText).ToArray();
-                writer.StartMacro(Utilities.GetMacroName(method), paramNames);
+                var isNmi = method.Identifier.ValueText.ToLowerInvariant() == "nmi";
+                var isMacro = method.AttributeLists.Any(att => att.Attributes.Any(a => a.Name.ToString() == "Macro"));
+
+                if (isNmi)
+                    writer.StartNmi();
+                else if (isMacro)
+                {
+                    var paramNames = method.ParameterList.Parameters.Select(p => p.Identifier.ValueText).ToArray();
+                    writer.StartMacro(Utilities.GetMacroName(method), paramNames);
+                }
+                else
+                    writer.StartProc(Utilities.GetProcName(method));
+
+                MethodVisitor.Visit(method, new MethodVisitorContext(context));
+
+                if (isNmi)
+                    writer.EndNmi();
+                else if (isMacro)
+                    writer.EndMacro();
+                else
+                    writer.EndProc();
             }
             else
-                writer.StartProc(Utilities.GetProcName(method));
-
-            MethodVisitor.Visit(method, new MethodVisitorContext(context));
-
-            if (isNmi)
-                writer.EndNmi();
-            else if (isMacro)
-                writer.EndMacro();
-            else
-                writer.EndProc();
+            {
+                context.ReportDiagnostic(Diagnostics.MethodNotStatic, method.GetLocation());
+            }
         }
 
         if (memberDeclarationSyntax is FieldDeclarationSyntax field)

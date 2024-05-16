@@ -5,7 +5,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class CharScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
     }
 

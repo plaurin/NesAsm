@@ -10,7 +10,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [FileInclude<SubFolderScript>("SubFolder")]
 internal class CallingOtherScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         MultiProcScript.ProcB();
 
@@ -19,7 +19,7 @@ internal class CallingOtherScript : NesScript
         MultiProcScript.ProcC();
     }
 
-    public void MyProcC()
+    public static void MyProcC()
     {
         LDA(MultiProcScript.Data);
         LDA(MultiProcScript.SpritePalettes, X);

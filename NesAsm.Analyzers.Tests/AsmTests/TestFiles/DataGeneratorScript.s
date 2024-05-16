@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope DataGeneratorScript
 
-  .proc main
+  .proc start
 
     ldx #0
   @loop1_on_X:

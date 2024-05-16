@@ -6,7 +6,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [FileInclude<MacroScript>]
 internal class CallingOtherMacroScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         MacroScript.MacroNoParam();
     }

@@ -172,7 +172,7 @@ public class Game1 : NesScript
         LDA(0);
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         // Transfer Sprites via OAM
         LDAi(0x00);
@@ -187,7 +187,7 @@ public class Game1 : NesScript
         INC(0x30);
     }
 
-    public void Reset()
+    public static void Reset()
     {
         SEI();
         CLD();
@@ -244,7 +244,7 @@ public class Game1 : NesScript
         Main();
     }
 
-    public void ResetPalettes()
+    public static void ResetPalettes()
     {
         BIT(0x2002);
 

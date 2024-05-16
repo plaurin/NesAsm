@@ -7,7 +7,7 @@
 
 .scope CallingOtherScript
 
-  .proc main
+  .proc start
     jsr MultiProcScript::procB
 
     jsr myProcC

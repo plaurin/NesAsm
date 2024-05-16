@@ -7,7 +7,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [PostFileInclude("wrapper.s")]
 internal class IterationStatementsScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         // for - using X or Y register
         for (X = 0; X < 10; X++)
@@ -42,11 +42,11 @@ internal class IterationStatementsScript : NesScript
     }
 
     [RomData]
-    private readonly byte[] Data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    private static readonly byte[] Data = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    public int Z { get; set; }
+    public static int Z { get; set; }
 
-    public void InvalidFor()
+    public static void InvalidFor()
     {
         // NA0013 - Should be X or Y only
         for (Z = 0; Z < 10; Z++)

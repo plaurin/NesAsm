@@ -178,7 +178,7 @@ public class Game1C : NesScript
         }
     }
 
-    public void Nmi()
+    public static void Nmi()
     {
         // Transfer Sprites via OAM
         LDAi(0x00);
@@ -193,7 +193,7 @@ public class Game1C : NesScript
         INC(FrameCounter);
     }
 
-    public void Reset()
+    public static void Reset()
     {
         SEI();
         CLD();
@@ -255,7 +255,7 @@ public class Game1C : NesScript
         Game1C.Main();
     }
 
-    public void ResetPalettes()
+    public static void ResetPalettes()
     {
         // 0x2002 PPU_STATUS
         BIT(PPU.PPU_STATUS);

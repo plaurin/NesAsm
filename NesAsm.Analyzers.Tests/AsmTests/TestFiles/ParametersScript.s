@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope ParametersScript
 
-  .proc main
+  .proc start
     lda #25
     sta 0
     lda #232

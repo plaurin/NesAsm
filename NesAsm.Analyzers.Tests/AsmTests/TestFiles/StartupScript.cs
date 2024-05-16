@@ -9,7 +9,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [StartupSegment()]
 internal class StartupScript : NesScript
 {
-    public void Main() // TODO All mmembers should be static!
+    public static void Start() // TODO All mmembers should be static!
     {
         LDA(25);
     }

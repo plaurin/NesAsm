@@ -7,7 +7,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [PostFileInclude("wrapper.s")]
 internal class SelectionStatementsScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         LDXi(12);
         LDYi(12);
@@ -28,7 +28,7 @@ internal class SelectionStatementsScript : NesScript
         }
     }
 
-    public void InvalidIf()
+    public static void InvalidIf()
     {
     }
 

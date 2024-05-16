@@ -5,7 +5,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class SubroutineResultsScript : NesScript
 {
-    public void Main()
+    public static void Start()
     {
         // Argument of the method could not be used after calling a subroutine with return values
         var (a, b, c) = ProcB();
@@ -20,7 +20,7 @@ internal class SubroutineResultsScript : NesScript
         STA(0x42);
     }
 
-    public (byte, ushort, bool) ProcB()
+    public static (byte, ushort, bool) ProcB()
     {
         return (250, 1080, true);
     }

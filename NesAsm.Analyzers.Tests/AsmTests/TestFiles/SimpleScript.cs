@@ -7,11 +7,7 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 [PostFileInclude("wrapper.s")]
 internal class SimpleScript : NesScript
 {
-    public SimpleScript()
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         // Start by loading the value 25 into the X register
         LDXi(25);
@@ -20,7 +16,7 @@ internal class SimpleScript : NesScript
         INX();
     }
 
-    public void InvalidParsing()
+    public static void InvalidParsing()
     {
         LDAa(0b_101010101010);
         
@@ -28,7 +24,7 @@ internal class SimpleScript : NesScript
     }
 
     // Only to force NA0005 in InvalidParsing
-    private void LDAa(long l)
+    private static void LDAa(long l)
     {
     }
 }

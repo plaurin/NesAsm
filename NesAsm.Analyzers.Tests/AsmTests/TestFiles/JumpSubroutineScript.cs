@@ -6,13 +6,13 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class JumpSubroutineScript : NesScript
 {
-    public void ProcA()
+    public static void ProcA()
     {
         ProcB();
         ProcC();
     }
 
-    public void ProcB()
+    public static void ProcB()
     {
         LDAi(1);
 
