@@ -3,7 +3,7 @@
 
   JOYPAD1 = $4016
   JOYPAD2 = $4017
-  .proc main
+  .proc start
     lda #1
     sta JOYPAD1
     lda #0

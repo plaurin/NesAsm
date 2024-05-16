@@ -1,3 +1,16 @@
+﻿- Main diagnostics:
+- SyntaxTrees Count: 4
+- Output diagnostics:
+..\..\..\..\NesAsm.Example\Game1\Game1.cs(85,9): warning CS0164: This label has not been referenced
+- RunResult.GeneratedTrees Count: 2
+- RunResults diagnostics:
+- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[0] diagnostics:
+- RunResult[0].GeneratedSources Count: 2
+- RunResult[0].Exception: 
+- RunResult[0].GeneratedSources[0].HintName: Asm.Game1.cs
+- RunResult[0].GeneratedSources[0].SourceText:
+/* Generator Asm code in file Asm.Game1.s
 ; Auto generated code using the NesAsm project
 .segment "HEADER"
   .byte $4E, $45, $53, $1A  ; iNES header identifier
@@ -572,3 +585,57 @@ palettes:
 .byte 0
 
 
+
+*/
+- RunResult[0].GeneratedSources[1].HintName: Asm.Controller.cs
+- RunResult[0].GeneratedSources[1].SourceText:
+/* Generator Asm code in file Asm.Controller.s
+; Auto generated code using the NesAsm project
+.scope Controller
+
+  JOYPAD1 = $4016
+  JOYPAD2 = $4017
+  BUTTON_A = %10000000
+  BUTTON_B = %01000000
+  BUTTON_SELECT = %00100000
+  BUTTON_START = %00010000
+  BUTTON_UP = %00001000
+  BUTTON_DOWN = %00000100
+  BUTTON_LEFT = %00000010
+  BUTTON_RIGHT = %00000001
+  Down1 = $20
+  Pressed1 = $21
+  .proc readControllerOne
+    ; Initialize the output memory
+    lda #1
+    sta Down1
+
+    ; Send the latch pulse down to the 4021
+    sta JOYPAD1
+    lda #0
+    sta JOYPAD1
+
+    ; Read the buttons from the data line
+
+  @read_loop:
+
+    lda JOYPAD1
+    lsr a
+    rol Down1
+    bcc @read_loop
+
+    ; Temp copy
+    lda Down1
+    sta Pressed1
+
+    rts
+  .endproc
+
+.endscope
+
+
+*/
+- RunResult[1].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
+- RunResult[1] diagnostics:
+- RunResult[1].GeneratedSources Count: 0
+- RunResult[1].Exception: 

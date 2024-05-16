@@ -3,7 +3,7 @@
 
   .proc procA
     jsr procB
-    jsr procC
+    jmp procC
 
     rts
   .endproc
@@ -18,6 +18,8 @@
 
   .proc procC
     lda #2
+
+    jmp jumpInsideProc
 
     rts
   .endproc

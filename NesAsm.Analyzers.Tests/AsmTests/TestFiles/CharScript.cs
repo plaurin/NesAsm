@@ -3,18 +3,14 @@ using NesAsm.Emulator.Attributes;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class CharScript : ScriptBase
+internal class CharScript : NesScript
 {
-    public CharScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
     }
 
     [CharData]
-    public byte[] Sprite = [
+    public static byte[] Sprite = [
         0b_01000001,
         0b_11000010,
         0b_01000100,

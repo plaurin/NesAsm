@@ -1,14 +1,11 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.AsmTests.TestFiles.SubFolder;
 
-internal class SubFolderScript : ScriptBase
+internal class SubFolderScript : NesScript
 {
-    public SubFolderScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void ProcS()
+    public static void ProcS()
     {
         LDXi(25);
     }

@@ -3,8 +3,8 @@
 
 .scope CallingOtherMacroScript
 
-  .proc main
-    MacroScript::MacroNoParam )
+  .proc start
+    MacroScript::MacroNoParam 
 
     rts
   .endproc

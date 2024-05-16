@@ -1,14 +1,11 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class SubroutineResultScript : ScriptBase
+internal class SubroutineResultScript : NesScript
 {
-    public SubroutineResultScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         // Argument of the method could not be used after calling a subroutine with return values
         var a = ProcB();
@@ -17,7 +14,7 @@ internal class SubroutineResultScript : ScriptBase
         STA(0x40);
     }
 
-    public byte ProcB()
+    public static byte ProcB()
     {
         return 178;
     }

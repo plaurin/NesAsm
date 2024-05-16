@@ -14,7 +14,7 @@ The goal of NesAsm is to make writing games for the NES accessible to more peopl
 ## Write ASM code but in C#
 - Access to intellisense, documentation on OpCodes
 
-![Scripting](doc/ScriptBase.png)
+![Scripting](doc/NesScript.png)
 
 - Get warnings or errors when you do something wrong
 
@@ -60,8 +60,8 @@ The goal of NesAsm is to make writing games for the NES accessible to more peopl
 
 # How does it works
 
-## ScriptBase base class to access all the Apis and utilities
-- All script code must inherit from the ScriptBase class
+## NesScript base class to access all the Apis and utilities
+- All script code must inherit from the NesScript class
 - [WIP] All 6502 OpCodes can be accessed through that base class
 
 ## NESEmulator class

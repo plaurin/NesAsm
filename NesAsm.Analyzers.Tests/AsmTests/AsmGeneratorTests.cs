@@ -6,14 +6,6 @@ namespace NesAsm.Analyzers.Tests.AsmTests;
 public class AsmGeneratorTests
 {
     [Fact]
-    public void TestExampleScript()
-    {
-        var generator = new AsmGenerator();
-
-        GeneratorTestUtilities.TestGenerator(generator, $@"..\..\..\..\NesAsm.Example\HiloWorld\HiloWorld.cs");
-    }
-
-    [Fact]
     public void TestSimpleScript()
     {
         TestScript("SimpleScript.cs");
@@ -32,9 +24,9 @@ public class AsmGeneratorTests
     }
 
     [Fact]
-    public void TestCharsScript()
+    public void TestCharScript()
     {
-        TestScript("CharsScript.cs");
+        TestScript("CharScript.cs");
     }
 
     [Fact]
@@ -121,6 +113,6 @@ public class AsmGeneratorTests
 
         var sourcePaths = filenames.Select(filename => $@"..\..\..\AsmTests\TestFiles\{filename}").ToArray();
 
-        GeneratorTestUtilities.TestGenerator(generator, sourcePaths);
+        GeneratorTestUtilities.TestGenerator(sourcePaths, generator);
     }
 }

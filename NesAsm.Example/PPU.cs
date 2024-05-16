@@ -2,12 +2,8 @@
 
 namespace NesAsm.Example;
 
-public class PPU : ScriptBase
+public class PPU : NesScript
 {
-    public PPU(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     public const ushort PPU_CTRL = 0x2000;
     public const ushort PPU_MASK = 0x2001;
     public const ushort PPU_STATUS = 0x2002;

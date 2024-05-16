@@ -1,14 +1,11 @@
 ﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class BranchScript : ScriptBase
+internal class BranchScript : NesScript
 {
-    public BranchScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         LDXi(0);
 

@@ -1,16 +1,13 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
 [PostFileInclude("wrapper.s")]
-internal class SimpleScript : ScriptBase
+internal class SimpleScript : NesScript
 {
-    public SimpleScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
-    public void Main()
+    public static void Start()
     {
         // Start by loading the value 25 into the X register
         LDXi(25);
@@ -19,7 +16,7 @@ internal class SimpleScript : ScriptBase
         INX();
     }
 
-    public void InvalidParsing()
+    public static void InvalidParsing()
     {
         LDAa(0b_101010101010);
         
@@ -27,7 +24,7 @@ internal class SimpleScript : ScriptBase
     }
 
     // Only to force NA0005 in InvalidParsing
-    private void LDAa(long l)
+    private static void LDAa(long l)
     {
     }
 }

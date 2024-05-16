@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope SimpleScript
 
-  .proc main
+  .proc start
     ; Start by loading the value 25 into the X register
     ldx #25
 
@@ -12,7 +12,10 @@
   .endproc
 
   .proc invalidParsing
+    jsr lDAa
 
+    lda #22
+    sta 0
     jsr lDAa
 
     rts

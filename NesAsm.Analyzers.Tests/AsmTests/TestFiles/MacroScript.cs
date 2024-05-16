@@ -1,28 +1,29 @@
 ﻿using NesAsm.Emulator;
 using NesAsm.Emulator.Attributes;
+using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Analyzers.Tests.TestFiles;
 
-internal class MacroScript : ScriptBase
+internal class MacroScript : NesScript
 {
     public MacroScript(NESEmulator emulator) : base(emulator)
     {
     }
 
     [Macro]
-    public void MacroNoParam()
+    public static void MacroNoParam()
     {
-        Macro<MacroScript>(s => s.MacroWithParams(5, 10, 0x4000));
+        MacroWithParams(5, 10, 0x4000);
     }
 
     [Macro]
-    public void MacroWithParams(byte a, byte b, ushort c)
+    public static void MacroWithParams(byte a, byte b, ushort c)
     {
         MacroOneParam((ushort)(c + b * 0x20 + a));
     }
 
     [Macro]
-    public void MacroOneParam(ushort a)
+    public static void MacroOneParam(ushort a)
     {
         BIT(PPUSTATUS);
         LDA(a / 256);

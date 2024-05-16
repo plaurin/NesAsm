@@ -1,7 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope CharScript
 
-  .proc main
+  .proc start
 
     rts
   .endproc
