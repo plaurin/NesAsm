@@ -8,5 +8,6 @@ internal class CallingOtherMacroScript : NesScript
 {
     public static void Start()
     {
+        MacroScript.MacroNoParam();
     }
 }

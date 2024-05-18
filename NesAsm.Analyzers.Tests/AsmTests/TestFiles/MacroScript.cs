@@ -6,10 +6,6 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class MacroScript : NesScript
 {
-    public MacroScript(NESEmulator emulator) : base(emulator)
-    {
-    }
-
     [Macro]
     public static void MacroNoParam()
     {

@@ -17,6 +17,42 @@ internal class TypeCache
         _typeCache = new Dictionary<string, MethodInfo[]>();
     }
 
+    public void Scan(ClassDeclarationSyntax classDeclarationSyntax)
+    {
+        if (_typeCache.ContainsKey(classDeclarationSyntax.Identifier.Text))
+        {
+            return;
+        }
+
+        var methods = new List<MethodInfo>();
+
+        foreach (var member in classDeclarationSyntax.Members)
+        {
+            if (member is MethodDeclarationSyntax method)
+            {
+                var methodInfo = new MethodInfo { Name = method.Identifier.Text };
+
+                foreach (var attributeList in method.AttributeLists)
+                {
+                    foreach (var attribute in attributeList.Attributes)
+                    {
+                        if (attribute.Name.ToString() == "Macro")
+                            methodInfo.IsMacro = true;
+                        else if (attribute.Name.ToString() == "NoReturnProc")
+                            methodInfo.IsNoReturnProc = true;
+                    }
+                }
+
+                if (!(methodInfo.IsNoReturnProc || methodInfo.IsMacro))
+                    methodInfo.IsProc = true;
+
+                methods.Add(methodInfo);
+            }
+        }
+
+        _typeCache.Add(classDeclarationSyntax.Identifier.Text, methods.ToArray());
+    }
+
     public void Scan(SyntaxTree syntaxTree, SyntaxNode syntaxNode)
     {
         var model = _compilation.GetSemanticModel(syntaxTree);
