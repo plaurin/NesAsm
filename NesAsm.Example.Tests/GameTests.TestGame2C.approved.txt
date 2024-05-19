@@ -1,6 +1,7 @@
 ﻿- Main diagnostics:
 - SyntaxTrees Count: 9
 - Output diagnostics:
+..\..\..\..\NesAsm.Example\Game2\Game2C.cs(4,1): hidden CS8019: Unnecessary using directive.
 - RunResult.GeneratedTrees Count: 5
 - RunResults diagnostics:
 - RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
@@ -80,6 +81,7 @@ FrameCounter = $30
   bne @loop2_on_X
 
   ; Draw backgound
+  jsr drawBackground
 
   ; Main game loop
 @endless_loop:
@@ -96,6 +98,21 @@ FrameCounter = $30
   cmp FrameCounter
   beq @WaitForVBlank
   jmp @endless_loop
+
+  rts
+.endproc
+
+.proc drawBackground
+  VramColRow 11, 3, PPU::NAMETABLE_A
+
+  lda #$01
+  sta $2007
+
+  lda #$02
+  sta $2007
+
+  lda #$03
+  sta $2007
 
   rts
 .endproc
@@ -512,6 +529,18 @@ heart_sprite:
   NAMETABLE_B = $2400
   NAMETABLE_C = $2800
   NAMETABLE_D = $2c00
+  .macro VramColRow col, row, nametable
+    VramAddress (nametable + row * $20 + col)
+  .endmacro
+
+  .macro VramAddress address
+    bit $2002
+    lda #.HIBYTE(address)
+    sta $2006
+    lda #.LOBYTE(address)
+    sta $2006
+  .endmacro
+
 .endscope
 
 

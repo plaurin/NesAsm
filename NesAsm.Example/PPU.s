@@ -14,5 +14,17 @@
   NAMETABLE_B = $2400
   NAMETABLE_C = $2800
   NAMETABLE_D = $2c00
+  .macro VramColRow col, row, nametable
+    VramAddress (nametable + row * $20 + col)
+  .endmacro
+
+  .macro VramAddress address
+    bit $2002
+    lda #.HIBYTE(address)
+    sta $2006
+    lda #.LOBYTE(address)
+    sta $2006
+  .endmacro
+
 .endscope
 

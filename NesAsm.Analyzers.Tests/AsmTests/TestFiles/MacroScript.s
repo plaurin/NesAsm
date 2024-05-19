@@ -1,6 +1,7 @@
 ; Auto generated code using the NesAsm project
 .scope MacroScript
 
+  ADDR = $2000
   .macro MacroNoParam 
     MacroWithParams 5, 10, $4000
   .endmacro

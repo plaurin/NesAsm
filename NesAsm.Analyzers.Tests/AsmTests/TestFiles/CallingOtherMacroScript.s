@@ -4,7 +4,11 @@
 .scope CallingOtherMacroScript
 
   .proc start
-    MacroScript::MacroNoParam 
+    MacroNoParam 
+
+    MacroWithParams 4, 8, MacroScript::ADDR
+
+    MacroWithParams 5, 9, ADDR
 
     rts
   .endproc

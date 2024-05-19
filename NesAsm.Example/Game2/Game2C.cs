@@ -56,6 +56,7 @@ public class Game2C : NesScript
         }
 
         // Draw backgound
+        DrawBackground();
 
         // Main game loop
         while (true)
@@ -73,6 +74,20 @@ public class Game2C : NesScript
             CMP(FrameCounter);
             if (BEQ()) goto WaitForVBlank;
         }
+    }
+
+    public static void DrawBackground()
+    {
+        PPU.VramColRow(11, 3, PPU.NAMETABLE_A);
+
+        LDAi(0x01);
+        STA(PPUDATA);
+
+        LDAi(0x02);
+        STA(PPUDATA);
+
+        LDAi(0x03);
+        STA(PPUDATA);
     }
 
     public static void UpdateController()

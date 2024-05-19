@@ -6,6 +6,8 @@ namespace NesAsm.Analyzers.Tests.TestFiles;
 
 internal class MacroScript : NesScript
 {
+    public const ushort ADDR = 0x2000;
+
     [Macro]
     public static void MacroNoParam()
     {

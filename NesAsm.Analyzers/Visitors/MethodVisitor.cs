@@ -567,11 +567,25 @@ internal class MethodVisitor
                             }
 
                             if (methodInfo.IsProc)
+                            {
                                 context.Writer.WriteJSROpCode(className, Utilities.GetProcName(methodInfo.Name));
+                                return true;
+                            }
                             else if (methodInfo.IsNoReturnProc)
+                            {
                                 context.Writer.WriteJMPOpCode(className, Utilities.GetProcName(methodInfo.Name));
+                                return true;
+                            }
                             else if (methodInfo.IsMacro)
-                                context.Writer.WriteCallMacro(className, Utilities.GetMacroName(methodInfo.Name), new string[] { /*resolvedOperand*/ }); // TODO Add support for parameters
+                            {
+                                var arguments = ConvertArguments(invocationExpression.ArgumentList.Arguments.ToArray(), context);
+
+                                if (arguments.All(a => a != null))
+                                {
+                                    context.Writer.WriteCallMacro(null, Utilities.GetMacroName(methodInfo.Name), arguments);
+                                    return true;
+                                }
+                            }
 
                             return true;
                         }
@@ -590,11 +604,9 @@ internal class MethodVisitor
                     var model = context.Compilation.GetSemanticModel(identifierName2.SyntaxTree);
 
                     var memberSymbol = model.GetMemberGroup(identifierName2);
+                    if (memberSymbol.Length == 0) return false;
 
                     var className = memberSymbol[0].ContainingType.Name;
-
-                    // Temp until we handle everything here
-                    if (className != currentClass) return false;
 
                     var methodName = identifierName2.Identifier.ValueText;
 
@@ -661,9 +673,15 @@ internal class MethodVisitor
 
                         text = text.Substring(0, literalExpression.Token.SpanStart - expression.SpanStart) + newValue + text.Substring(literalExpression.Span.End - expression.SpanStart);
                     }
+                    else if (node is MemberAccessExpressionSyntax memberAccessExpression)
+                    {
+                        var newValue = memberAccessExpression.ToString().Replace(".", "::");
+
+                        text = text.Substring(0, memberAccessExpression.SpanStart - expression.SpanStart) + newValue + text.Substring(memberAccessExpression.Span.End - expression.SpanStart);
+                    }
                 }
 
-                if (expression is LiteralExpressionSyntax)
+                if (expression is LiteralExpressionSyntax || expression is MemberAccessExpressionSyntax || expression is IdentifierNameSyntax)
                     result[i] = text;
                 else
                     result[i] = $"({text})";

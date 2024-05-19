@@ -68,6 +68,7 @@ FrameCounter = $30
   bne @loop2_on_X
 
   ; Draw backgound
+  jsr drawBackground
 
   ; Main game loop
 @endless_loop:
@@ -84,6 +85,21 @@ FrameCounter = $30
   cmp FrameCounter
   beq @WaitForVBlank
   jmp @endless_loop
+
+  rts
+.endproc
+
+.proc drawBackground
+  VramColRow 11, 3, PPU::NAMETABLE_A
+
+  lda #$01
+  sta $2007
+
+  lda #$02
+  sta $2007
+
+  lda #$03
+  sta $2007
 
   rts
 .endproc

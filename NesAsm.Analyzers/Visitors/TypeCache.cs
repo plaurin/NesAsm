@@ -121,7 +121,7 @@ internal class TypeCache
         throw new InvalidOperationException($"Method {operation} not found");
     }
 
-    internal MethodInfo GetMethod(string className, string methodName)
+    internal MethodInfo? GetMethod(string className, string methodName)
     {
         if (_typeCache.TryGetValue(className, out var methods))
         {
@@ -130,11 +130,9 @@ internal class TypeCache
             {
                 return result;
             }
-
-            throw new InvalidOperationException($"Method {methodName} not found");
         }
 
-        throw new InvalidOperationException($"Class {className} not found");
+        return null;
     }
 }
 
