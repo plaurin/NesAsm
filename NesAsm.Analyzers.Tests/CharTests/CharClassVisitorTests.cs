@@ -41,6 +41,12 @@ public class CharClassVisitorTests
         TestScript("BackgroundOnly.cs");
     }
 
+    [Fact]
+    public void TestDefinedPaletteScript()
+    {
+        TestScript("DefinedPalette.cs");
+    }
+
     private static void TestScript(params string[] filenames)
     {
         var generator = new CharGenerator();

@@ -5,6 +5,10 @@ namespace NesAsm.Example.Game2;
 
 [ImportChar("game2.png")]
 // TODO ImportChar without grid 128x256
+[SpritePalette(paletteIndex: 0, tileIndex: 9, name: "Face")]
+[SpritePalette(paletteIndex: 0, tileIndex: 10, name: "Hearth")]
+[BackgroundPalette(paletteIndex: 0, tileIndex: 2, name: "Ground")]
+[BackgroundPalette(paletteIndex: 1, tileIndex: 3, name: "Brick")]
 public partial class Game2Char : CharDefinition
 {
     public const byte RightTile = 1;

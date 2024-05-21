@@ -1,606 +1,5 @@
-﻿- Main diagnostics:
-- SyntaxTrees Count: 9
-- Output diagnostics:
-- RunResult.GeneratedTrees Count: 5
-- RunResults diagnostics:
-- RunResult[0].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
-- RunResult[0] diagnostics:
-- RunResult[0].GeneratedSources Count: 3
-- RunResult[0].Exception: 
-- RunResult[0].GeneratedSources[0].HintName: Asm.Game2C.cs
-- RunResult[0].GeneratedSources[0].SourceText:
-/* Generator Asm code in file Asm.Game2C.s
 ; Auto generated code using the NesAsm project
-.segment "HEADER"
-  .byte $4E, $45, $53, $1A  ; iNES header identifier
-  .byte 2                   ; 2x 16KB PRG-ROM Banks
-  .byte 1                   ; 1x  8KB CHR-ROM
-  .byte $01                 ; mapper 0 - $01
-  .byte $00                 ; $00 - vertical mirroring
-
-.segment "VECTORS"
-  .addr nmi
-  .addr reset
-  .addr 0
-
-.segment "STARTUP"
-
-.include "../Controller.s"
-
-.include "../PPU.s"
-
-.include "Game2Char.s"
-
-.segment "CODE"
-
-RightButtonPalette = $20A
-LeftButtonPalette = $20E
-DownButtonPalette = $212
-UpButtonPalette = $216
-StartButtonPalette = $21A
-SelectButtonPalette = $21E
-BButtonPalette = $222
-AButtonPalette = $226
-FaceX = $22B
-FaceY = $228
-FrameCounter = $30
-.proc main
-  ; Read the PPUSTATUS register $2002 PPU_STATUS
-  lda PPU::PPU_STATUS
-
-  ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
-  lda #$3F
-  ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
-  lda #$00
-  ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
-
-
-  ldx #0
-@loop1_on_X:
-  lda Game2Char::background_palettes, x
-
-  ; Write palette data to PPUDATA $2007 PPU_DATA
-  sta PPU::PPU_DATA
-
-  inx
-  cpx #32
-  bne @loop1_on_X
-
-  ; Transfert sprite data into $200-$2ff memory range
-
-  ldx #0
-@loop2_on_X:
-  lda empty_sprites1, x
-  sta $200, x
-
-  inx
-  cpx #48
-  bne @loop2_on_X
-
-  ; Draw backgound
-  jsr drawBackground
-
-  ; Main game loop
-@endless_loop:
-  jsr Controller::readControllerOne
-
-  jsr updateController
-
-  jsr moveFace
-
-  ; Wait for VBlank
-  lda FrameCounter
-
-@WaitForVBlank:
-  cmp FrameCounter
-  beq @WaitForVBlank
-  jmp @endless_loop
-
-  rts
-.endproc
-
-.proc drawBackground
-  ; Nametable
-  VramColRow 2, 25, PPU::NAMETABLE_A
-
-  lda #$01
-  sta $2007
-  sta $2007
-  sta $2007
-  sta $2007
-
-  lda #$03
-  sta $2007
-  sta $2007
-
-  VramColRow 2, 24, PPU::NAMETABLE_A
-
-  lda #$02
-  sta $2007
-  sta $2007
-  sta $2007
-  sta $2007
-
-  lda #$03
-  sta $2007
-  sta $2007
-
-  ; Attribute table
-  VramColRow 0, 0, PPU::ATTR_A
-  lda #%01010101
-  sta $2007
-  sta $2007
-  sta $2007
-  sta $2007
-
-  VramReset 
-
-  rts
-.endproc
-
-.proc updateController
-  ; ## Update button palette
-  ; Init palette to zero
-  ldx #0
-  stx RightButtonPalette
-  stx LeftButtonPalette
-  stx DownButtonPalette
-  stx UpButtonPalette
-  stx StartButtonPalette
-  stx SelectButtonPalette
-  stx BButtonPalette
-  stx AButtonPalette
-
-  ldx #1
-
-  ; Check Button Right
-  lda Controller::Down1
-  ; if1_start
-  and #Controller::BUTTON_RIGHT
-  beq @if1_exit
-
-  stx RightButtonPalette
-
-@if1_exit:
-
-  ; Check Button Left
-  lda Controller::Down1
-  ; if2_start
-  and #Controller::BUTTON_LEFT
-  beq @if2_exit
-
-  stx LeftButtonPalette
-
-@if2_exit:
-
-  ; Check Button Down
-  lda Controller::Down1
-  ; if3_start
-  and #Controller::BUTTON_DOWN
-  beq @if3_exit
-
-  stx DownButtonPalette
-
-@if3_exit:
-
-  ; Check Button Up
-  lda Controller::Down1
-  ; if4_start
-  and #Controller::BUTTON_UP
-  beq @if4_exit
-
-  stx UpButtonPalette
-
-@if4_exit:
-
-  ; Check Button Start
-  lda Controller::Down1
-  ; if5_start
-  and #Controller::BUTTON_START
-  beq @if5_exit
-
-  stx StartButtonPalette
-
-@if5_exit:
-
-  ; Check Button Select
-  lda Controller::Down1
-  ; if6_start
-  and #Controller::BUTTON_SELECT
-  beq @if6_exit
-
-  stx SelectButtonPalette
-
-@if6_exit:
-
-  ; Check Button B
-  lda Controller::Down1
-  ; if7_start
-  and #Controller::BUTTON_B
-  beq @if7_exit
-
-  stx BButtonPalette
-
-@if7_exit:
-
-  ; Check Button A
-  lda Controller::Down1
-  ; if8_start
-  and #Controller::BUTTON_A
-  beq @if8_exit
-
-  stx AButtonPalette
-
-@if8_exit:
-
-  rts
-.endproc
-
-.proc moveFace
-  ; Move right
-  lda Controller::Down1
-  ; if1_start
-  and #Controller::BUTTON_RIGHT
-  beq @if1_exit
-
-  inc FaceX
-
-@if1_exit:
-
-  ; Move left
-  lda Controller::Down1
-  ; if2_start
-  and #Controller::BUTTON_LEFT
-  beq @if2_exit
-
-  dec FaceX
-
-@if2_exit:
-
-  ; Move down
-  lda Controller::Down1
-  ; if3_start
-  and #Controller::BUTTON_DOWN
-  beq @if3_exit
-
-  inc FaceY
-
-@if3_exit:
-
-  ; Move up
-  lda Controller::Down1
-  ; if4_start
-  and #Controller::BUTTON_UP
-  beq @if4_exit
-
-  dec FaceY
-
-@if4_exit:
-
-  rts
-.endproc
-
-nmi:
-; Transfer Sprites via OAM
-lda #$00
-; 0x2003 = OAM_ADDR
-sta PPU::OAM_ADDR
-
-lda #$02
-; 0x4014 = OAM_DMA
-sta PPU::OAM_DMA
-
-; Increment frame counter
-inc FrameCounter
-rti
-
-.proc reset
-  sei
-  cld
-
-  ldx #%01000000
-  stx $4017
-
-  ldx #$ff
-  txs
-
-  ldx #%00010000
-  ; 0x2000 PPU_CTRL
-  stx PPU::PPU_CTRL
-  ; 0x2001 PPU_MASK
-  stx PPU::PPU_MASK
-  stx $4010
-
-  ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
-
-@vblankWait1:
-  ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
-  bpl @vblankWait1
-
-  ; Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
-  lda #$00
-
-  ldx #0
-@loop1_on_X:
-  sta $0000, x
-  sta $0100, x
-  sta $0200, x
-  sta $0300, x
-  sta $0400, x
-  sta $0500, x
-  sta $0600, x
-  sta $0700, x
-
-  inx
-  cpx #255
-  bne @loop1_on_X
-
-@vblankWait2:
-  ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
-  bpl @vblankWait2
-
-  jsr resetPalettes
-
-  ; To Main
-
-  ; Enable Sprites & Background
-  lda #%00011000
-  ; 0x2002 PPU_STATUS
-  sta PPU::PPU_MASK
-
-  ; Enable NMI & Background pattern table address $1000
-  lda #%10010000
-  ; 0x2000 PPU_CTRL
-  sta PPU::PPU_CTRL
-
-  jmp main
-
-  rts
-.endproc
-
-.proc resetPalettes
-  ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
-
-  lda #$3f
-  ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
-  lda #$00
-  ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
-
-  lda #$0F
-  ldx #$20
-
-@paletteLoadLoop:
-
-  ; 0x2007 PPU_DATA
-  sta PPU::PPU_DATA
-  dex
-  bne @paletteLoadLoop
-
-  rts
-.endproc
-
-.segment "CODE"
-
-empty_sprites1:
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-
-.segment "CODE"
-
-empty_sprites2:
-.byte 0
-.byte 0
-.byte 0
-.byte 0
-
-.segment "CODE"
-
-right_sprite:
-.byte 30
-.byte 1
-.byte 0
-.byte 50
-
-.segment "CODE"
-
-left_sprite:
-.byte 30
-.byte 2
-.byte 0
-.byte 30
-
-.segment "CODE"
-
-down_sprite:
-.byte 40
-.byte 3
-.byte 0
-.byte 40
-
-.segment "CODE"
-
-up_sprite:
-.byte 20
-.byte 4
-.byte 0
-.byte 40
-
-.segment "CODE"
-
-start_sprite:
-.byte 30
-.byte 5
-.byte 0
-.byte 70
-
-.segment "CODE"
-
-select_sprite:
-.byte 30
-.byte 6
-.byte 0
-.byte 60
-
-.segment "CODE"
-
-bsprite:
-.byte 30
-.byte 7
-.byte 0
-.byte 80
-
-.segment "CODE"
-
-asprite:
-.byte 30
-.byte 8
-.byte 0
-.byte 90
-
-.segment "CODE"
-
-face_sprite:
-.byte 80
-.byte 9
-.byte 2
-.byte 80
-
-.segment "CODE"
-
-heart_sprite:
-.byte 80
-.byte 10
-.byte 3
-.byte 100
-
-
-*/
-- RunResult[0].GeneratedSources[1].HintName: Asm.Controller.cs
-- RunResult[0].GeneratedSources[1].SourceText:
-/* Generator Asm code in file Asm.Controller.s
-; Auto generated code using the NesAsm project
-.scope Controller
-
-  JOYPAD1 = $4016
-  JOYPAD2 = $4017
-  BUTTON_A = %10000000
-  BUTTON_B = %01000000
-  BUTTON_SELECT = %00100000
-  BUTTON_START = %00010000
-  BUTTON_UP = %00001000
-  BUTTON_DOWN = %00000100
-  BUTTON_LEFT = %00000010
-  BUTTON_RIGHT = %00000001
-  Down1 = $20
-  Pressed1 = $21
-  .proc readControllerOne
-    ; Initialize the output memory
-    lda #1
-    sta Down1
-
-    ; Send the latch pulse down to the 4021
-    sta JOYPAD1
-    lda #0
-    sta JOYPAD1
-
-    ; Read the buttons from the data line
-
-  @read_loop:
-
-    lda JOYPAD1
-    lsr a
-    rol Down1
-    bcc @read_loop
-
-    ; Temp copy
-    lda Down1
-    sta Pressed1
-
-    rts
-  .endproc
-
-.endscope
-
-
-*/
-- RunResult[0].GeneratedSources[2].HintName: Asm.PPU.cs
-- RunResult[0].GeneratedSources[2].SourceText:
-/* Generator Asm code in file Asm.PPU.s
-; Auto generated code using the NesAsm project
-.scope PPU
-
-  PPU_CTRL = $2000
-  PPU_MASK = $2001
-  PPU_STATUS = $2002
-  OAM_ADDR = $2003
-  OAM_DATA = $2004
-  OAM_DMA = $4014
-  PPU_SCROLL = $2005
-  PPU_ADDR = $2006
-  PPU_DATA = $2007
-  NAMETABLE_A = $2000
-  NAMETABLE_B = $2400
-  NAMETABLE_C = $2800
-  NAMETABLE_D = $2c00
-  ATTR_A = $23c0
-  ATTR_B = $27c0
-  ATTR_C = $2bc0
-  ATTR_D = $2fc0
-  .macro VramColRow col, row, nametable
-    VramAddress (nametable + row * $20 + col)
-  .endmacro
-
-  .macro VramAddress address
-    bit $2002
-    lda #.HIBYTE(address)
-    sta $2006
-    lda #.LOBYTE(address)
-    sta $2006
-  .endmacro
-
-  .macro VramReset 
-    bit $2002
-    lda #0
-    sta $2006
-    sta $2006
-  .endmacro
-
-.endscope
-
-
-*/
-- RunResult[1].Generator: Microsoft.CodeAnalysis.IncrementalGeneratorWrapper
-- RunResult[1] diagnostics:
-- RunResult[1].GeneratedSources Count: 2
-- RunResult[1].Exception: 
-- RunResult[1].GeneratedSources[0].HintName: Asm.Game2Char.cs
-- RunResult[1].GeneratedSources[0].SourceText:
-/* Generator Asm code in file Asm.Game2Char.s
-; Auto generated code using the NesAsm project
-.scope Game2Char
-
-.segment "CODE"
-
-  RightTile = 1
-  LeftTile = 2
-  DownTile = 3
-  UpTile = 4
-  StartTile = 5
-  SelectTile = 6
-  BTile = 7
-  ATile = 8
-  FaceTile = 9
-  HearthTile = 10
+.scope DefinedPalette
 
 .segment "CHARS"
 
@@ -609,126 +8,73 @@ heart_sprite:
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
   ; Sprite Tile 1
-  .byte %00001000
-  .byte %00001100
-  .byte %00001110
-  .byte %11111111
-  .byte %11111111
-  .byte %00001110
-  .byte %00001100
-  .byte %00001000
+  .byte %00000000
+  .byte %00000000
+  .byte %00111000
+  .byte %00111100
+  .byte %00000000
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
 
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00111100
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
+
 
   ; Sprite Tile 2
-  .byte %00010000
-  .byte %00110000
-  .byte %01110000
-  .byte %11111111
-  .byte %11111111
-  .byte %01110000
-  .byte %00110000
-  .byte %00010000
+  .byte %00000000
+  .byte %00000000
+  .byte %00111100
+  .byte %00000000
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00111100
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
 
   ; Sprite Tile 3
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %11111111
-  .byte %01111110
-  .byte %00111100
-  .byte %00011000
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 4
-  .byte %00011000
-  .byte %00111100
-  .byte %01111110
-  .byte %11111111
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-  .byte %00011000
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 5
   .byte %00000000
-  .byte %11100000
-  .byte %10001110
-  .byte %11000100
-  .byte %01100100
-  .byte %00100100
-  .byte %11100100
+  .byte %00000000
+  .byte %00111100
+  .byte %00000000
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
   .byte %00000000
 
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 6
   .byte %00000000
-  .byte %11100000
-  .byte %10001110
-  .byte %11001000
-  .byte %01101110
-  .byte %00101000
-  .byte %11101110
+  .byte %00000000
+  .byte %00000000
+  .byte %00111100
+  .byte %00111100
+  .byte %00000000
+  .byte %00000000
   .byte %00000000
 
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
 
-  ; Sprite Tile 7
-  .byte %11111000
-  .byte %11111100
-  .byte %11000010
-  .byte %11111100
-  .byte %11111100
-  .byte %11000010
-  .byte %11111100
-  .byte %11111000
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 8
-  .byte %00111100
-  .byte %00111100
-  .byte %11100111
-  .byte %11000011
-  .byte %11111111
-  .byte %11111111
-  .byte %11000011
-  .byte %11000011
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 9
-  .byte %00111100
-  .byte %01111110
-  .byte %11011011
-  .byte %11011011
-  .byte %11111111
-  .byte %11000011
-  .byte %01111110
-  .byte %00111100
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tile 10
-  .byte %00000000
-  .byte %01100110
-  .byte %01111110
-  .byte %11111111
-  .byte %11111111
-  .byte %01111110
-  .byte %00111100
-  .byte %00011000
-
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
-
-  ; Sprite Tiles 11 to 255 are empty
+  ; Sprite Tiles 4 to 255 are empty
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
+  .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
@@ -976,122 +322,104 @@ heart_sprite:
   .byte 0, 0, 0, 0, 0, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0
 
   ; Background Tile 256
-  .byte 0, 0, 0, 0, 0, 0, 0, 0
+  .byte %10101010
+  .byte %01010101
+  .byte %10101010
+  .byte %01010101
+  .byte %10101010
+  .byte %01010101
+  .byte %10101010
+  .byte %01010101
+
   .byte 0, 0, 0, 0, 0, 0, 0, 0
 
   ; Background Tile 257
-  .byte %11110111
-  .byte %10111101
   .byte %11111111
-  .byte %10110111
-  .byte %11111110
-  .byte %11011111
-  .byte %11111011
-  .byte %10111111
-
-  .byte %00001000
-  .byte %01000010
   .byte %00000000
-  .byte %01001000
-  .byte %00000001
-  .byte %00100000
-  .byte %00000100
-  .byte %01000000
+  .byte %11111111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+
+  .byte %00000000
+  .byte %11111111
+  .byte %11111111
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
 
 
   ; Background Tile 258
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
   .byte %11111111
-  .byte %10111111
+  .byte %00000000
   .byte %11111111
-  .byte %10110111
-  .byte %11111110
-  .byte %11011111
-  .byte %11111011
-  .byte %10111111
+  .byte %00000000
+  .byte %00000000
 
   .byte %00000000
-  .byte %01010101
+  .byte %00000000
+  .byte %00000000
+  .byte %00000000
   .byte %11111111
   .byte %11111111
-  .byte %11111111
-  .byte %11111111
-  .byte %11111111
-  .byte %11111111
+  .byte %00000000
+  .byte %00000000
 
 
   ; Background Tile 259
-  .byte %01111110
-  .byte %10010001
-  .byte %10010001
-  .byte %11111111
-  .byte %10000101
-  .byte %10000101
-  .byte %10000101
-  .byte %01111110
+  .byte %01011000
+  .byte %01010000
+  .byte %11010000
+  .byte %01010000
+  .byte %01010000
+  .byte %01010000
+  .byte %01010000
+  .byte %01010000
 
-  .byte %00000000
-  .byte %01101110
-  .byte %01101110
-  .byte %00000000
-  .byte %01111010
-  .byte %01111010
-  .byte %01111010
-  .byte %00000000
+  .byte %00111000
+  .byte %00110000
+  .byte %00110000
+  .byte %00110000
+  .byte %00110000
+  .byte %00110000
+  .byte %00110000
+  .byte %00110000
 
 
 .segment "CODE"
 
 background_palettes:
-  ; Background Palette 0 : Ground
-  .byte $0F, $0A, $07, $17
+  ; Background Palette 0 : Purple
+  .byte $0F, $04, $23, $33
 
-  ; Background Palette 1 : Brick
-  .byte $0F, $16, $27, $0F
+  ; Background Palette 1 : Green
+  .byte $0F, $19, $1A, $2B
 
   ; Background Palette 2
-  .byte $0F, $17, $07, $0F
+  .byte $0F, $11, $21, $31
 
   ; Background Palette 3
-  .byte $00, $00, $00, $00
-
-sprite_palettes:
-  ; Sprite Palette 0 : Face
-  .byte $0F, $12, $0F, $0F
-
-  ; Sprite Palette 1 : Hearth
-  .byte $0F, $16, $0F, $0F
-
-  ; Sprite Palette 2
   .byte $0F, $20, $0F, $0F
 
+sprite_palettes:
+  ; Sprite Palette 0 : Blue
+  .byte $0F, $01, $11, $21
+
+  ; Sprite Palette 1 : Green
+  .byte $0F, $1B, $2B, $3B
+
+  ; Sprite Palette 2
+  .byte $0F, $16, $27, $37
+
   ; Sprite Palette 3
-  .byte $0F, $29, $0F, $0F
+  .byte $00, $00, $00, $00
 
 .endscope
-
-
-*/
-- RunResult[1].GeneratedSources[1].HintName: Sharp.Game2Char.cs
-- RunResult[1].GeneratedSources[1].SourceText:
-// Auto generated code using the NesAsm project
-using NesAsm.Emulator;
-
-namespace NesAsm.Example.Game2;
-
-public partial class Game2Char : CharDefinition
-{
-    public static byte[] BackgroundPalettes = [
-        0x0F, 0x0A, 0x07, 0x17, // Palette 0 : Ground
-        0x0F, 0x16, 0x27, 0x0F, // Palette 1 : Brick
-        0x0F, 0x17, 0x07, 0x0F, // Palette 2
-        0x00, 0x00, 0x00, 0x00, // Palette 3
-    ];
-    public static byte[] SpritePalettes = [
-        0x0F, 0x12, 0x0F, 0x0F, // Palette 0 : Face
-        0x0F, 0x16, 0x0F, 0x0F, // Palette 1 : Hearth
-        0x0F, 0x20, 0x0F, 0x0F, // Palette 2
-        0x0F, 0x29, 0x0F, 0x0F, // Palette 3
-    ];
-
-}
 

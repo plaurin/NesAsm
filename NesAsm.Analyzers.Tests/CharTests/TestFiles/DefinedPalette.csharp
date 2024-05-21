@@ -1,0 +1,21 @@
+// Auto generated code using the NesAsm project
+using NesAsm.Emulator;
+
+namespace NesAsm.Analyzers.Tests.CharTests.TestFiles;
+
+public partial class DefinedPalette : CharDefinition
+{
+    public static byte[] BackgroundPalettes = [
+        0x0F, 0x04, 0x23, 0x33, // Palette 0 : Purple
+        0x0F, 0x19, 0x1A, 0x2B, // Palette 1 : Green
+        0x0F, 0x11, 0x21, 0x31, // Palette 2
+        0x0F, 0x20, 0x0F, 0x0F, // Palette 3
+    ];
+    public static byte[] SpritePalettes = [
+        0x0F, 0x01, 0x11, 0x21, // Palette 0 : Blue
+        0x0F, 0x1B, 0x2B, 0x3B, // Palette 1 : Green
+        0x0F, 0x16, 0x27, 0x37, // Palette 2
+        0x00, 0x00, 0x00, 0x00, // Palette 3
+    ];
+
+}

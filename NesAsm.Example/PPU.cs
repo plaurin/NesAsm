@@ -24,6 +24,11 @@ public class PPU : NesScript
     public const ushort NAMETABLE_C = 0x2800;
     public const ushort NAMETABLE_D = 0x2c00;
 
+    public const ushort ATTR_A = 0x23c0;
+    public const ushort ATTR_B = 0x27c0;
+    public const ushort ATTR_C = 0x2bc0;
+    public const ushort ATTR_D = 0x2fc0;
+
     // TODO Macro outside of scope
     [Macro]
     public static void VramColRow(byte col, byte row, ushort nametable)
@@ -38,6 +43,15 @@ public class PPU : NesScript
         LDA(address / 256);
         STA(PPUADDR);
         LDA(address % 256);
+        STA(PPUADDR);
+    }
+
+    [Macro]
+    public static void VramReset()
+    {
+        BIT(PPUSTATUS);
+        LDAi(0);
+        STA(PPUADDR);
         STA(PPUADDR);
     }
 }

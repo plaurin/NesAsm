@@ -14,6 +14,10 @@
   NAMETABLE_B = $2400
   NAMETABLE_C = $2800
   NAMETABLE_D = $2c00
+  ATTR_A = $23c0
+  ATTR_B = $27c0
+  ATTR_C = $2bc0
+  ATTR_D = $2fc0
   .macro VramColRow col, row, nametable
     VramAddress (nametable + row * $20 + col)
   .endmacro
@@ -23,6 +27,13 @@
     lda #.HIBYTE(address)
     sta $2006
     lda #.LOBYTE(address)
+    sta $2006
+  .endmacro
+
+  .macro VramReset 
+    bit $2002
+    lda #0
+    sta $2006
     sta $2006
   .endmacro
 

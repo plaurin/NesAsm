@@ -78,16 +78,40 @@ public class Game2C : NesScript
 
     public static void DrawBackground()
     {
-        PPU.VramColRow(11, 3, PPU.NAMETABLE_A);
+        // Nametable
+        PPU.VramColRow(2, 25, PPU.NAMETABLE_A);
 
         LDAi(0x01);
         STA(PPUDATA);
-
-        LDAi(0x02);
+        STA(PPUDATA);
+        STA(PPUDATA);
         STA(PPUDATA);
 
         LDAi(0x03);
         STA(PPUDATA);
+        STA(PPUDATA);
+
+        PPU.VramColRow(2, 24, PPU.NAMETABLE_A);
+
+        LDAi(0x02);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
+
+        LDAi(0x03);
+        STA(PPUDATA);
+        STA(PPUDATA);
+
+        // Attribute table
+        PPU.VramColRow(0, 0, PPU.ATTR_A);
+        LDAi(0b01010101);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
+
+        PPU.VramReset();
     }
 
     public static void UpdateController()
@@ -263,8 +287,8 @@ public class Game2C : NesScript
         // 0x2002 PPU_STATUS
         STA(PPU.PPU_MASK);
 
-        // Enable NMI
-        LDAi(0b_1000_0000);
+        // Enable NMI & Background pattern table address $1000
+        LDAi(0b_1001_0000);
         // 0x2000 PPU_CTRL
         STA(PPU.PPU_CTRL);
 

@@ -12,37 +12,70 @@ public static class CharClassVisitor
 {
     internal static void Visit(ClassDeclarationSyntax classDeclarationSyntax, VisitorContext context)
     {
-        foreach (var att in classDeclarationSyntax.AttributeLists)
+        var spritePaletteDirectives = GetPaletteDirectives(classDeclarationSyntax.AttributeLists.SelectMany(al => al.Attributes.Where(a => a.Name.ToString() == "SpritePalette")));
+        var backgroundPaletteDirectives = GetPaletteDirectives(classDeclarationSyntax.AttributeLists.SelectMany(al => al.Attributes.Where(a => a.Name.ToString() == "BackgroundPalette")));
+
+        foreach (var attribute in classDeclarationSyntax.AttributeLists.SelectMany(al => al.Attributes.Where(a => a.Name.ToString() == "ImportChar")))
         {
-            foreach (var attribute in att.Attributes)
+            var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation(), spritePaletteDirectives, backgroundPaletteDirectives);
+
+            // Only visit member if we are sure we have an ImportChar attribute
+            foreach (var member in classDeclarationSyntax.Members)
             {
-                if (attribute.Name.ToString() == "ImportChar")
-                {
-                    var charVisitorContext = new CharVisitorContext(context, attribute.GetLocation());
-
-                    // Only visit member if we are sure we have an ImportChar attribute
-                    foreach (var member in classDeclarationSyntax.Members)
-                    {
-                        CharMemberVisitor.Visit(member, charVisitorContext);
-                    }
-
-                    var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
-
-                    var sourceFilepath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
-                    var sourceFolderPath = Path.GetDirectoryName(sourceFilepath);
-                    var charFilepath = Path.Combine(sourceFolderPath, filepath);
-
-                    var classNamespace = classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
-                    classNamespace ??= classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
-
-                    var className = classDeclarationSyntax.Identifier.ToString();
-
-                    Process(className, classNamespace, charFilepath, charVisitorContext);
-
-                    return;
-                }
+                CharMemberVisitor.Visit(member, charVisitorContext);
             }
+
+            var filepath = (attribute.ArgumentList!.Arguments[0].Expression as LiteralExpressionSyntax).Token.ValueText;
+
+            var sourceFilepath = Path.GetFullPath(classDeclarationSyntax.SyntaxTree.FilePath);
+            var sourceFolderPath = Path.GetDirectoryName(sourceFilepath);
+            var charFilepath = Path.Combine(sourceFolderPath, filepath);
+
+            var classNamespace = classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<NamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
+            classNamespace ??= classDeclarationSyntax.SyntaxTree.GetRoot().DescendantNodes().OfType<FileScopedNamespaceDeclarationSyntax>().FirstOrDefault()?.Name?.ToString();
+
+            var className = classDeclarationSyntax.Identifier.ToString();
+
+            Process(className, classNamespace, charFilepath, charVisitorContext);
         }
+    }
+
+    private static IEnumerable<PaletteDirective> GetPaletteDirectives(IEnumerable<AttributeSyntax> attributes)
+    {
+        var paletteDirectives = new List<PaletteDirective>();
+
+        foreach (var attribute in attributes)
+        {
+            var index = 0;
+            var paletteIndex = 0;
+            var tileIndex = 0;
+            string? name = null;
+            foreach (var argument in attribute.ArgumentList!.Arguments)
+            {
+                var argname = argument.NameColon?.Name.ToString();
+
+                if (argname == "name" || (index == 2 && name == null))
+                {
+                    name = (argument.Expression as LiteralExpressionSyntax)!.Token.Value.ToString();
+                }
+                else
+                {
+                    var value = int.Parse(argument.Expression.ToString());
+
+                    if (argname == "paletteIndex" || (argname == null && index == 0)) paletteIndex = value;
+                    if (argname == "tileIndex" || (argname == null && index == 1)) tileIndex = value;
+                }
+
+                index++;
+            }
+
+            paletteDirectives.Add(new PaletteDirective { PaletteIndex = paletteIndex, TileIndex = tileIndex, PaletteName = name });
+
+            // TODO Check duplicate paletteIndex
+            // TODO Check gap in paletteIndex
+        }
+
+        return paletteDirectives;
     }
 
     internal static void Process(string className, string? classNamespace, string imageFilename, CharVisitorContext context)
@@ -58,8 +91,8 @@ public static class CharClassVisitor
             return;
         }
 
-        var (spriteTiles, spritePalettes) = GetTilesAndPalettes(image, 0, context);
-        var (backgroundTiles, backgroundPalettes) = GetTilesAndPalettes(image, 256, context);
+        var (spriteTiles, spritePalettes) = GetTilesAndPalettes(image, 0, context.SpritePaletteDirectives, context);
+        var (backgroundTiles, backgroundPalettes) = GetTilesAndPalettes(image, 256, context.BackgroundPaletteDirectives, context);
 
         writer.StartClassScope(className);
 
@@ -209,20 +242,31 @@ public static class CharClassVisitor
         csWriter.WriteEndBlock();
     }
 
-    private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex, CharVisitorContext context)
+    private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex, IEnumerable<PaletteDirective> paletteDirectives, CharVisitorContext context)
     {
-        var tiles = new List<TileData>();
+        var tiles = new TileData[256];
         var palettes = new ColorPalettes();
 
         var lastTile = -1;
 
+        // Starts with paletteDirectives
+        foreach (var directive in paletteDirectives.OrderBy(pd => pd.PaletteIndex))
+        {
+            var tileData = CreateTileData(image, directive.TileIndex + startingTileIndex, palettes, directive.PaletteName, context);
+            tiles[directive.TileIndex] = tileData;
+        }
+
+
         // Generate 256 TileData
         for (int tileIndex = 0; tileIndex < 16 * 16; tileIndex++)
         {
-            var tileData = CreateTileData(image, tileIndex + startingTileIndex, palettes, context);
-            tiles.Add(tileData);
+            if (tiles[tileIndex] == null)
+            {
+                var tileData = CreateTileData(image, tileIndex + startingTileIndex, palettes, string.Empty, context);
+                tiles[tileIndex] = tileData;
+            }
 
-            if (!tileData.Palette.IsEmpty)
+            if (!tiles[tileIndex].Palette.IsEmpty)
                 lastTile = tileIndex;
         }
 
@@ -235,7 +279,7 @@ public static class CharClassVisitor
         return (tiles.Take(lastTile + 1), palettes);
     }
 
-    private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, CharVisitorContext context)
+    private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, string paletteName, CharVisitorContext context)
     {
         var tileStartX = (tileIndex % 16) * 9;
         var tileStartY = (tileIndex / 16) * 9;
@@ -260,6 +304,8 @@ public static class CharClassVisitor
         }
 
         var colorPalette = colorPalettes.GetFromColors(colors);
+
+        colorPalette.SetName(paletteName);
 
         return new TileData(pixels.ToArray(), colorPalette, tileIndex);
     }
@@ -345,7 +391,7 @@ public static class CharClassVisitor
             var index = 0;
             foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
-                writer.WriteComment($"{segment} Palette {index++}");
+                writer.WriteComment($"{segment} Palette {index++}{(!string.IsNullOrWhiteSpace(palette.Name) ? $" : {palette.Name}" : "")}");
                 writer.WritePaletteColorsChars(palette.NesColors);
             }
 
@@ -363,7 +409,7 @@ public static class CharClassVisitor
             foreach (var palette in palettes.Where(p => !p.IsEmpty))
             {
                 writer.WritePaletteColorsData(palette.NesColors);
-                writer.WriteEndOfLineComment($"Palette {index++}");
+                writer.WriteEndOfLineComment($"Palette {index++}{(!string.IsNullOrWhiteSpace(palette.Name) ? $" : {palette.Name}" : "")}");
             }
 
             // Fill at least 4 palettes with empty colors
@@ -491,6 +537,8 @@ public static class CharClassVisitor
 
         public byte[] NesColors => _colors.Select(c => GetNesColorIndex(c)).ToArray();
 
+        public string Name { get; private set; }
+
         private static byte GetNesColorIndex(Pixel color)
         {
             if (color.IsEmpty) return 0x0F;
@@ -516,5 +564,14 @@ public static class CharClassVisitor
 
             return closestColor;
         }
+
+        internal void SetName(string name) => Name = name;
+    }
+
+    public class PaletteDirective
+    {
+        public int PaletteIndex { get; set; }
+        public int TileIndex { get; set; }
+        public string PaletteName { get; set; }
     }
 }

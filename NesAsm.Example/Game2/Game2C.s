@@ -90,16 +90,40 @@ FrameCounter = $30
 .endproc
 
 .proc drawBackground
-  VramColRow 11, 3, PPU::NAMETABLE_A
+  ; Nametable
+  VramColRow 2, 25, PPU::NAMETABLE_A
 
   lda #$01
   sta $2007
-
-  lda #$02
+  sta $2007
+  sta $2007
   sta $2007
 
   lda #$03
   sta $2007
+  sta $2007
+
+  VramColRow 2, 24, PPU::NAMETABLE_A
+
+  lda #$02
+  sta $2007
+  sta $2007
+  sta $2007
+  sta $2007
+
+  lda #$03
+  sta $2007
+  sta $2007
+
+  ; Attribute table
+  VramColRow 0, 0, PPU::ATTR_A
+  lda #%01010101
+  sta $2007
+  sta $2007
+  sta $2007
+  sta $2007
+
+  VramReset 
 
   rts
 .endproc
@@ -317,8 +341,8 @@ rti
   ; 0x2002 PPU_STATUS
   sta PPU::PPU_MASK
 
-  ; Enable NMI
-  lda #%10000000
+  ; Enable NMI & Background pattern table address $1000
+  lda #%10010000
   ; 0x2000 PPU_CTRL
   sta PPU::PPU_CTRL
 
