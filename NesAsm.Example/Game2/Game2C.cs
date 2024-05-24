@@ -79,33 +79,36 @@ public class Game2C : NesScript
     public static void DrawBackground()
     {
         // Nametable
-        PPU.VramColRow(2, 25, PPU.NAMETABLE_A);
 
-        LDAi(0x01);
-        STA(PPUDATA);
-        STA(PPUDATA);
-        STA(PPUDATA);
-        STA(PPUDATA);
-
+        PPU.VramColRow(6, 25, PPU.NAMETABLE_A);
         LDAi(0x03);
         STA(PPUDATA);
         STA(PPUDATA);
 
-        PPU.VramColRow(2, 24, PPU.NAMETABLE_A);
-
+        PPU.VramColRow(0, 26, PPU.NAMETABLE_A);
         LDAi(0x02);
-        STA(PPUDATA);
-        STA(PPUDATA);
-        STA(PPUDATA);
-        STA(PPUDATA);
+        PPU.DrawNametableLine();
+        //LDAi(0x02);
+        //STA(PPUDATA);
+        //STA(PPUDATA);
+        //STA(PPUDATA);
+        //STA(PPUDATA);
 
-        LDAi(0x03);
-        STA(PPUDATA);
-        STA(PPUDATA);
+        PPU.VramColRow(2, 27, PPU.NAMETABLE_A);
+        LDAi(0x01);
+        PPU.DrawNametableLine();
+        //STA(PPUDATA);
+        //STA(PPUDATA);
+        //STA(PPUDATA);
+        //STA(PPUDATA);
 
         // Attribute table
-        PPU.VramColRow(0, 0, PPU.ATTR_A);
-        LDAi(0b01010101);
+        PPU.AttributeColRow(0, 6, PPU.ATTR_A);
+        LDAi(0b00000101);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
+        STA(PPUDATA);
         STA(PPUDATA);
         STA(PPUDATA);
         STA(PPUDATA);

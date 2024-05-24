@@ -454,30 +454,30 @@
 .segment "CODE"
 
 background_palettes:
-  ; Background Palette 0
-  .byte $0F, $17, $07, $0F
-
-  ; Background Palette 1
+  ; Background Palette 0 : Ground
   .byte $0F, $0A, $07, $17
 
-  ; Background Palette 2
+  ; Background Palette 1 : Brick
   .byte $0F, $16, $27, $0F
+
+  ; Background Palette 2
+  .byte $0F, $17, $07, $0F
 
   ; Background Palette 3
   .byte $00, $00, $00, $00
 
 sprite_palettes:
-  ; Sprite Palette 0
-  .byte $0F, $20, $0F, $0F
-
-  ; Sprite Palette 1
-  .byte $0F, $29, $0F, $0F
-
-  ; Sprite Palette 2
+  ; Sprite Palette 0 : Face
   .byte $0F, $12, $0F, $0F
 
-  ; Sprite Palette 3
+  ; Sprite Palette 1 : Hearth
   .byte $0F, $16, $0F, $0F
+
+  ; Sprite Palette 2
+  .byte $0F, $20, $0F, $0F
+
+  ; Sprite Palette 3
+  .byte $0F, $29, $0F, $0F
 
 .endscope
 

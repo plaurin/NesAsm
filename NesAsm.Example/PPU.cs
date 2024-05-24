@@ -29,11 +29,19 @@ public class PPU : NesScript
     public const ushort ATTR_C = 0x2bc0;
     public const ushort ATTR_D = 0x2fc0;
 
-    // TODO Macro outside of scope
+    // TODO Detect duplicate Macro because it will always be outside of scope
+    // Reference: https://github.com/NesHacker/PlatformerMovement/blob/main/src/lib/ppu.s
     [Macro]
     public static void VramColRow(byte col, byte row, ushort nametable)
     {
         VramAddress((ushort)(nametable + row * 0x20 + col));
+    }
+
+    [Macro]
+    public static void AttributeColRow(byte col, byte row, ushort attributeTable)
+    {
+        // TODO C# only parameter checker
+        VramAddress((ushort)(attributeTable + row * 0x08 + col));
     }
 
     [Macro]
@@ -53,5 +61,14 @@ public class PPU : NesScript
         LDAi(0);
         STA(PPUADDR);
         STA(PPUADDR);
+    }
+
+    [Macro]
+    public static void DrawNametableLine()
+    {
+        for (X = 0; X < 32; X++)
+        {
+            STA(PPUDATA);
+        }
     }
 }

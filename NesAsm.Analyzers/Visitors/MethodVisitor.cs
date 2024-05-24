@@ -38,6 +38,7 @@ internal class MethodVisitor
 
         int endlessloopIndex = 1;
         string? expectedAndOfLoop = null;
+        var isMacro = method.AttributeLists.Any(att => att.Attributes.Any(a => a.Name.ToString() == "Macro"));
 
         var lines = method.Body.ToString().Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
         foreach (var line in lines)
@@ -282,7 +283,7 @@ internal class MethodVisitor
                 continue;
             }
 
-            if (TryHandleFor(line, location, context)) continue;
+            if (TryHandleFor(line, location, isMacro, context)) continue;
             if (TryHandleEndFor(line, location, context)) continue;
             
             if (TryHandleIfExit(line, location, context)) continue;
@@ -330,7 +331,7 @@ internal class MethodVisitor
 
     private static readonly Regex forPattern = new("\\s*for \\(((?'VarType'\\w+) )?(?'Register'\\w+)? = (?'Init'\\d+); (?'Register2'\\w+) (?'Condition'[<|>|<=|>=]) (?'ConditionValue'\\d+); (?'Register3'\\w+)(?'Increment'.+)\\)", RegexOptions.Compiled);
 
-    private static bool TryHandleFor(string line, Location location, MethodVisitorContext context)
+    private static bool TryHandleFor(string line, Location location, bool isMacro, MethodVisitorContext context)
     {
         var match = forPattern.Match(line);
         if (match.Success)
@@ -360,6 +361,7 @@ internal class MethodVisitor
             var condition = match.Groups["Condition"].Value;
             var conditionValue = match.Groups["ConditionValue"].Value;
             var increment = match.Groups["Increment"].Value;
+            string labelName = "";
 
             context.Writer.WriteEmptyLine();
 
@@ -367,13 +369,23 @@ internal class MethodVisitor
             ParseOp(register == "X" ? "LDXi" : "LDYi", init, string.Empty, location, context);
 
             // Label
-            var labelName = $"loop{context.ForLoopIndex}_on_{register}";
-            context.Writer.WriteLabel(labelName);
+            if (isMacro)
+            {
+                labelName = "-";
+                context.Writer.WriteUnnamedLabel();
+            }
+            else
+            {
+                labelName = $"loop{context.ForLoopIndex}_on_{register}";
+                context.Writer.WriteLabel(labelName);
+            }
 
             // Code
 
             // Increment
-            var incrementOpCode = register == "X" ? "INX" : "INY";
+            var incrementOpCode = register == "X"
+                ? (increment == "++" ? "INX" : "DEX")
+                : (increment == "++" ? "INY" : "DEY");
 
             // Condition Evaluation
             var conditionOpCode = register == "X" ? $"CPXi" : "CPYi";
@@ -405,7 +417,13 @@ internal class MethodVisitor
             ParseOp(forLoopData.ConditionOpCode, forLoopData.ConditionOperand, string.Empty, location, context);
 
             // Branch
-            context.Writer.WriteBranchOpCode("bne", forLoopData.LabelName);
+            string label = forLoopData.LabelName; 
+            if (forLoopData.LabelName.Contains("-") && context.ForLoopDepth == 0)
+            {
+                label = string.Join("", Enumerable.Repeat("-", context.NestedLoopDepth + 1));
+            }
+
+            context.Writer.WriteBranchOpCode("bne", label);
 
             return true;
         }
@@ -709,7 +727,7 @@ internal class MethodVisitor
         foreach (var data in dataItems)
         {
             if (data == null) continue;
-            if (byte.TryParse(data, out var byteData))
+            else if (byte.TryParse(data, out var byteData))
             {
                 writer.WriteOpCodeImmediate("lda", byteData);
                 writer.WriteOpCode("sta", index++);
@@ -730,11 +748,22 @@ internal class MethodVisitor
             {
                 try
                 {
-                    var value = Convert.ToInt32(data, 16);
-                    writer.WriteOpCodeImmediate("lda", (byte)(value % 256));
-                    writer.WriteOpCode("sta", index++);
-                    writer.WriteOpCodeImmediate("lda", (byte)(value / 256));
-                    writer.WriteOpCode("sta", index++);
+                    var value = data.StartsWith("$") 
+                        ? Convert.ToInt32($"0x{data.Substring(1)}", 16)
+                        : Convert.ToInt32(data, 16);
+
+                    if (value < 256)
+                    {
+                        writer.WriteOpCodeImmediate("lda", (byte)value);
+                        writer.WriteOpCode("sta", index++);
+                    }
+                    else
+                    {
+                        writer.WriteOpCodeImmediate("lda", (byte)(value % 256));
+                        writer.WriteOpCode("sta", index++);
+                        writer.WriteOpCodeImmediate("lda", (byte)(value / 256));
+                        writer.WriteOpCode("sta", index++);
+                    }
                 }
                 catch (FormatException)
                 {

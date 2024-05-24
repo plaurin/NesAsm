@@ -91,33 +91,36 @@ FrameCounter = $30
 
 .proc drawBackground
   ; Nametable
-  VramColRow 2, 25, PPU::NAMETABLE_A
 
-  lda #$01
-  sta $2007
-  sta $2007
-  sta $2007
-  sta $2007
-
+  VramColRow 6, 25, PPU::NAMETABLE_A
   lda #$03
   sta $2007
   sta $2007
 
-  VramColRow 2, 24, PPU::NAMETABLE_A
-
+  VramColRow 0, 26, PPU::NAMETABLE_A
   lda #$02
-  sta $2007
-  sta $2007
-  sta $2007
-  sta $2007
+  DrawNametableLine 
+  ; LDAi(0x02);
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
 
-  lda #$03
-  sta $2007
-  sta $2007
+  VramColRow 2, 27, PPU::NAMETABLE_A
+  lda #$01
+  DrawNametableLine 
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
+  ; STA(PPUDATA);
 
   ; Attribute table
-  VramColRow 0, 0, PPU::ATTR_A
-  lda #%01010101
+  AttributeColRow 0, 6, PPU::ATTR_A
+  lda #%00000101
+  sta $2007
+  sta $2007
+  sta $2007
+  sta $2007
   sta $2007
   sta $2007
   sta $2007

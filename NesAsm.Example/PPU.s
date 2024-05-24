@@ -22,6 +22,11 @@
     VramAddress (nametable + row * $20 + col)
   .endmacro
 
+  .macro AttributeColRow col, row, attributeTable
+    ; TODO C# only parameter checker
+    VramAddress (attributeTable + row * $08 + col)
+  .endmacro
+
   .macro VramAddress address
     bit $2002
     lda #.HIBYTE(address)
@@ -35,6 +40,17 @@
     lda #0
     sta $2006
     sta $2006
+  .endmacro
+
+  .macro DrawNametableLine 
+
+    ldx #0
+  :
+    sta $2007
+
+    inx
+    cpx #32
+    bne :-
   .endmacro
 
 .endscope

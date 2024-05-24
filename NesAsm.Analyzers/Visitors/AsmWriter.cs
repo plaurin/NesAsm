@@ -168,6 +168,7 @@ internal class AsmWriter
     
     public void WriteLabel(string label) => _sb.AppendLine($"{CurrentLabelIndentation}@{label}:");
     public void WriteVariableLabel(string variableLabel) => _sb.AppendLine($"{CurrentLabelIndentation}{variableLabel}:");
+    public void WriteUnnamedLabel() => _sb.AppendLine($"{CurrentLabelIndentation}:");
 
     public void WriteConstant(string constName, string value) => _sb.AppendLine($"{CurrentIndentation}{constName} = {value}");
 
@@ -186,7 +187,14 @@ internal class AsmWriter
     public void WriteCallMacro(string? callingScope, string macroName, string[] operands)
         => _sb.AppendLine($"{CurrentIndentation}{GetFullName(callingScope, macroName)} {string.Join(", ", operands)}");
 
-    public void WriteBranchOpCode(string opCode, string label) => _sb.AppendLine($"{CurrentIndentation}{opCode} @{label}");
+    public void WriteBranchOpCode(string opCode, string label)
+    {
+        var fullLabel = label.Contains("+") || label.Contains("-")
+            ? $":{label}"
+            : $"@{label}";
+
+        _sb.AppendLine($"{CurrentIndentation}{opCode} {fullLabel}");
+    }
 
     public override string ToString() => _sb.ToString();
 

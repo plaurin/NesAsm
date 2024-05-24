@@ -8,6 +8,7 @@ internal class ParametersScript : NesScript
     public static void Start()
     {
         ProcB(25, 1000, true);
+        ProcB(0x20, 0x2000, true);
     }
 
     public static void ProcB(byte a, ushort b, bool c)

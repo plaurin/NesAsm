@@ -11,6 +11,15 @@
     lda #1
     sta 3
     jsr procB
+    lda #32
+    sta 0
+    lda #0
+    sta 1
+    lda #32
+    sta 2
+    lda #1
+    sta 3
+    jsr procB
 
     rts
   .endproc

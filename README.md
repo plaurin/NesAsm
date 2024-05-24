@@ -21,13 +21,13 @@ The goal of NesAsm is to make writing games for the NES accessible to more peopl
 ![Warnings](doc/AnalyzerWarning.png)
 
 ## Use basic C# code instead of ASM
-- [TBD] use if, for, while statements (maybe simple switch statement)
+- [WIP] use if, for, while statements (maybe simple switch statement)
 - Call C# methods, pass parameters and use return values
 
 ![Parameters](doc/Parameters.png)
 
 - [TBD] use local variables
-- [TBD] Create macro methods to be generate inline instead of subroutines
+- Create macro methods to be generate inline instead of subroutines
 
 ## Mix C# with ASM code seemlessly for compilation into a rom file
 - Include C# file in the compilation (after ASM code generation)

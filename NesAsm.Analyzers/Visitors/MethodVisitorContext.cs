@@ -15,22 +15,25 @@ internal class MethodVisitorContext : ClassVisitorContext
     {
     }
 
+    internal int ForLoopDepth => _forLoopDataStack.Count;
+    internal int NestedLoopDepth { get; private set; }
+
     public int ForLoopIndex => _forLoopIndex;
 
     public int IdExitIndex => _ifExitIndex;
 
     internal void PushForLoopData(string labelName, string conditionOpCode, string conditionOperand, string incrementOpCode, string endloopPattern)
     {
+        if (_forLoopDataStack.Count == 0 && NestedLoopDepth != 0) NestedLoopDepth = 0;
+        if (_forLoopDataStack.Count > 0) NestedLoopDepth++;
+
         var forLoopData = new ForLoopData { LabelName = labelName, ConditionOpCode = conditionOpCode, ConditionOperand = conditionOperand, IncrementOpCode = incrementOpCode, EndloopPattern = endloopPattern };
 
         _forLoopDataStack.Push(forLoopData);
         _forLoopIndex++;
     }
 
-    internal bool IsLineMatchingEndLoop(string line)
-    {
-        return _forLoopDataStack.Count > 0 && _forLoopDataStack.Peek().EndloopPattern == line;
-    }
+    internal bool IsLineMatchingEndLoop(string line) => _forLoopDataStack.Count > 0 && _forLoopDataStack.Peek().EndloopPattern == line;
 
     internal ForLoopData PopForLoopData()
     {
