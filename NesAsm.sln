@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Analyzers.Tests", "N
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Example.Tests", "NesAsm.Example.Tests\NesAsm.Example.Tests.csproj", "{400D8547-E3BC-4688-A495-803B1215BF10}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Benchmark", "NesAsm.Benchmark\NesAsm.Benchmark.csproj", "{8C3EBDB0-5C3F-4E56-BBA6-807D56FAE230}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{400D8547-E3BC-4688-A495-803B1215BF10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{400D8547-E3BC-4688-A495-803B1215BF10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{400D8547-E3BC-4688-A495-803B1215BF10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C3EBDB0-5C3F-4E56-BBA6-807D56FAE230}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C3EBDB0-5C3F-4E56-BBA6-807D56FAE230}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C3EBDB0-5C3F-4E56-BBA6-807D56FAE230}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C3EBDB0-5C3F-4E56-BBA6-807D56FAE230}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
