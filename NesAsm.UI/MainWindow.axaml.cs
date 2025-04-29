@@ -1,9 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using NesAsm.Emulator;
+using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 
@@ -12,11 +13,15 @@ public partial class MainWindow : Window
 {
     private readonly SKBitmap _bitmap;
     private readonly DispatcherTimer _timer = new();
+    private readonly WriteableBitmap writeableBitmap;
+    private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
 
     private int _x;
-    private DateTimeOffset _startTime;
     private int _frameNumber;
     private bool _isRendering;
+
+    private DateTimeOffset _startTime;
+    private DateTimeOffset _nextFrameTime;
 
     public MainWindow()
     {
@@ -24,25 +29,42 @@ public partial class MainWindow : Window
 
         _bitmap = new SKBitmap(256, 240);
         _x = 10;
+
+        writeableBitmap = new WriteableBitmap(
+            new PixelSize(_bitmap.Width, _bitmap.Height),
+            new Vector(96, 96),
+            PixelFormat.Bgra8888,
+            AlphaFormat.Opaque);
+        
+        Image.Source = writeableBitmap;
+
+        BackgroundExemple.PaletteExemple();
+
+        _startTime = DateTimeOffset.Now;
+        _nextFrameTime = _startTime;
+
+        _timer.Interval = TimeSpan.FromSeconds(1) / 10000.0;
+        _timer.Tick += Timer_Tick;
+        _timer.Start();
     }
 
-    private void Button_OnClick(object? sender, RoutedEventArgs e)
-    {
-        if (!_timer.IsEnabled)
-        {
-            _timer.Interval = TimeSpan.FromSeconds(1) / 100.0;
-            _timer.Tick += Timer_Tick;
-            _timer.Start();
-            _startTime = DateTimeOffset.Now;
-        }
-        else
-        {
-            _timer.Stop();
-            _timer.Tick -= Timer_Tick;
-        }
-    }
+    //public override void Render(DrawingContext context)
+    //{
+    //    context.DrawEllipse(Brushes.Red, new Pen(Brushes.Red), new Rect(10, 10, 10, 10) );
+    //    context.DrawImage(writeableBitmap, new Rect(0, 0, writeableBitmap.PixelSize.Width, writeableBitmap.PixelSize.Height));
+    //}
 
     private void Timer_Tick(object? sender, EventArgs e)
+    {
+        //while(true)
+        {
+            if (DateTimeOffset.Now < _nextFrameTime) return;
+            DrawLoop();
+            _nextFrameTime += _frameDuration;
+        }
+    }
+
+    private void DrawLoop()
     {
         if (_isRendering)
             return;
@@ -50,29 +72,28 @@ public partial class MainWindow : Window
 
         using (var canvas = new SKCanvas(_bitmap))
         {
-            canvas.Clear(SKColors.White);
-            // Draw whatever you like, e.g., a red rectangle
-            using var paint = new SKPaint { Color = SKColors.Red, IsAntialias = true };
-            canvas.DrawRect(_x, 50, 100, 100, paint);
-        }
+            var screen = PPU.DrawScreen();
 
-        var writeableBitmap = new WriteableBitmap(
-            new PixelSize(_bitmap.Width, _bitmap.Height),
-            new Vector(96, 96),
-            PixelFormat.Bgra8888,
-            AlphaFormat.Opaque);
+            var colorPalette = new SKColor[5] { SKColors.Black, SKColors.Blue, SKColors.Green, SKColors.Red, SKColors.Yellow };
+
+            for (int y = 0; y < 240; y++)
+                for (int x = 0; x < 256; x++)
+                {
+                    canvas.DrawPoint(x, y, colorPalette[screen[x + y * 256]]);
+                }
+        }
 
         using (var frameBuffer = writeableBitmap.Lock())
         {
             unsafe
             {
                 void* dataStart = (void*)frameBuffer.Address;
-                Span<byte> buffer = new Span<byte>(dataStart, 256 * 240 * 4); // assume each pixel is 1 byte in size and my image has 4 channels
+                Span<byte> buffer = new(dataStart, 256 * 240 * 4); // assume each pixel is 1 byte in size and my image has 4 channels
                 _bitmap.Bytes.CopyTo(buffer);
             }
         }
 
-        Image.Source = writeableBitmap;
+        Image.InvalidateVisual();
 
         _isRendering = false;
 

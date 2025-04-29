@@ -22,7 +22,9 @@ csharp_style_expression_bodied_local_functions = false:silent
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
 tab_width = 4
 indent_size = 4
+indent_style = space
 end_of_line = crlf
+
 [*.{cs,vb}]
 #### Naming styles ####
 

@@ -20,4 +20,9 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NesAsm.Emulator\NesAsm.Emulator.csproj" />
+    <ProjectReference Include="..\NesAsm.Example\NesAsm.Example.csproj" />
+  </ItemGroup>
 </Project>
