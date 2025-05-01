@@ -15,7 +15,7 @@
 
 .include "../Controller.s"
 
-.include "../PPU.s"
+.include "../PPUHelper.s"
 
 .include "Game1Char.s"
 
@@ -34,15 +34,15 @@ FaceY = $228
 FrameCounter = $30
 .proc main
   ; Read the PPUSTATUS register $2002 PPU_STATUS
-  lda PPU::PPU_STATUS
+  lda PPUHelper::PPU_STATUS
 
   ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
   lda #$3F
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
   lda #$00
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
 
 
   ldx #0
@@ -50,7 +50,7 @@ FrameCounter = $30
   lda Game1Char::background_palettes, x
 
   ; Write palette data to PPUDATA $2007 PPU_DATA
-  sta PPU::PPU_DATA
+  sta PPUHelper::PPU_DATA
 
   inx
   cpx #32
@@ -233,11 +233,11 @@ nmi:
 ; Transfer Sprites via OAM
 lda #$00
 ; 0x2003 = OAM_ADDR
-sta PPU::OAM_ADDR
+sta PPUHelper::OAM_ADDR
 
 lda #$02
 ; 0x4014 = OAM_DMA
-sta PPU::OAM_DMA
+sta PPUHelper::OAM_DMA
 
 ; Increment frame counter
 inc FrameCounter
@@ -255,17 +255,17 @@ rti
 
   ldx #%00010000
   ; 0x2000 PPU_CTRL
-  stx PPU::PPU_CTRL
+  stx PPUHelper::PPU_CTRL
   ; 0x2001 PPU_MASK
-  stx PPU::PPU_MASK
+  stx PPUHelper::PPU_MASK
   stx $4010
 
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
 
 @vblankWait1:
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
   bpl @vblankWait1
 
   ; Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
@@ -288,7 +288,7 @@ rti
 
 @vblankWait2:
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
   bpl @vblankWait2
 
   jsr resetPalettes
@@ -298,12 +298,12 @@ rti
   ; Enable Sprites & Background
   lda #%00011000
   ; 0x2002 PPU_STATUS
-  sta PPU::PPU_MASK
+  sta PPUHelper::PPU_MASK
 
   ; Enable NMI
   lda #%10000000
   ; 0x2000 PPU_CTRL
-  sta PPU::PPU_CTRL
+  sta PPUHelper::PPU_CTRL
 
   jmp main
 
@@ -312,14 +312,14 @@ rti
 
 .proc resetPalettes
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
 
   lda #$3f
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
   lda #$00
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
 
   lda #$0F
   ldx #$20
@@ -327,7 +327,7 @@ rti
 @paletteLoadLoop:
 
   ; 0x2007 PPU_DATA
-  sta PPU::PPU_DATA
+  sta PPUHelper::PPU_DATA
   dex
   bne @paletteLoadLoop
 

@@ -1,5 +1,5 @@
 ; Auto generated code using the NesAsm project
-.scope PPU
+.scope PPUHelper
 
   PPU_CTRL = $2000
   PPU_MASK = $2001

@@ -4,7 +4,7 @@ using static NesAsm.Emulator.NESEmulatorStatic;
 
 namespace NesAsm.Example;
 
-public class PPU : NesScript
+public class PPUHelper : NesScript
 {
     // TODO Unscoped constants
     public const ushort PPU_CTRL = 0x2000;

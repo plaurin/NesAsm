@@ -15,7 +15,7 @@
 
 .include "../Controller.s"
 
-.include "../PPU.s"
+.include "../PPUHelper.s"
 
 .include "Game2Char.s"
 
@@ -34,15 +34,15 @@ FaceY = $228
 FrameCounter = $30
 .proc main
   ; Read the PPUSTATUS register $2002 PPU_STATUS
-  lda PPU::PPU_STATUS
+  lda PPUHelper::PPU_STATUS
 
   ; Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
   lda #$3F
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
   lda #$00
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
 
 
   ldx #0
@@ -50,7 +50,7 @@ FrameCounter = $30
   lda Game2Char::background_palettes, x
 
   ; Write palette data to PPUDATA $2007 PPU_DATA
-  sta PPU::PPU_DATA
+  sta PPUHelper::PPU_DATA
 
   inx
   cpx #32
@@ -92,12 +92,12 @@ FrameCounter = $30
 .proc drawBackground
   ; Nametable
 
-  VramColRow 6, 25, PPU::NAMETABLE_A
+  VramColRow 6, 25, PPUHelper::NAMETABLE_A
   lda #$03
   sta $2007
   sta $2007
 
-  VramColRow 0, 26, PPU::NAMETABLE_A
+  VramColRow 0, 26, PPUHelper::NAMETABLE_A
   lda #$02
   DrawNametableLine 
   ; LDAi(0x02);
@@ -106,7 +106,7 @@ FrameCounter = $30
   ; STA(PPUDATA);
   ; STA(PPUDATA);
 
-  VramColRow 2, 27, PPU::NAMETABLE_A
+  VramColRow 2, 27, PPUHelper::NAMETABLE_A
   lda #$01
   DrawNametableLine 
   ; STA(PPUDATA);
@@ -115,7 +115,7 @@ FrameCounter = $30
   ; STA(PPUDATA);
 
   ; Attribute table
-  AttributeColRow 0, 6, PPU::ATTR_A
+  AttributeColRow 0, 6, PPUHelper::ATTR_A
   lda #%00000101
   sta $2007
   sta $2007
@@ -277,11 +277,11 @@ nmi:
 ; Transfer Sprites via OAM
 lda #$00
 ; 0x2003 = OAM_ADDR
-sta PPU::OAM_ADDR
+sta PPUHelper::OAM_ADDR
 
 lda #$02
 ; 0x4014 = OAM_DMA
-sta PPU::OAM_DMA
+sta PPUHelper::OAM_DMA
 
 ; Increment frame counter
 inc FrameCounter
@@ -299,17 +299,17 @@ rti
 
   ldx #%00010000
   ; 0x2000 PPU_CTRL
-  stx PPU::PPU_CTRL
+  stx PPUHelper::PPU_CTRL
   ; 0x2001 PPU_MASK
-  stx PPU::PPU_MASK
+  stx PPUHelper::PPU_MASK
   stx $4010
 
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
 
 @vblankWait1:
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
   bpl @vblankWait1
 
   ; Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
@@ -332,7 +332,7 @@ rti
 
 @vblankWait2:
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
   bpl @vblankWait2
 
   jsr resetPalettes
@@ -342,12 +342,12 @@ rti
   ; Enable Sprites & Background
   lda #%00011000
   ; 0x2002 PPU_STATUS
-  sta PPU::PPU_MASK
+  sta PPUHelper::PPU_MASK
 
   ; Enable NMI & Background pattern table address $1000
   lda #%10010000
   ; 0x2000 PPU_CTRL
-  sta PPU::PPU_CTRL
+  sta PPUHelper::PPU_CTRL
 
   jmp main
 

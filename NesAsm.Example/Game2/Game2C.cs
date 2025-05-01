@@ -8,7 +8,7 @@ namespace NesAsm.Example.Game2;
 [VectorsSegment()]
 [StartupSegment()]
 [FileInclude<Controller>("..")]
-[FileInclude<PPU>("..")]
+[FileInclude<PPUHelper>("..")]
 [FileInclude<Game2Char>()]
 public class Game2C : NesScript
 {
@@ -30,22 +30,22 @@ public class Game2C : NesScript
     public static void Main()
     {
         // Read the PPUSTATUS register $2002 PPU_STATUS
-        LDA(PPU.PPU_STATUS);
+        LDA(PPUHelper.PPU_STATUS);
 
         // Store the address $3f01 in the PPUADDR $2006 (begining of the background palette 0)
         LDAi(0x3F);
         // 0x2006 PPU_ADDR
-        STA(PPU.PPU_ADDR);
+        STA(PPUHelper.PPU_ADDR);
         LDAi(0x00);
         // 0x2006 PPU_ADDR
-        STA(PPU.PPU_ADDR);
+        STA(PPUHelper.PPU_ADDR);
 
         for (X = 0; X < 32; X++)
         {
             LDA(Game2Char.BackgroundPalettes, X);
 
             // Write palette data to PPUDATA $2007 PPU_DATA
-            STA(PPU.PPU_DATA);
+            STA(PPUHelper.PPU_DATA);
         }
 
         // Transfert sprite data into $200-$2ff memory range
@@ -80,30 +80,30 @@ public class Game2C : NesScript
     {
         // Nametable
 
-        PPU.VramColRow(6, 25, PPU.NAMETABLE_A);
+        PPUHelper.VramColRow(6, 25, PPUHelper.NAMETABLE_A);
         LDAi(0x03);
         STA(PPUDATA);
         STA(PPUDATA);
 
-        PPU.VramColRow(0, 26, PPU.NAMETABLE_A);
+        PPUHelper.VramColRow(0, 26, PPUHelper.NAMETABLE_A);
         LDAi(0x02);
-        PPU.DrawNametableLine();
+        PPUHelper.DrawNametableLine();
         //LDAi(0x02);
         //STA(PPUDATA);
         //STA(PPUDATA);
         //STA(PPUDATA);
         //STA(PPUDATA);
 
-        PPU.VramColRow(2, 27, PPU.NAMETABLE_A);
+        PPUHelper.VramColRow(2, 27, PPUHelper.NAMETABLE_A);
         LDAi(0x01);
-        PPU.DrawNametableLine();
+        PPUHelper.DrawNametableLine();
         //STA(PPUDATA);
         //STA(PPUDATA);
         //STA(PPUDATA);
         //STA(PPUDATA);
 
         // Attribute table
-        PPU.AttributeColRow(0, 6, PPU.ATTR_A);
+        PPUHelper.AttributeColRow(0, 6, PPUHelper.ATTR_A);
         LDAi(0b00000101);
         STA(PPUDATA);
         STA(PPUDATA);
@@ -114,7 +114,7 @@ public class Game2C : NesScript
         STA(PPUDATA);
         STA(PPUDATA);
 
-        PPU.VramReset();
+        PPUHelper.VramReset();
     }
 
     public static void UpdateController()
@@ -226,11 +226,11 @@ public class Game2C : NesScript
         // Transfer Sprites via OAM
         LDAi(0x00);
         // 0x2003 = OAM_ADDR
-        STA(PPU.OAM_ADDR);
+        STA(PPUHelper.OAM_ADDR);
 
         LDAi(0x02);
         // 0x4014 = OAM_DMA
-        STA(PPU.OAM_DMA);
+        STA(PPUHelper.OAM_DMA);
 
         // Increment frame counter
         INC(FrameCounter);
@@ -249,17 +249,17 @@ public class Game2C : NesScript
 
         LDXi(0b_0001_0000);
         // 0x2000 PPU_CTRL
-        STX(PPU.PPU_CTRL);
+        STX(PPUHelper.PPU_CTRL);
         // 0x2001 PPU_MASK
-        STX(PPU.PPU_MASK);
+        STX(PPUHelper.PPU_MASK);
         STX(0x4010);
 
         // 0x2002 PPU_STATUS
-        BIT(PPU.PPU_STATUS);
+        BIT(PPUHelper.PPU_STATUS);
 
         vblankWait1:
         // 0x2002 PPU_STATUS
-        BIT(PPU.PPU_STATUS);
+        BIT(PPUHelper.PPU_STATUS);
         if (BPL()) goto vblankWait1;
 
         // Clear Memory - TODO Generate a loop that can go all the way from exactly 0 to 255 and don't stop before
@@ -278,7 +278,7 @@ public class Game2C : NesScript
 
         vblankWait2:
         // 0x2002 PPU_STATUS
-        BIT(PPU.PPU_STATUS);
+        BIT(PPUHelper.PPU_STATUS);
         if (BPL()) goto vblankWait2;
 
         ResetPalettes();
@@ -288,12 +288,12 @@ public class Game2C : NesScript
         // Enable Sprites & Background
         LDAi(0b_0001_1000);
         // 0x2002 PPU_STATUS
-        STA(PPU.PPU_MASK);
+        STA(PPUHelper.PPU_MASK);
 
         // Enable NMI & Background pattern table address $1000
         LDAi(0b_1001_0000);
         // 0x2000 PPU_CTRL
-        STA(PPU.PPU_CTRL);
+        STA(PPUHelper.PPU_CTRL);
 
         Main();
     }
@@ -301,14 +301,14 @@ public class Game2C : NesScript
     public static void ResetPalettes()
     {
         // 0x2002 PPU_STATUS
-        BIT(PPU.PPU_STATUS);
+        BIT(PPUHelper.PPU_STATUS);
 
         LDAi(0x3f);
         // 0x2006 PPU_ADDR
-        STA(PPU.PPU_ADDR);
+        STA(PPUHelper.PPU_ADDR);
         LDAi(0x00);
         // 0x2006 PPU_ADDR
-        STA(PPU.PPU_ADDR);
+        STA(PPUHelper.PPU_ADDR);
 
         LDAi(0x0F);
         LDXi(0x20);
@@ -316,7 +316,7 @@ public class Game2C : NesScript
         paletteLoadLoop:
 
         // 0x2007 PPU_DATA
-        STA(PPU.PPU_DATA);
+        STA(PPUHelper.PPU_DATA);
         DEX();
         if (BNE()) goto paletteLoadLoop;
     }
