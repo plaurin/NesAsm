@@ -7,6 +7,7 @@ using NesAsm.Emulator;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
+using System.Linq;
 
 namespace NesAsm.UI;
 public partial class MainWindow : Window
@@ -19,6 +20,7 @@ public partial class MainWindow : Window
     private int _x;
     private int _frameNumber;
     private bool _isRendering;
+    private SKColor[] _colorPalette;
 
     private DateTimeOffset _startTime;
     private DateTimeOffset _nextFrameTime;
@@ -39,6 +41,8 @@ public partial class MainWindow : Window
         Image.Source = writeableBitmap;
 
         BackgroundExemple.PaletteExemple();
+
+        _colorPalette = PPU.Colors.Select(c => new SKColor(c.r, c.g, c.b)).ToArray()!;
 
         _startTime = DateTimeOffset.Now;
         _nextFrameTime = _startTime;
@@ -74,12 +78,10 @@ public partial class MainWindow : Window
         {
             var screen = PPU.DrawScreen();
 
-            var colorPalette = new SKColor[5] { SKColors.Black, SKColors.Blue, SKColors.Green, SKColors.Red, SKColors.Yellow };
-
             for (int y = 0; y < 240; y++)
                 for (int x = 0; x < 256; x++)
                 {
-                    canvas.DrawPoint(x, y, colorPalette[screen[x + y * 256]]);
+                    canvas.DrawPoint(x, y, _colorPalette[screen[x + y * 256]]);
                 }
         }
 
