@@ -356,14 +356,14 @@ rti
 
 .proc resetPalettes
   ; 0x2002 PPU_STATUS
-  bit PPU::PPU_STATUS
+  bit PPUHelper::PPU_STATUS
 
   lda #$3f
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
   lda #$00
   ; 0x2006 PPU_ADDR
-  sta PPU::PPU_ADDR
+  sta PPUHelper::PPU_ADDR
 
   lda #$0F
   ldx #$20
@@ -371,7 +371,7 @@ rti
 @paletteLoadLoop:
 
   ; 0x2007 PPU_DATA
-  sta PPU::PPU_DATA
+  sta PPUHelper::PPU_DATA
   dex
   bne @paletteLoadLoop
 
