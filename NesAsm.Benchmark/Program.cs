@@ -15,6 +15,12 @@ public class TestBenchmark
     [Benchmark]
     public void PPUDrawAll()
     {
-        for (var i = 0; i < 60; i++) PPU.DrawScreen();
+        for (var i = 0; i < 60*100; i++) PPU.DrawScreen(true, false);
+    }
+
+    [Benchmark]
+    public void PPUDrawTransparentColorFirst()
+    {
+        for (var i = 0; i < 60*100; i++) PPU.DrawScreen(true, true);
     }
 }

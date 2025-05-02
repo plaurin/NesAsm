@@ -2,14 +2,14 @@
 
 public class PPU
 {
-    private static byte[,] _backgroundPalette = new byte[4, 4];
-    private static byte[,] _spritePalette = new byte[4, 4];
-    private static byte[,,] _nametables = new byte[4, 32, 30];
-    private static byte[,,] _attributeTables = new byte[4, 16, 16];
-    private static byte[,,] _patternTables = new byte[2, 128, 128];
+    private static readonly byte[,] _backgroundPalette = new byte[4, 4];
+    private static readonly byte[,] _spritePalette = new byte[4, 4];
+    private static readonly byte[,,] _nametables = new byte[4, 32, 30];
+    private static readonly byte[,,] _attributeTables = new byte[4, 16, 16];
+    private static readonly byte[,,] _patternTables = new byte[2, 128, 128];
 
-    private static SpriteData[] _sprites = new SpriteData[64];
-    private struct SpriteData 
+    private static readonly SpriteData[] _sprites = new SpriteData[64];
+    private struct SpriteData
     {
         public byte x;
         public byte y;
@@ -95,7 +95,85 @@ public class PPU
         new(), // new(0, 0, 0),
     ];
 
-    public static void SetBackgroundPaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3)
+    public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true)
+    {
+        var screen = new byte[256 * 240];
+
+        if (setbackgroundcolor)
+            for (int y = 0; y < 240; y++)
+                for (int x = 0; x < 256; x++)
+                    screen[x + y * 256] = _backgroundPalette[0, 0];
+
+        if (drawSprites)
+        for (int i = 0; i < 63; i++)
+            if (_sprites[i].isBehindBackground)
+                for (int y = 0; y < 7; y++)
+                    for (int x = 0; x < 7; x++)
+                    {
+                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
+                        screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
+                    }
+
+        for (int y = 0; y < 240; y++)
+            for (int x = 0; x < 256; x++)
+            {
+                var screenIndex = x + y * 256;
+                screen[screenIndex] = DrawBackgroundPixel(x, y, screen[screenIndex]);
+            }
+
+        if (drawSprites)
+        for (int i = 0; i < 63; i++)
+            if (!_sprites[i].isBehindBackground)
+                for (int y = 0; y < 7; y++)
+                    for (int x = 0; x < 7; x++)
+                    {
+                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
+                        screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
+                    }
+
+        return screen;
+    }
+
+    private static byte DrawBackgroundPixel(int x, int y, byte colorIndexIfTransparent)
+    {
+        var (nametableX, nametableY) = GetNametablePosition(x, y);
+        var patternIndex = _nametables[0, nametableX, nametableY];
+
+        var (patternX, patternY) = GetPatternTablePosition(x, y);
+        var colorIndex = _patternTables[0, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY];
+
+        if (colorIndex == 0)
+        {
+            return colorIndexIfTransparent;
+        }
+
+        var (attributeX, attributeY) = GetAttributeTablePosition(nametableX, nametableY);
+        var paletteIndex = _attributeTables[0, attributeX, attributeY];
+
+        return _backgroundPalette[paletteIndex, colorIndex];
+    }
+
+    private static byte DrawSpritePixel(int spriteIndex, int x, int y, byte colorIndexIfTransparent)
+    {
+        var spriteData = _sprites[spriteIndex];
+
+        var patternIndex = spriteData.tileIndex;
+        var colorIndex = _patternTables[1, (patternIndex % 16) * 8 + x, (patternIndex / 16) * 8 + y];
+        if (colorIndex == 0)
+        {
+            return colorIndexIfTransparent;
+        }
+
+        var paletteIndex = spriteData.paletteIndex;
+
+        return _spritePalette[paletteIndex, colorIndex];
+    }
+
+    private static (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
+    private static (int patternX, int patternY) GetPatternTablePosition(int screenX, int screenY) => (screenX % 8, screenY % 8);
+    private static (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 2, nametableY / 2);
+
+    internal static void SetBackgroundPaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3)
     {
         if (paletteIndex < 0 || paletteIndex > 3)
             throw new ArgumentOutOfRangeException(nameof(paletteIndex), "must be between 0 and 3");
@@ -106,7 +184,7 @@ public class PPU
         _backgroundPalette[paletteIndex, 3] = color3;
     }
 
-    public static void SetSpritePaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3)
+    internal static void SetSpritePaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3)
     {
         if (paletteIndex < 0 || paletteIndex > 3)
             throw new ArgumentOutOfRangeException(nameof(paletteIndex), "must be between 0 and 3");
@@ -117,7 +195,7 @@ public class PPU
         _spritePalette[paletteIndex, 3] = color3;
     }
 
-    public static void SetSpriteData(byte spriteIndex, byte x, byte y, byte tileIndex, byte paletteIndex, bool isBehindBackground, bool flipHorizontally, bool flipVertically)
+    internal static void SetSpriteData(byte spriteIndex, byte x, byte y, byte tileIndex, byte paletteIndex, bool isBehindBackground, bool flipHorizontally, bool flipVertically)
     {
         if (spriteIndex < 0 || spriteIndex > 63)
             throw new ArgumentOutOfRangeException(nameof(spriteIndex), "must be between 0 and 63");
@@ -137,7 +215,7 @@ public class PPU
         };
     }
 
-    public static void SetPatternTablePixel(int tableNumber, int x, int y, byte colorIndex)
+    internal static void SetPatternTablePixel(int tableNumber, int x, int y, byte colorIndex)
     {
         if (tableNumber < 0 || tableNumber > 1)
             throw new ArgumentOutOfRangeException(nameof(tableNumber), "must be between 0 and 1");
@@ -154,7 +232,7 @@ public class PPU
         _patternTables[tableNumber, x, y] = colorIndex;
     }
 
-    public static void SetNametableTile(int tableNumber, int x, int y, byte tileIndex)
+    internal static void SetNametableTile(int tableNumber, int x, int y, byte tileIndex)
     {
         if (tableNumber < 0 || tableNumber > 3)
             throw new ArgumentOutOfRangeException(nameof(tableNumber), "must be between 0 and 3");
@@ -168,7 +246,7 @@ public class PPU
         _nametables[tableNumber, x, y] = tileIndex;
     }
 
-    public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex)
+    internal static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex)
     {
         if (tableNumber < 0 || tableNumber > 3)
             throw new ArgumentOutOfRangeException(nameof(tableNumber), "must be between 0 and 3");
@@ -184,64 +262,4 @@ public class PPU
 
         _attributeTables[tableNumber, x, y] = paletteIndex;
     }
-
-    public static byte[] DrawScreen()
-    {
-        var screen = new byte[256 * 240];
-
-        for (int y = 0; y < 240; y++)
-            for (int x = 0; x < 256; x++)
-            {
-                screen[x + y * 256] = DrawBackgroundPixel(x, y);
-            }
-
-        for (int i = 0; i < 63; i++)
-            for (int y = 0; y < 7; y++)
-                for (int x = 0; x < 7; x++)
-                {
-                    screen[(_sprites[i].x + x) + (_sprites[i].y + y) * 256] = DrawSpritePixel(i, x, y);
-                }
-
-        return screen;
-    }
-
-    private static byte DrawBackgroundPixel(int x, int y)
-    {
-        var (nametableX, nametableY) = GetNametablePosition(x, y);
-        var patternIndex = _nametables[0, nametableX, nametableY];
-
-        var (patternX, patternY) = GetPatternTablePosition(x, y);
-        var colorIndex = _patternTables[0, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY];
-
-        if (colorIndex == 0)
-        {
-            return _backgroundPalette[0, 0];
-        }
-
-        var (attributeX, attributeY) = GetAttributeTablePosition(nametableX, nametableY);
-        var paletteIndex = _attributeTables[0, attributeX, attributeY];
-
-        return _backgroundPalette[paletteIndex, colorIndex];
-    }
-
-    private static byte DrawSpritePixel(int spriteIndex, int x, int y)
-    {
-        var spriteData = _sprites[spriteIndex];
-
-        var patternIndex = spriteData.tileIndex;
-        var colorIndex = _patternTables[1, (patternIndex % 16) * 8 + x, (patternIndex / 16) * 8 + y];
-        if (colorIndex == 0)
-        {
-            // TODO Transparency
-            return _backgroundPalette[0, 0];
-        }
-
-        var paletteIndex = spriteData.paletteIndex;
-
-        return _spritePalette[paletteIndex, colorIndex];
-    }
-
-    internal static (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
-    internal static (int patternX, int patternY) GetPatternTablePosition(int screenX, int screenY) => (screenX % 8, screenY % 8);
-    internal static (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 2, nametableY / 2);
 }
