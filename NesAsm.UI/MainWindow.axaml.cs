@@ -4,6 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
+using NesAsm.Example.Game1;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
@@ -40,7 +41,8 @@ public partial class MainWindow : Window
         
         Image.Source = writeableBitmap;
 
-        BackgroundExemple.PaletteExemple();
+        //NesApiCSharp.RunGame(BackgroundExemple.AllExemple);
+        NesApiCSharp.RunGame(Game1.Reset);
 
         _colorPalette = PPU.Colors.Select(c => new SKColor(c.r, c.g, c.b)).ToArray()!;
 

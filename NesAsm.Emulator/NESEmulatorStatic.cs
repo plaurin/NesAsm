@@ -12,6 +12,10 @@ public static class NESEmulatorStatic
     private static bool _zero;
     private static bool _negative;
 
+    private static bool _interrupt = true;
+
+    private static byte _sp;
+
     public static ReadOnlySpan<byte> Memory => _memory;
     public static byte A => _a;
     public static byte X => _x;
@@ -19,6 +23,7 @@ public static class NESEmulatorStatic
     public static bool Carry => _carry;
     public static bool Zero => _zero;
     public static bool Negative => _negative;
+    public static bool Interupt => _interrupt;
 
     // Immediate Load instructions
     public static void LDAi(byte value) => _a = value;
@@ -52,7 +57,10 @@ public static class NESEmulatorStatic
     public static void TAX() => _x = _a;
     public static void TXA() => _a = _x;
 
-    public static void TXS() { throw new NotImplementedException(); } // SP = X
+    /// <summary>
+    /// Transfert X to SP
+    /// </summary>
+    public static void TXS() { _sp = _x; }
 
     // Zero Page Store instructions
     public static void STA(byte address) => _memory[address] = _a;
@@ -178,11 +186,22 @@ public static class NESEmulatorStatic
 
     public static void JMP(/* Goto Label */) { throw new NotImplementedException(); }
 
-    public static void BIT(ushort address) { throw new NotImplementedException(); }
+    /// <summary>
+    /// Bit Test
+    /// </summary>
+    /// <param name="address"></param>
+    /// <remarks></remarks>
+    public static void BIT(ushort address) { }
     
-    public static void SEI() { throw new NotImplementedException(); }
+    /// <summary>
+    /// Set Interrupt Disable
+    /// </summary>
+    public static void SEI() { _interrupt = false; }
 
-    public static void CLD() { throw new NotImplementedException(); }
+    /// <summary>
+    /// Clear Decimal Mode
+    /// </summary>
+    public static void CLD() { }
 
     public static void JSR(/* nameof(Method) */) { throw new NotImplementedException(); }
     public static void RTI() { throw new NotImplementedException(); }
