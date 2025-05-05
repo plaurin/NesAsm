@@ -9,6 +9,7 @@ using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NesAsm.UI;
 public partial class MainWindow : Window
@@ -41,17 +42,17 @@ public partial class MainWindow : Window
         
         Image.Source = writeableBitmap;
 
-        //NesApiCSharp.RunGame(BackgroundExemple.AllExemple);
-        NesApiCSharp.RunGame(Game1.Reset);
-
         _colorPalette = PPU.Colors.Select(c => new SKColor(c.r, c.g, c.b)).ToArray()!;
 
         _startTime = DateTimeOffset.Now;
         _nextFrameTime = _startTime;
 
-        _timer.Interval = TimeSpan.FromSeconds(1) / 10000.0;
+        _timer.Interval = TimeSpan.FromMilliseconds(1);
         _timer.Tick += Timer_Tick;
         _timer.Start();
+
+        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
+        Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
     }
 
     //public override void Render(DrawingContext context)
@@ -60,14 +61,34 @@ public partial class MainWindow : Window
     //    context.DrawImage(writeableBitmap, new Rect(0, 0, writeableBitmap.PixelSize.Width, writeableBitmap.PixelSize.Height));
     //}
 
+    bool _canDraw = false;
+    bool _running = false;
+
+    void Draw()
+    {
+        while(!_canDraw)         {
+            // Wait for the next frame to be ready
+            Task.Delay(10).Wait();
+        }
+        Dispatcher.UIThread.Post(() => DrawLoop());
+        _canDraw = false;
+    }
+
     private void Timer_Tick(object? sender, EventArgs e)
     {
-        //while(true)
+        if (!_running)
         {
-            if (DateTimeOffset.Now < _nextFrameTime) return;
-            DrawLoop();
-            _nextFrameTime += _frameDuration;
+            _running = true;
+            //NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi);
+            return;
         }
+
+        //NesApiCSharp.RunOnce(Game1.Reset);
+
+        if (_isRendering || _canDraw || DateTimeOffset.Now < _nextFrameTime) return;
+        _canDraw = true;
+        //DrawLoop();
+        _nextFrameTime += _frameDuration;
     }
 
     private void DrawLoop()

@@ -2,9 +2,9 @@
 
 namespace NesAsm.Example.PPUExamples;
 
-public class BackgroundExemple
+public class PPUExemple
 {
-    public static void AllExemple()
+    public static void Run()
     {
         // Background palette
         SetBackgroundPaletteColors(0, 0x_01, 0x_15, 0x_2A, 0X_23);
@@ -58,14 +58,5 @@ public class BackgroundExemple
         SetSpriteData(1, 30, 30, 1, 1, false, false, false);
         SetSpriteData(2, 40, 40, 1, 2, true, false, false);
         SetSpriteData(3, 50, 50, 1, 3, false, false, false);
-    }
-
-    public static void GameLoop()
-    {
-        // Reset
-
-        // Main loop
-
-        // Nmi
     }
 }

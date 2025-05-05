@@ -1,4 +1,5 @@
-﻿namespace NesAsm.Emulator;
+﻿
+namespace NesAsm.Emulator;
 
 public class PPUApiCSharp
 {
@@ -19,4 +20,16 @@ public class PPUApiCSharp
 
     public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex) =>
         PPU.SetAttributeTablePalette(tableNumber, x, y, paletteIndex);
+
+    public static void WaitForVBlank()
+    {
+        _nmiCallback?.Invoke();
+    }
+
+    private static Action? _nmiCallback = null;
+
+    internal static void SetNmiCallback(Action callback)
+    {
+        _nmiCallback = callback;
+    }
 }
