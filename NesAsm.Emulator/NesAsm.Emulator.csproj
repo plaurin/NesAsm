@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NesAsm.Utilities\NesAsm.Utilities.csproj" />
+  </ItemGroup>
+
 </Project>

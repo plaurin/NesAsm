@@ -1,4 +1,7 @@
 ﻿
+using NesAsm.Utilities;
+using System.Reflection;
+
 namespace NesAsm.Emulator;
 
 public class PPUApiCSharp
@@ -20,6 +23,21 @@ public class PPUApiCSharp
 
     public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex) =>
         PPU.SetAttributeTablePalette(tableNumber, x, y, paletteIndex);
+
+    public static void LoadImage(string filePath)
+    {
+        var outputFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
+        var path = Path.Combine(outputFolder!, filePath);
+
+        if (File.Exists(path))
+        {
+            CharHelpers.LoadImage(path);
+        }
+        else
+        {
+            throw new FileNotFoundException("Don't forget to copy image file to output!", filePath);
+        }
+    }
 
     public static void WaitForVBlank()
     {

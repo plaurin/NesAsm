@@ -9,7 +9,14 @@
   <ItemGroup>
     <ProjectReference Include="..\NesAsm.Analyzers\NesAsm.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\NesAsm.Emulator\NesAsm.Emulator.csproj" />
+    <ProjectReference Include="..\NesAsm.Utilities\NesAsm.Utilities.csproj" />
 </ItemGroup>
+
+  <ItemGroup>
+    <None Update="PPUExamples\Image1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <Exec Command="call run.bat" />
