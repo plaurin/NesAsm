@@ -5,7 +5,7 @@ public class PPU
     private static readonly byte[,] _backgroundPalette = new byte[4, 4];
     private static readonly byte[,] _spritePalette = new byte[4, 4];
     private static readonly byte[,,] _nametables = new byte[4, 32, 30];
-    private static readonly byte[,,] _attributeTables = new byte[4, 16, 16];
+    private static readonly byte[,,] _attributeTables = new byte[4, 16, 15];
     private static readonly byte[,,] _patternTables = new byte[2, 128, 128];
 
     private static readonly SpriteData[] _sprites = new SpriteData[64];
@@ -254,7 +254,7 @@ public class PPU
         if (x < 0 || x > 15)
             throw new ArgumentOutOfRangeException(nameof(x), "must be between 0 and 31");
 
-        if (y < 0 || y > 15)
+        if (y < 0 || y > 14)
             throw new ArgumentOutOfRangeException(nameof(y), "must be between 0 and 29");
 
         if (paletteIndex < 0 || paletteIndex > 3)
