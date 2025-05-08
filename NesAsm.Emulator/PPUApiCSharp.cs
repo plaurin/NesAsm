@@ -1,5 +1,4 @@
-﻿
-using NesAsm.Utilities;
+﻿using NesAsm.Utilities;
 using System.Reflection;
 
 namespace NesAsm.Emulator;
@@ -31,7 +30,49 @@ public class PPUApiCSharp
 
         if (File.Exists(path))
         {
-            CharHelpers.LoadImage(path);
+            var charData = CharHelpers.LoadImage(path);
+
+            if (charData.HasValue)
+            {
+                // Set Palettes
+                int paletteIndex = 0;
+                foreach (var palette in charData.Value.BackgroundPalettes.Take(4))
+                {
+                    SetBackgroundPaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
+                }
+
+                paletteIndex = 0;
+                foreach (var palette in charData.Value.SpritePalettes.Take(4))
+                {
+                    SetSpritePaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
+                }
+
+                // Set Background Tiles
+                var tileIndex = 0;
+                foreach (var tileData in charData.Value.BackgroundTiles)
+                {
+                    for (int x = 0; x < 8; x++)
+                        for (int y = 0; y < 8; y++)
+                        {
+                            byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
+                            SetPatternTablePixel(0, (tileIndex % 8) * 8 + x, (tileIndex / 8) * 8 + y, colorIndex);
+                        }
+                    tileIndex++;
+                }
+
+                // Set Sprite Tiles
+                tileIndex = 0;
+                foreach (var tileData in charData.Value.SpriteTiles)
+                {
+                    for (int x = 0; x < 8; x++)
+                        for (int y = 0; y < 8; y++)
+                        {
+                            byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
+                            SetPatternTablePixel(1, (tileIndex % 8) * 8 + x, (tileIndex / 8) * 8 + y, colorIndex);
+                        }
+                    tileIndex++;
+                }
+            }
         }
         else
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BigGustave.PngUtil;
@@ -117,11 +118,14 @@ namespace NesAsm.Utilities
             public int Index { get; }
         }
 
-        public class ColorPalettes
+        public class ColorPalettes : IEnumerable<ColorPalette>
         {
-            private readonly HashSet<ColorPalette> palettes = new HashSet<ColorPalette>(new ColorPaletteComparer());
+            private readonly HashSet<ColorPalette> _palettes = new HashSet<ColorPalette>(new ColorPaletteComparer());
 
-            public int NonEmptyCount => palettes.Count(p => !p.IsEmpty);
+            public int NonEmptyCount => _palettes.Count(p => !p.IsEmpty);
+
+            public IEnumerator<ColorPalette> GetEnumerator() => _palettes.GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => _palettes.GetEnumerator();
 
             public ColorPalette GetFromColors(Pixel[] colors)
             {
@@ -132,9 +136,9 @@ namespace NesAsm.Utilities
 
             public ColorPalette GetFromPalette(ColorPalette palette)
             {
-                if (!palettes.Contains(palette))
+                if (!_palettes.Contains(palette))
                 {
-                    palettes.Add(palette);
+                    _palettes.Add(palette);
                 }
 
                 return palette;
