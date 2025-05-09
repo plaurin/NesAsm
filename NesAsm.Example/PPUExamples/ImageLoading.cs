@@ -9,10 +9,6 @@ public class ImageLoading
         // Init;
         LoadImage(@"PPUExamples\Image1.png");
 
-        SetSpriteData(0, 20, 20, 1, 0, false, false, false);
-        SetSpriteData(1, 40, 40, 2, 1, false, false, false);
-        SetSpriteData(2, 60, 60, 3, 2, false, false, false);
-        SetSpriteData(3, 80, 80, 4, 3, false, false, false);
 
         // Nametable
         byte tileIndex = 1;
@@ -32,6 +28,14 @@ public class ImageLoading
 
         SetAttributeTablePalette(0, 13, 14, 1);
         SetAttributeTablePalette(0, 14, 14, 2);
+
+        // Sprites
+        SetNametableTile(0, 1, 1, 0);
+
+        SetSpriteData(0, 20, 20, 1, 0, false, false, false);
+        SetSpriteData(1, 8, 8, 2, 1, false, false, false);
+        SetSpriteData(2, 60, 60, 3, 2, false, false, false);
+        SetSpriteData(3, 80, 80, 4, 3, false, false, false);
 
         while (true)
         {

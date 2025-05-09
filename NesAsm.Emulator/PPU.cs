@@ -105,10 +105,10 @@ public class PPU
                     screen[x + y * 256] = _backgroundPalette[0, 0];
 
         if (drawSprites)
-        for (int i = 0; i < 63; i++)
+        for (int i = 0; i < 64; i++)
             if (_sprites[i].isBehindBackground)
-                for (int y = 0; y < 7; y++)
-                    for (int x = 0; x < 7; x++)
+                for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
@@ -122,10 +122,10 @@ public class PPU
             }
 
         if (drawSprites)
-        for (int i = 0; i < 63; i++)
+        for (int i = 0; i < 64; i++)
             if (!_sprites[i].isBehindBackground)
-                for (int y = 0; y < 7; y++)
-                    for (int x = 0; x < 7; x++)
+                for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
