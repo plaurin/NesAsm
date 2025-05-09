@@ -28,7 +28,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="PPUTests.Test.verified.bin">
+    <None Update="Image1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="PPUApiCSharpTests.TestImageLoading.verified.bin">
+      <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0].Split('(')[0])</ParentFile>
+    </None>
+    <None Update="PPUApiCSharpTests.TestBackgroundAndForeground.verified.bin">
       <ParentFile>$([System.String]::Copy('%(FileName)').Split('.')[0].Split('(')[0])</ParentFile>
       <DependentUpon>%(ParentFile).cs</DependentUpon>
     </None>

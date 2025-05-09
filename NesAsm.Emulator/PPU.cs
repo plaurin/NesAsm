@@ -95,6 +95,31 @@ public class PPU
         new(), // new(0, 0, 0),
     ];
 
+    public static void Reset()
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                _backgroundPalette[i, j] = 0;
+                _spritePalette[i, j] = 0;
+            }
+
+            for (int j = 0; j < 32; j++)
+                for (int k = 0; k < 30; k++)
+                    _nametables[i, j, k] = 0;
+
+            for (int j = 0; j < 16; j++)
+                for (int k = 0; k < 15; k++)
+                    _attributeTables[i, j, k] = 0;
+        }
+
+        for (int i = 0; i < 2; i++)
+            for (int j = 0; j < 128; j++)
+                for (int k = 0; k < 128; k++)
+                    _patternTables[i, j, k] = 0;
+    }
+
     public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true)
     {
         var screen = new byte[256 * 240];
