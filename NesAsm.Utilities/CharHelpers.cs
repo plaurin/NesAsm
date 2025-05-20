@@ -16,33 +16,39 @@ namespace NesAsm.Utilities
             public ColorPalettes BackgroundPalettes;
         }
 
-        public static CharData? LoadImage(string imageFilename)
+        public static CharData? LoadImage(string imageFilename, bool hasTileSeparator = true, ColorPalettes backgroundPalettes = null, ColorPalettes spritePalettes = null)
         {
             var image = Png.Open(imageFilename);
 
             // Image should have specific size
-            if (image.Width != 143 || image.Height != 287)
+            if (hasTileSeparator && (image.Width != 143 || image.Height != 287))
             {
                 Console.WriteLine("Image size not valid width: {0} height: {1}", image.Width, image.Height);
                 return null;
             }
 
-            var (spriteTiles, spritePalettes) = GetTilesAndPalettes(image, 0);
-            var (backgroundTiles, backgroundPalettes) = GetTilesAndPalettes(image, 256);
+            if (!hasTileSeparator && (image.Width != 128 || image.Height != 256))
+            {
+                Console.WriteLine("Image size not valid width: {0} height: {1}", image.Width, image.Height);
+                return null;
+            }
+
+            var (spriteTiles, outSpritePalettes) = GetTilesAndPalettes(image, 0, hasTileSeparator, spritePalettes);
+            var (backgroundTiles, outBackgroundPalettes) = GetTilesAndPalettes(image, 256, hasTileSeparator, backgroundPalettes);
 
             return new CharData
             {
                 SpriteTiles = spriteTiles.ToArray(),
-                SpritePalettes = spritePalettes,
+                SpritePalettes = outSpritePalettes,
                 BackgroundTiles = backgroundTiles.ToArray(),
-                BackgroundPalettes = backgroundPalettes
+                BackgroundPalettes = outBackgroundPalettes
             };
         }
 
-        private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex)
+        private static (IEnumerable<TileData> tiles, ColorPalettes palettes) GetTilesAndPalettes(Png image, int startingTileIndex, bool hasTileSeparator, ColorPalettes existingPallettes = null)
         {
             var tiles = new TileData[256];
-            var palettes = new ColorPalettes();
+            var palettes = existingPallettes ?? new ColorPalettes();
 
             var lastTile = -1;
 
@@ -51,7 +57,7 @@ namespace NesAsm.Utilities
             {
                 if (tiles[tileIndex] == null)
                 {
-                    var tileData = CreateTileData(image, tileIndex + startingTileIndex, palettes, string.Empty);
+                    var tileData = CreateTileData(image, tileIndex + startingTileIndex, palettes, hasTileSeparator);
                     tiles[tileIndex] = tileData;
                 }
 
@@ -68,12 +74,16 @@ namespace NesAsm.Utilities
             return (tiles.Take(lastTile + 1), palettes);
         }
 
-        private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, string paletteName)
+        private static TileData CreateTileData(Png image, int tileIndex, ColorPalettes colorPalettes, bool hasTileSeparator)
         {
-            var tileStartX = (tileIndex % 16) * 9;
-            var tileStartY = (tileIndex / 16) * 9;
+            var tileSize = hasTileSeparator ? 9 : 8;
+
+            var tileStartX = (tileIndex % 16) * tileSize;
+            var tileStartY = (tileIndex / 16) * tileSize;
 
             var pixels = new List<Pixel>();
+
+            // TODO Work with NESColor directly in ColorPalette
 
             for (var j = 0; j < 8; j++)
                 for (var i = 0; i < 8; i++)
@@ -93,8 +103,6 @@ namespace NesAsm.Utilities
             }
 
             var colorPalette = colorPalettes.GetFromColors(colors);
-
-            colorPalette.SetName(paletteName);
 
             return new TileData(pixels.ToArray(), colorPalette, tileIndex);
         }
@@ -127,6 +135,22 @@ namespace NesAsm.Utilities
             public IEnumerator<ColorPalette> GetEnumerator() => _palettes.GetEnumerator();
             IEnumerator IEnumerable.GetEnumerator() => _palettes.GetEnumerator();
 
+            public void AddNesColorPalette(byte[] nesColors)
+            {
+                if (nesColors == null) throw new ArgumentNullException(nameof(nesColors));
+                if (nesColors.Length != 4) throw new ArgumentOutOfRangeException(nameof(nesColors), "Exactly 4 bytes required");
+
+                var palette = new ColorPalette(new Pixel[]
+                {
+                    ColorPalette.AllNesColors[nesColors[0]],
+                    ColorPalette.AllNesColors[nesColors[1]],
+                    ColorPalette.AllNesColors[nesColors[2]],
+                    ColorPalette.AllNesColors[nesColors[3]]
+                });
+
+                _palettes.Add(palette);
+            }
+
             public ColorPalette GetFromColors(Pixel[] colors)
             {
                 var palette = new ColorPalette(colors);
@@ -154,7 +178,7 @@ namespace NesAsm.Utilities
 
         public class ColorPalette
         {
-            private static readonly Pixel[] AllNesColors = new Pixel[]
+            public static readonly Pixel[] AllNesColors = new Pixel[]
             {
                 new Pixel(102, 102, 102),
                 new Pixel(0, 42, 136),
@@ -230,10 +254,16 @@ namespace NesAsm.Utilities
             };
 
             private readonly Pixel[] _colors = new Pixel[4];
+            private readonly byte[] _nesColors = new byte[4];
 
             public ColorPalette(Pixel[] colors)
             {
                 colors.CopyTo(_colors, 0);
+            }
+
+            public ColorPalette(byte[] nesColors)
+            {
+                nesColors.CopyTo(_nesColors, 0);
             }
 
             public bool IsEmpty => _colors[0] == Pixel.Empty && _colors[1] == Pixel.Empty && _colors[2] == Pixel.Empty && _colors[3] == Pixel.Empty;
@@ -286,7 +316,7 @@ namespace NesAsm.Utilities
                     Console.WriteLine("Color mismatch for color {0}, closest is {1} at pixel {2}, {3}", closestColor, color, x, y);
                 }
 
-                return closestColor;
+                return AllNesColors.IndexOf(closestColor);
             }
 
             internal void SetName(string name) => Name = name;

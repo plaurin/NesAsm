@@ -23,28 +23,61 @@ public class PPUApiCSharp
     public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex) =>
         PPU.SetAttributeTablePalette(tableNumber, x, y, paletteIndex);
 
-    public static void LoadImage(string filePath)
+    public static void LoadImage(string filePath, bool hasTileSeparator = true, bool useExistingPalettes = false)
     {
         var outputFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
         var path = Path.Combine(outputFolder!, filePath);
 
         if (File.Exists(path))
         {
-            var charData = CharHelpers.LoadImage(path);
+            CharHelpers.ColorPalettes? backgroundPalettes = null;
+            CharHelpers.ColorPalettes? spritePalettes = null;
+
+            if (useExistingPalettes)
+            {
+                backgroundPalettes = new CharHelpers.ColorPalettes();
+                for (int i = 0; i < 4; i++)
+                {
+                    backgroundPalettes.AddNesColorPalette(
+                    [
+                        PPU.BackgroundPalettes[i, 0],
+                        PPU.BackgroundPalettes[i, 1],
+                        PPU.BackgroundPalettes[i, 2],
+                        PPU.BackgroundPalettes[i, 3],
+                    ]);
+                }
+
+                spritePalettes = new CharHelpers.ColorPalettes();
+                for (int i = 0; i < 4; i++)
+                {
+                    spritePalettes.AddNesColorPalette(
+                    [
+                        PPU.BackgroundPalettes[i, 0],
+                        PPU.BackgroundPalettes[i, 1],
+                        PPU.BackgroundPalettes[i, 2],
+                        PPU.BackgroundPalettes[i, 3],
+                    ]);
+                }
+            }
+
+            var charData = CharHelpers.LoadImage(path, hasTileSeparator, backgroundPalettes, spritePalettes);
 
             if (charData.HasValue)
             {
-                // Set Palettes
-                int paletteIndex = 0;
-                foreach (var palette in charData.Value.BackgroundPalettes.Take(4))
+                if (!useExistingPalettes)
                 {
-                    SetBackgroundPaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
-                }
+                    // Set the loaded Palettes
+                    int paletteIndex = 0;
+                    foreach (var palette in charData.Value.BackgroundPalettes.Take(4))
+                    {
+                        SetBackgroundPaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
+                    }
 
-                paletteIndex = 0;
-                foreach (var palette in charData.Value.SpritePalettes.Take(4))
-                {
-                    SetSpritePaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
+                    paletteIndex = 0;
+                    foreach (var palette in charData.Value.SpritePalettes.Take(4))
+                    {
+                        SetSpritePaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
+                    }
                 }
 
                 // Set Background Tiles
@@ -55,7 +88,7 @@ public class PPUApiCSharp
                         for (int y = 0; y < 8; y++)
                         {
                             byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
-                            SetPatternTablePixel(0, (tileIndex % 8) * 8 + x, (tileIndex / 8) * 8 + y, colorIndex);
+                            SetPatternTablePixel(0, (tileIndex % 16) * 8 + x, (tileIndex / 16) * 8 + y, colorIndex);
                         }
                     tileIndex++;
                 }
@@ -68,7 +101,7 @@ public class PPUApiCSharp
                         for (int y = 0; y < 8; y++)
                         {
                             byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
-                            SetPatternTablePixel(1, (tileIndex % 8) * 8 + x, (tileIndex / 8) * 8 + y, colorIndex);
+                            SetPatternTablePixel(1, (tileIndex % 16) * 8 + x, (tileIndex / 16) * 8 + y, colorIndex);
                         }
                     tileIndex++;
                 }

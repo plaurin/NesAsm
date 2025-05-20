@@ -5,6 +5,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
 using NesAsm.Example.Game1;
+using NesAsm.Example.JumpMan;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
@@ -53,7 +54,8 @@ public partial class MainWindow : Window
 
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
-        Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
+        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
+        Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi)).ConfigureAwait(false);
     }
 
     //public override void Render(DrawingContext context)

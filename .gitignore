@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # NesAsm
 *.nes
+/NesAsm.Example/JumpMan/JumpMan.png

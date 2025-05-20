@@ -95,6 +95,10 @@ public class PPU
         new(), // new(0, 0, 0),
     ];
 
+    public static byte[,] BackgroundPalettes => _backgroundPalette;
+
+    public static byte[,] SpritePalettes => _spritePalette;
+
     public static void Reset()
     {
         for (int i = 0; i < 4; i++)
