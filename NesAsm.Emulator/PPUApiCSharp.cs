@@ -23,63 +23,42 @@ public class PPUApiCSharp
     public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex) =>
         PPU.SetAttributeTablePalette(tableNumber, x, y, paletteIndex);
 
-    public static void LoadImage(string filePath, bool hasTileSeparator = true, bool useExistingPalettes = false)
+    public static void LoadImage(string filePath, bool hasTileSeparator = true)
     {
         var outputFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
         var path = Path.Combine(outputFolder!, filePath);
 
         if (File.Exists(path))
         {
-            CharHelpers.ColorPalettes? backgroundPalettes = null;
-            CharHelpers.ColorPalettes? spritePalettes = null;
+            NesColorPalette[] backgroundPalettes = new NesColorPalette[4];
+            NesColorPalette[] spritePalettes = new NesColorPalette[4];
 
-            if (useExistingPalettes)
+            for (int i = 0; i < 4; i++)
             {
-                backgroundPalettes = new CharHelpers.ColorPalettes();
-                for (int i = 0; i < 4; i++)
-                {
-                    backgroundPalettes.AddNesColorPalette(
-                    [
-                        PPU.BackgroundPalettes[i, 0],
-                        PPU.BackgroundPalettes[i, 1],
-                        PPU.BackgroundPalettes[i, 2],
-                        PPU.BackgroundPalettes[i, 3],
-                    ]);
-                }
+                backgroundPalettes[i] = new NesColorPalette(
+                [
+                    PPU.BackgroundPalettes[i, 0],
+                    PPU.BackgroundPalettes[i, 1],
+                    PPU.BackgroundPalettes[i, 2],
+                    PPU.BackgroundPalettes[i, 3],
+                ]);
+            }
 
-                spritePalettes = new CharHelpers.ColorPalettes();
-                for (int i = 0; i < 4; i++)
-                {
-                    spritePalettes.AddNesColorPalette(
-                    [
-                        PPU.BackgroundPalettes[i, 0],
-                        PPU.BackgroundPalettes[i, 1],
-                        PPU.BackgroundPalettes[i, 2],
-                        PPU.BackgroundPalettes[i, 3],
-                    ]);
-                }
+            for (int i = 0; i < 4; i++)
+            {
+                spritePalettes[i] = new NesColorPalette(
+                [
+                    PPU.SpritePalettes[i, 0],
+                    PPU.SpritePalettes[i, 1],
+                    PPU.SpritePalettes[i, 2],
+                    PPU.SpritePalettes[i, 3],
+                ]);
             }
 
             var charData = CharHelpers.LoadImage(path, hasTileSeparator, backgroundPalettes, spritePalettes);
 
             if (charData.HasValue)
             {
-                if (!useExistingPalettes)
-                {
-                    // Set the loaded Palettes
-                    int paletteIndex = 0;
-                    foreach (var palette in charData.Value.BackgroundPalettes.Take(4))
-                    {
-                        SetBackgroundPaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
-                    }
-
-                    paletteIndex = 0;
-                    foreach (var palette in charData.Value.SpritePalettes.Take(4))
-                    {
-                        SetSpritePaletteColors(paletteIndex++, palette.NesColors[0], palette.NesColors[1], palette.NesColors[2], palette.NesColors[3]);
-                    }
-                }
-
                 // Set Background Tiles
                 var tileIndex = 0;
                 foreach (var tileData in charData.Value.BackgroundTiles)
@@ -87,7 +66,7 @@ public class PPUApiCSharp
                     for (int x = 0; x < 8; x++)
                         for (int y = 0; y < 8; y++)
                         {
-                            byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
+                            byte colorIndex = tileData.Pixels[x + y * 8];
                             SetPatternTablePixel(0, (tileIndex % 16) * 8 + x, (tileIndex / 16) * 8 + y, colorIndex);
                         }
                     tileIndex++;
@@ -100,7 +79,7 @@ public class PPUApiCSharp
                     for (int x = 0; x < 8; x++)
                         for (int y = 0; y < 8; y++)
                         {
-                            byte colorIndex = tileData.Palette.GetColorIndex(tileData.Pixels[x + y * 8]);
+                            byte colorIndex = tileData.Pixels[x + y * 8];
                             SetPatternTablePixel(1, (tileIndex % 16) * 8 + x, (tileIndex / 16) * 8 + y, colorIndex);
                         }
                     tileIndex++;

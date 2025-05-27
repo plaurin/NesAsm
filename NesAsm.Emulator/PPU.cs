@@ -152,7 +152,7 @@ public class PPU
 
         if (drawSprites)
         for (int i = 0; i < 64; i++)
-            if (!_sprites[i].isBehindBackground)
+            if (!_sprites[i].isBehindBackground && _sprites[i].y < 240)
                 for (int y = 0; y < 8; y++)
                     for (int x = 0; x < 8; x++)
                     {
