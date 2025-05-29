@@ -76,7 +76,7 @@ public class PPU
         new(), // new(0, 0, 0),
         new(), // new(0, 0, 0),
 
-        new(), // new(255, 254, 255),
+        new(255, 254, 255),
         new(192, 223, 255),
         new(211, 210, 255),
         new(232, 200, 255),
@@ -281,7 +281,7 @@ public class PPU
             throw new ArgumentOutOfRangeException(nameof(tableNumber), "must be between 0 and 3");
 
         if (x < 0 || x > 15)
-            throw new ArgumentOutOfRangeException(nameof(x), "must be between 0 and 31");
+            throw new ArgumentOutOfRangeException(nameof(x), "must be between 0 and 15");
 
         if (y < 0 || y > 14)
             throw new ArgumentOutOfRangeException(nameof(y), "must be between 0 and 29");

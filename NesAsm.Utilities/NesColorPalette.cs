@@ -93,7 +93,7 @@ namespace NesAsm.Utilities
             new Pixel(), // new(0, 0, 0),
 
             // 0x30
-            new Pixel(), // new(255, 254, 255),
+            new Pixel(255, 254, 255),
             new Pixel(192, 223, 255),
             new Pixel(211, 210, 255),
             new Pixel(232, 200, 255),
