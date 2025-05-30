@@ -121,8 +121,20 @@ public static class JumpManGame
         }
     }
 
+    static int FrameCount = 0;
     private static void MainLoop()
     {
+        FrameCount++;
+
+        var colorAnimFrame = FrameCount % 48;
+        if (colorAnimFrame < 8)
+            SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
+        else if (colorAnimFrame < 16)
+            SetBackgroundPaletteColors(3, 0x_0F, 0x_07, 0x_17, 0x_0F);
+        else if (colorAnimFrame < 24)
+            SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
+        else
+            SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
     }
 
     public static void Nmi()
