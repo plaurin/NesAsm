@@ -92,6 +92,9 @@ public class PPUApiCSharp
         }
     }
 
+    public static void SetScrollPosition(byte nametable, byte x, byte y) =>
+        PPU.SetScrollPosition(nametable, x, y);
+
     public static void WaitForVBlank()
     {
         _nmiCallback?.Invoke();

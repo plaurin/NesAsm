@@ -73,7 +73,7 @@ public static class JumpManGame
         LoadImage(@"JumpMan\JumpMan.png", hasTileSeparator: false);
 
         // Full sky
-        DrawBlockFill(0, 0, 16, 15, SkyTiles, SkyPalette);
+        DrawBlockFill(0, 0, 32, 15, SkyTiles, SkyPalette);
 
         // Hide sprites
         for (byte i = 0; i < 64; i++)
@@ -114,6 +114,8 @@ public static class JumpManGame
 
         DrawBlockStretch(12, 3, 5, 2, CloudStretchTiles, CloudPalette);
 
+        //SetScrollPosition(1, 0, 0);
+
         while (true)
         {
             MainLoop();
@@ -122,6 +124,8 @@ public static class JumpManGame
     }
 
     static int FrameCount = 0;
+    static byte ScrollX = 0;
+    static byte ScrollNametable = 0;
     private static void MainLoop()
     {
         FrameCount++;
@@ -135,6 +139,9 @@ public static class JumpManGame
             SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
         else
             SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
+
+        SetScrollPosition(ScrollNametable, ScrollX++, 0);
+        if (ScrollX == 255) { ScrollX = 0; ScrollNametable = (byte)((ScrollNametable + 1) % 2); } else ScrollX++;
     }
 
     public static void Nmi()

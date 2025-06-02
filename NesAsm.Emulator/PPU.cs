@@ -2,6 +2,9 @@
 
 public class PPU
 {
+    private const byte BackgroundPatternTableIndex = 0;
+    private const byte SpritePatternTableIndex = 1;
+
     private static readonly byte[,] _backgroundPalette = new byte[4, 4];
     private static readonly byte[,] _spritePalette = new byte[4, 4];
     private static readonly byte[,,] _nametables = new byte[4, 32, 30];
@@ -19,6 +22,10 @@ public class PPU
         public bool flipHorizontally;
         public bool flipVertically;
     }
+
+    private static byte ScrollNametable;
+    private static byte ScrollX;
+    private static byte ScrollY;
 
     public static readonly (byte r, byte g, byte b)[] Colors =
     [
@@ -126,7 +133,7 @@ public class PPU
 
     public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true)
     {
-        var screen = new byte[256 * 240];
+        var screen = new byte[256 * 240]; // TODO no new!!
 
         if (setbackgroundcolor)
             for (int y = 0; y < 240; y++)
@@ -165,11 +172,14 @@ public class PPU
 
     private static byte DrawBackgroundPixel(int x, int y, byte colorIndexIfTransparent)
     {
-        var (nametableX, nametableY) = GetNametablePosition(x, y);
-        var patternIndex = _nametables[0, nametableX, nametableY];
+        var nametableIndex = ScrollNametable;
+        var (nametableX, nametableY) = GetNametablePosition(x + ScrollX, y + ScrollY);
+        if (nametableX > 31) { nametableIndex = (byte)((nametableIndex + 1) % 2); nametableX -= 32; }
 
-        var (patternX, patternY) = GetPatternTablePosition(x, y);
-        var colorIndex = _patternTables[0, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY];
+        var patternIndex = _nametables[nametableIndex, nametableX, nametableY];
+
+        var (patternX, patternY) = GetPatternTablePosition(x + ScrollX, y + ScrollY);
+        var colorIndex = _patternTables[BackgroundPatternTableIndex, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY];
 
         if (colorIndex == 0)
         {
@@ -177,7 +187,7 @@ public class PPU
         }
 
         var (attributeX, attributeY) = GetAttributeTablePosition(nametableX, nametableY);
-        var paletteIndex = _attributeTables[0, attributeX, attributeY];
+        var paletteIndex = _attributeTables[nametableIndex, attributeX, attributeY];
 
         return _backgroundPalette[paletteIndex, colorIndex];
     }
@@ -290,5 +300,23 @@ public class PPU
             throw new ArgumentOutOfRangeException(nameof(paletteIndex), "must be between 0 and 3");
 
         _attributeTables[tableNumber, x, y] = paletteIndex;
+    }
+
+    internal static void SetScrollPosition(byte nametable, byte x, byte y)
+    {
+        if (nametable < 0 || nametable > 3)
+            throw new ArgumentOutOfRangeException(nameof(nametable), "must be between 0 and 3");
+
+        if (y > 239)
+            throw new ArgumentOutOfRangeException(nameof(y), "must be between 0 and 239");
+
+        ScrollNametable = nametable;
+        ScrollX = x;
+        ScrollY = y;
+    }
+
+    internal static void SetScrollNametable(byte nametable)
+    {
+        ScrollNametable = nametable;
     }
 }
