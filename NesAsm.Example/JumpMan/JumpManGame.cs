@@ -39,7 +39,8 @@ public static class JumpManGame
     const byte BushPalette = 0;
 
     static readonly byte[] HillLeftTiles = [0x24, 0x30, 0x30, 0x26];
-    static readonly byte[] HillTiles = [0x26, 0x34, 0x26, 0x26];
+    static readonly byte[] HillEmptyTiles = [0x26, 0x26, 0x26, 0x26];
+    static readonly byte[] HillSpotTiles = [0x26, 0x34, 0x26, 0x26];
     static readonly byte[] HillTopTiles = [0x24, 0x24, 0x31, 0x32];
     static readonly byte[] HillRightTiles = [0x33, 0x24, 0x26, 0x33];
     const byte HillPalette = 0;
@@ -72,8 +73,7 @@ public static class JumpManGame
         // Init;
         LoadImage(@"JumpMan\JumpMan.png", hasTileSeparator: false);
 
-        // Full sky
-        DrawBlockFill(0, 0, 32, 15, SkyTiles, SkyPalette);
+        LoadLevel("1-1");
 
         // Hide sprites
         for (byte i = 0; i < 64; i++)
@@ -81,40 +81,48 @@ public static class JumpManGame
             SetSpriteData(i, 0, 250, 0, 0, false, false, false);
         }
 
-        DrawBlockRow(0, 13, 16, GroundTiles, GroundPalette);
-        DrawBlockRow(0, 14, 16, GroundTiles, GroundPalette);
+        //// Full sky
+        //DrawBlockFill(0, 0, 32, 15, SkyTiles, SkyPalette);
 
-        DrawBlock(1, 9, EmptyTiles, EmptyPalette);
+        //DrawBlockRow(0, 13, 16, GroundTiles, GroundPalette);
+        //DrawBlockRow(0, 14, 16, GroundTiles, GroundPalette);
 
-        DrawBlock(5, 9, BrickTiles, BrickPalette);
-        DrawBlock(6, 9, QuestionTiles, QuestionPalette);
-        DrawBlock(7, 9, BrickTiles, BrickPalette);
-        DrawBlock(8, 9, QuestionTiles, QuestionPalette);
-        DrawBlock(9, 9, BrickTiles, BrickPalette);
+        //DrawBlock(1, 9, EmptyTiles, EmptyPalette);
 
-        DrawBlock(7, 5, QuestionTiles, QuestionPalette);
+        //DrawBlock(5, 9, BrickTiles, BrickPalette);
+        //DrawBlock(6, 9, QuestionTiles, QuestionPalette);
+        //DrawBlock(7, 9, BrickTiles, BrickPalette);
+        //DrawBlock(8, 9, QuestionTiles, QuestionPalette);
+        //DrawBlock(9, 9, BrickTiles, BrickPalette);
 
-        DrawBlockStretch(13, 11, 2, 2, PipeStretchTiles, PipePalette);
+        //DrawBlock(7, 5, QuestionTiles, QuestionPalette);
 
-        DrawBlock(1, 12, HillLeftTiles, HillPalette);
-        DrawBlock(2, 12, HillTiles, HillPalette);
-        DrawBlock(3, 12, HillRightTiles, HillPalette);
-        DrawBlock(2, 11, HillTopTiles, HillPalette);
+        //DrawBlockStretch(13, 11, 2, 2, PipeStretchTiles, PipePalette);
 
-        DrawBlock(8, 12, BushLeftTiles, BushPalette);
-        DrawBlock(9, 12, BushTiles, BushPalette);
-        DrawBlock(10, 12, BushRightTiles, BushPalette);
+        //DrawBlock(1, 12, HillLeftTiles, HillPalette);
+        //DrawBlock(2, 12, HillTiles, HillPalette);
+        //DrawBlock(3, 12, HillRightTiles, HillPalette);
+        //DrawBlock(2, 11, HillTopTiles, HillPalette);
 
-        DrawBlock(4, 2, CloudTopLeftTiles, CloudPalette);
-        DrawBlock(5, 2, CloudTopTiles, CloudPalette);
-        DrawBlock(6, 2, CloudTopRightTiles, CloudPalette);
-        DrawBlock(4, 3, CloudBottomLeftTiles, CloudPalette);
-        DrawBlock(5, 3, CloudBottomTiles, CloudPalette);
-        DrawBlock(6, 3, CloudBottomRightTiles, CloudPalette);
+        //DrawBlock(8, 12, BushLeftTiles, BushPalette);
+        //DrawBlock(9, 12, BushTiles, BushPalette);
+        //DrawBlock(10, 12, BushRightTiles, BushPalette);
 
-        DrawBlockStretch(12, 3, 5, 2, CloudStretchTiles, CloudPalette);
+        //DrawBlock(4, 2, CloudTopLeftTiles, CloudPalette);
+        //DrawBlock(5, 2, CloudTopTiles, CloudPalette);
+        //DrawBlock(6, 2, CloudTopRightTiles, CloudPalette);
+        //DrawBlock(4, 3, CloudBottomLeftTiles, CloudPalette);
+        //DrawBlock(5, 3, CloudBottomTiles, CloudPalette);
+        //DrawBlock(6, 3, CloudBottomRightTiles, CloudPalette);
+
+        //DrawBlockStretch(12, 3, 5, 2, CloudStretchTiles, CloudPalette);
 
         //SetScrollPosition(1, 0, 0);
+
+        for (int i = 0; i < 32; i++)
+        {
+            DrawColumn(i);
+        }
 
         while (true)
         {
@@ -200,5 +208,154 @@ public static class JumpManGame
         DrawBlock(leftX, topY + height - 1, tileIndexes[6], backgroundPalette);
         DrawBlockRow(leftX + 1, topY + height - 1, width - 2, tileIndexes[7], backgroundPalette);
         DrawBlock(leftX + width - 1, topY + height - 1, tileIndexes[8], backgroundPalette);
+    }
+
+    static readonly byte[][] ColumnBlocks = new byte[15][];
+    static readonly byte[] ColumnPalettes = new byte[15];
+
+    private static void DrawColumn(int x)
+    {
+        // Default to sky
+        for (int i = 0; i < 15; i++)
+        {
+            ColumnBlocks[i] = SkyTiles;
+            ColumnPalettes[i] = SkyPalette;
+        }
+
+        // Repeating patterns
+        foreach (var (pattern, index) in BackgroundPatterns)
+        {
+            if (x == index % PatternLegth)
+            {
+                switch (pattern)
+                {
+                    case MapPattern.HillStart:
+                        ColumnBlocks[12] = HillLeftTiles;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+                    case MapPattern.HillLeft1:
+                        ColumnBlocks[11] = HillLeftTiles;
+                        ColumnBlocks[12] = HillSpotTiles;
+                        ColumnPalettes[11] = HillPalette;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+                    case MapPattern.HillTop1:
+                        ColumnBlocks[11] = HillTopTiles;
+                        ColumnBlocks[12] = HillSpotTiles;
+                        ColumnPalettes[11] = HillPalette;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+                    case MapPattern.HillTop2:
+                        ColumnBlocks[10] = HillTopTiles;
+                        ColumnBlocks[11] = HillSpotTiles;
+                        ColumnBlocks[12] = HillEmptyTiles;
+                        ColumnPalettes[10] = HillPalette;
+                        ColumnPalettes[11] = HillPalette;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+                    case MapPattern.HillRight1:
+                        ColumnBlocks[11] = HillRightTiles;
+                        ColumnBlocks[12] = HillSpotTiles;
+                        ColumnPalettes[11] = HillPalette;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+                    case MapPattern.HillEnd:
+                        ColumnBlocks[12] = HillRightTiles;
+                        ColumnPalettes[12] = HillPalette;
+                        break;
+
+                    case MapPattern.BushStart:
+                        ColumnBlocks[12] = BushLeftTiles;
+                        ColumnPalettes[12] = BushPalette;
+                        break;
+                    case MapPattern.BushFull:
+                        ColumnBlocks[12] = BushTiles;
+                        ColumnPalettes[12] = BushPalette;
+                        break;
+                    case MapPattern.BushEnd:
+                        ColumnBlocks[12] = BushRightTiles;
+                        ColumnPalettes[12] = BushPalette;
+                        break;
+                }
+            }
+        }
+
+        // Ground
+        ColumnBlocks[13] = GroundTiles;
+        ColumnPalettes[13] = GroundPalette;
+        ColumnBlocks[14] = GroundTiles;
+        ColumnPalettes[14] = GroundPalette;
+
+        // Draw
+        for (int i = 0; i < 15; i++)
+        {
+            DrawBlock(x, i, ColumnBlocks[i], ColumnPalettes[i]);
+        }
+    }
+
+    enum MapPattern
+    {
+        HillStart,
+        HillLeft1,
+        HillTop1,
+        HillTop2,
+        HillRight1,
+        HillEnd,
+
+        BushStart,
+        BushFull,
+        BushEnd,
+
+        CloudStart,
+        CloudFull,
+        CloudEnd,
+    }
+
+    static List<(MapPattern, int)> BackgroundPatterns = [];
+    static List<(MapPattern, int, int)> BackgroundPatternsHeight = [];
+    static int PatternLegth;
+
+    private static void LoadLevel(string level)
+    {
+        PatternLegth = 48;
+        
+        SetBigHill(0);
+        SetSmallHill(17);
+        SetBush(12, 3);
+        SetBush(24, 1);
+        SetBush(42, 2);
+        SetCloud(9, 1, 5);
+        SetCloud(20, 1, 4);
+        SetCloud(28, 3, 5);
+        SetCloud(37, 2, 4);
+    }
+
+    private static void SetBigHill(int x) => SetBackgroundPattern(x, MapPattern.HillStart, MapPattern.HillLeft1, MapPattern.HillTop2, MapPattern.HillRight1, MapPattern.HillEnd);
+    private static void SetSmallHill(int x) => SetBackgroundPattern(x, MapPattern.HillStart, MapPattern.HillTop1, MapPattern.HillEnd);
+    private static void SetBush(int x, int length) => SetBackgroundPatterns(x, length, MapPattern.BushStart, MapPattern.BushFull, MapPattern.BushEnd);
+    private static void SetCloud(int x, int length, int height) => SetBackgroundPatternsHeight(x, length, height, MapPattern.CloudStart, MapPattern.CloudFull, MapPattern.CloudEnd);
+
+    private static void SetBackgroundPattern(int x, params MapPattern[] patterns)
+    {
+        for (int i = 0; i < patterns.Length; i++) BackgroundPatterns.Add((patterns[i], x + i));
+    }
+
+    private static void SetBackgroundPatternHeight(int x, int height, params MapPattern[] patterns)
+    {
+        for (int i = 0; i < patterns.Length; i++) BackgroundPatternsHeight.Add((patterns[i], x + i, height));
+    }
+
+    private static void SetBackgroundPatterns(int x, int length, MapPattern patternStart, MapPattern patternMiddle, MapPattern patternEnd)
+    {
+        SetBackgroundPattern(x, patternStart);
+        for (int i = 0; i < length; i++) BackgroundPatterns.Add((patternMiddle, x + i + 1));
+        SetBackgroundPattern(x + length + 1, patternEnd);
+    }
+
+    private static void SetBackgroundPatternsHeight(int x, int length, int height, MapPattern patternStart, MapPattern patternMiddle, MapPattern patternEnd)
+    {
+        SetBackgroundPatternHeight(x, height, patternStart);
+        for (int i = 0; i < length; i++) BackgroundPatternsHeight.Add((patternMiddle, x + i + 1, height));
+        SetBackgroundPatternHeight(x + length + 1, height, patternEnd);
     }
 }
