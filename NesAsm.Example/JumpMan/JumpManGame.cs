@@ -119,7 +119,7 @@ public static class JumpManGame
 
         //SetScrollPosition(1, 0, 0);
 
-        for (int i = 0; i < 32; i++)
+        for (int i = WindowX / 16; i < (WindowX / 16) + 11; i++)
         {
             DrawColumn(i);
         }
@@ -131,10 +131,18 @@ public static class JumpManGame
         }
     }
 
+    static int WindowX = 512;
+
+    private static void MainLoop()
+    {
+        WindowX += 2;
+        DrawColumn((WindowX / 16) + 10);
+    }
+
     static int FrameCount = 0;
     static byte ScrollX = 0;
     static byte ScrollNametable = 0;
-    private static void MainLoop()
+    public static void Nmi()
     {
         FrameCount++;
 
@@ -148,22 +156,19 @@ public static class JumpManGame
         else
             SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
 
-        SetScrollPosition(ScrollNametable, ScrollX++, 0);
-        if (ScrollX == 255) { ScrollX = 0; ScrollNametable = (byte)((ScrollNametable + 1) % 2); } else ScrollX++;
-    }
-
-    public static void Nmi()
-    {
+        ScrollX = (byte)(WindowX % 256);
+        ScrollNametable = (byte)((WindowX / 256) % 2);
+        SetScrollPosition(ScrollNametable, ScrollX, 0);
     }
 
     private static void DrawTile(int x, int y, byte tileIndex)
     {
-        SetNametableTile(x / 32, x % 32, y, tileIndex);
+        SetNametableTile((x % 64) / 32, x % 32, y, tileIndex);
     }
 
     private static void SetPalette(int x, int y, byte paletteIndex)
     {
-        SetAttributeTablePalette(x / 16, x % 16, y, paletteIndex);
+        SetAttributeTablePalette((x % 32) / 16, x % 16, y, paletteIndex);
     }
 
     private static void DrawBlock(int x, int y, byte[] tileIndexes, byte backgroundPalette)
@@ -210,11 +215,14 @@ public static class JumpManGame
         DrawBlock(leftX + width - 1, topY + height - 1, tileIndexes[8], backgroundPalette);
     }
 
+    static int LastDrawnColumn = 255;
     static readonly byte[][] ColumnBlocks = new byte[15][];
     static readonly byte[] ColumnPalettes = new byte[15];
-
     private static void DrawColumn(int x)
     {
+        if (x == LastDrawnColumn) return;
+        LastDrawnColumn = x;
+
         // Default to sky
         for (int i = 0; i < 15; i++)
         {
@@ -225,7 +233,7 @@ public static class JumpManGame
         // Repeating patterns
         foreach (var (pattern, index) in BackgroundPatterns)
         {
-            if (x == index % PatternLegth)
+            if (x % PatternLegth == index)
             {
                 switch (pattern)
                 {
@@ -280,6 +288,37 @@ public static class JumpManGame
             }
         }
 
+        foreach (var (pattern, index, height) in BackgroundPatternsHeight)
+        {
+            if (x % PatternLegth == index)
+            {
+                switch (pattern)
+                {
+                    case MapPattern.CloudStart:
+                        ColumnBlocks[height] = CloudTopLeftTiles;
+                        ColumnBlocks[height + 1] = CloudBottomLeftTiles;
+                        ColumnPalettes[height] = CloudPalette;
+                        ColumnPalettes[height + 1] = CloudPalette;
+                        break;
+                    case MapPattern.CloudFull:
+                        ColumnBlocks[height] = CloudTopTiles;
+                        ColumnBlocks[height + 1] = CloudBottomTiles;
+                        ColumnPalettes[height] = CloudPalette;
+                        ColumnPalettes[height + 1] = CloudPalette;
+                        break;
+                    case MapPattern.CloudEnd:
+                        ColumnBlocks[height] = CloudTopRightTiles;
+                        ColumnBlocks[height + 1] = CloudBottomRightTiles;
+                        ColumnPalettes[height] = CloudPalette;
+                        ColumnPalettes[height + 1] = CloudPalette;
+                        break;
+                }
+            }
+        }
+
+        // Repeating patterns with heights
+
+
         // Ground
         ColumnBlocks[13] = GroundTiles;
         ColumnPalettes[13] = GroundPalette;
@@ -324,10 +363,10 @@ public static class JumpManGame
         SetBush(12, 3);
         SetBush(24, 1);
         SetBush(42, 2);
-        SetCloud(9, 1, 5);
-        SetCloud(20, 1, 4);
-        SetCloud(28, 3, 5);
-        SetCloud(37, 2, 4);
+        SetCloud(9, 1, 3);
+        SetCloud(20, 1, 2);
+        SetCloud(28, 3, 3);
+        SetCloud(37, 2, 2);
     }
 
     private static void SetBigHill(int x) => SetBackgroundPattern(x, MapPattern.HillStart, MapPattern.HillLeft1, MapPattern.HillTop2, MapPattern.HillRight1, MapPattern.HillEnd);
