@@ -2,80 +2,8 @@
 
 namespace NesAsm.Example.JumpMan;
 
-public static class JumpManGame
+public static partial class JumpManGame
 {
-    const int SkyTile = 0x24;
-    static readonly byte[] SkyTiles = [SkyTile, SkyTile, SkyTile, SkyTile];
-    const byte SkyPalette = 0;
-
-    static readonly byte[] BrickTiles = [0x45, 0x45, 0x47, 0x47];
-    const byte BrickPalette = 1;
-
-    static readonly byte[] GroundTiles = [0xB4, 0xB5, 0xB6, 0xB7];
-    const byte GroundPalette = 1;
-
-    static readonly byte[] QuestionTiles = [0x53, 0x54, 0x55, 0x56];
-    const byte QuestionPalette = 3;
-
-    static readonly byte[] EmptyTiles = [0x57, 0x58, 0x59, 0x5A];
-    const byte EmptyPalette = 3;
-
-    static readonly byte[] BlockTiles = [0xAB, 0xAD, 0xAC, 0xAE];
-    const byte BlockPalette = 1;
-
-    static readonly byte[] PoleTopTiles = [0x24, 0x24, 0x2F, 0x3D];
-    static readonly byte[] PoleTiles = [0xA2, 0xA3, 0xA2, 0xA3];
-    const byte FlagPalette = 0;
-
-    static readonly byte[] PipeTopLeftTiles = [0x60, 0x61, 0x64, 0x65];
-    static readonly byte[] PipeTopRightTiles = [0x62, 0x63, 0x66, 0x67];
-    static readonly byte[] PipeTubeLeftTiles = [0x68, 0x69, 0x68, 0x69];
-    static readonly byte[] PipeTubeRightTiles = [0x26, 0x6A, 0x26, 0x6A];
-    const byte PipePalette = 0;
-
-    static readonly byte[][] PipeStretchTiles =
-    [
-        PipeTopLeftTiles, EmptyTiles, PipeTopRightTiles,
-        PipeTubeLeftTiles, EmptyTiles, PipeTubeRightTiles,
-        PipeTubeLeftTiles, EmptyTiles, PipeTubeRightTiles
-    ];
-
-    static readonly byte[] BushLeftTiles = [0x24, 0x24, 0x24, 0x35];
-    static readonly byte[] BushTiles = [0x36, 0x37, 0x25, 0x25];
-    static readonly byte[] BushRightTiles = [0x24, 0x24, 0x38, 0x24];
-    const byte BushPalette = 0;
-
-    static readonly byte[] HillLeftTiles = [0x24, 0x30, 0x30, 0x26];
-    static readonly byte[] HillEmptyTiles = [0x26, 0x26, 0x26, 0x26];
-    static readonly byte[] HillSpotTiles = [0x26, 0x34, 0x26, 0x26];
-    static readonly byte[] HillTopTiles = [0x24, 0x24, 0x31, 0x32];
-    static readonly byte[] HillRightTiles = [0x33, 0x24, 0x26, 0x33];
-    const byte HillPalette = 0;
-
-    static readonly byte[] CloudTopLeftTiles = BushLeftTiles;
-    static readonly byte[] CloudTopTiles = BushTiles;
-    static readonly byte[] CloudTopRightTiles = BushRightTiles;
-    static readonly byte[] CloudBottomLeftTiles = [0x24, 0x39, 0x24, 0x24];
-    static readonly byte[] CloudBottomTiles = [0x3A, 0x3B, 0x24, 0x24];
-    static readonly byte[] CloudBottomRightTiles = [0x3C, 0x24, 0x24, 0x24];
-    const byte CloudPalette = 2;
-
-    static readonly byte[] CastleBrick = [0x47, 0x47, 0x47, 0x47];
-    static readonly byte[] CastleRempart = [0x9D, 0x9E, 0x47, 0x47];
-    static readonly byte[] CastleRempartFront = [0xA9, 0xAA, 0x47, 0x47];
-    static readonly byte[] CastleWindowRight = [0x47, 0x27, 0x47, 0x27];
-    static readonly byte[] CastleWindowLeft = [0x27, 0x47, 0x27, 0x47];
-    static readonly byte[] CastleDoorTop = [0x9B, 0x9C, 0x27, 0x27];
-    static readonly byte[] CastleDoorBottom = [0x27, 0x27, 0x27, 0x27];
-    const byte CastlePalette = 1;
-
-    static readonly byte[][] CloudStretchTiles =
-    [
-        CloudTopLeftTiles, CloudTopTiles, CloudTopRightTiles,
-        EmptyTiles, EmptyTiles, EmptyTiles,
-        CloudBottomLeftTiles, CloudBottomTiles, CloudBottomRightTiles
-    ];
-
     public static void Reset()
     {
         // Background palette
@@ -97,12 +25,35 @@ public static class JumpManGame
             SetSpriteData(i, 0, 250, 0, 0, false, false, false);
         }
 
-
+        // Draw first 16 columns
         for (int i = WindowX / 16; i < (WindowX / 16) + 16; i++)
         {
             DrawColumn(i);
         }
 
+        // Draw HUD
+        for (int i = 0; i < 32; i++)
+        {
+            DrawBlock(i, 0, SkyTiles, HudPalette);
+            DrawBlock(i, 1, SkyTiles, HudPalette);
+        }
+
+        DrawWord(3, 2, "MARIO");
+        DrawNumber(3, 3, 300, 6);
+
+        DrawBlock(5, 1, HudCoinTiles, HudCoinPalette);
+        DrawTile(12, 3, HudXTile);
+        DrawNumber(13, 3, 2, 2);
+
+        DrawWord(18, 2, "WORLD");
+        DrawDigit(19, 3, '1');
+        DrawCharacter(20, 3, '-');
+        DrawDigit(21, 3, '1');
+
+        DrawWord(25, 2, "TIME");
+        DrawNumber(26, 3, 297);
+
+        // Main Loop
         while (true)
         {
             MainLoop();
@@ -110,7 +61,7 @@ public static class JumpManGame
         }
     }
 
-    static int WindowX = 3000;
+    static int WindowX = 0000;
 
     private static void MainLoop()
     {
@@ -148,6 +99,37 @@ public static class JumpManGame
     private static void SetPalette(int x, int y, byte paletteIndex)
     {
         SetAttributeTablePalette((x % 32) / 16, x % 16, y, paletteIndex);
+    }
+
+    private static void DrawWord(int x, int y, string word)
+    {
+        for (int i = 0; i < word.Length; i++) DrawCharacter(x + i, y, word[i]);
+    }
+
+    private static void DrawCharacter(int x, int y, char character)
+    {
+        if ((character < 65 || character > 90) && character != 45) // A-Z or -
+        {
+            throw new ArgumentException("Letter must be between A and Z (ASCII 65 to 90) or a hyphen (-)");
+        }
+
+        DrawTile(x, y, (byte)(character == 45 ? 0x28 : 10 - 65 + character));
+    }
+
+    private static void DrawNumber(int x, int y, long number, int paddingZeros = 0)
+    {
+        var digits = number.ToString().PadLeft(paddingZeros, '0');
+        for (int i = 0; i < digits.Length; i++) DrawDigit(x + i, y, digits[i]);
+    }
+
+    private static void DrawDigit(int x, int y, char digit)
+    {
+        if (digit < 48 || digit > 57) // 0-9
+        {
+            throw new ArgumentException("Digit must be between 0 and 9 (ASCII 48 to 57).");
+        }
+
+        DrawTile(x, y, (byte)(digit - 48));
     }
 
     private static void DrawBlock(int x, int y, byte[] tileIndexes, byte backgroundPalette)
@@ -203,7 +185,7 @@ public static class JumpManGame
         LastDrawnColumn = x;
 
         // Default to sky
-        for (int i = 0; i < 15; i++)
+        for (int i = 2; i < 15; i++)
         {
             SetColumnBlocks(i, SkyPalette, SkyTiles);
         }
@@ -323,7 +305,7 @@ public static class JumpManGame
 
 
         // Draw
-        for (int i = 0; i < 15; i++)
+        for (int i = 2; i < 15; i++)
         {
             DrawBlock(x, i, ColumnBlocks[i], ColumnPalettes[i]);
         }
@@ -354,224 +336,4 @@ public static class JumpManGame
 
         for (int i = 0; i < length; i++) ColumnPalettes[y + i] = paletteIndex;
     }
-
-    enum MapPattern
-    {
-        HillStart,
-        HillLeft1,
-        HillTop1,
-        HillTop2,
-        HillRight1,
-        HillEnd,
-
-        BushStart,
-        BushFull,
-        BushEnd,
-
-        CloudStart,
-        CloudFull,
-        CloudEnd,
-
-        CoinBox,
-        Brick,
-        EmptyBox,
-        Block,
-
-        PipeLeft,
-        PipeRight,
-
-        Hole,
-
-        Flag,
-
-        CastleWall,
-        CastleWallLvl2Left,
-        CastleWallLvl2,
-        CastleWallLvl2Right,
-        CastleDoor
-    }
-
-    static List<(MapPattern, int)> BackgroundPatterns = [];
-    static List<(MapPattern, int, int)> BackgroundPatternsHeight = [];
-    static int PatternLegth;
-
-    static List<(MapPattern, int, int)> ForegroundElements = [];
-
-    private static void LoadLevel(string level)
-    {
-        // Repeating background patterns
-        PatternLegth = 48;
-
-        SetBigHill(0);
-        SetCloud(8, 1, 3);
-        SetBush(11, 3);
-        SetSmallHill(16);
-        SetCloud(19, 1, 2);
-        SetBush(23, 1);
-        SetCloud(27, 3, 3);
-        SetCloud(36, 2, 2);
-        SetBush(41, 2);
-
-        // Forground map elements
-        SetForegroundElement(16, 9, MapPattern.CoinBox);
-
-        SetForegroundElement(20, 9, MapPattern.Brick);
-        SetForegroundElement(21, 9, MapPattern.CoinBox);
-        SetForegroundElement(22, 5, MapPattern.CoinBox);
-        SetForegroundElement(22, 9, MapPattern.Brick);
-        SetForegroundElement(23, 9, MapPattern.CoinBox);
-        SetForegroundElement(24, 9, MapPattern.Brick);
-        
-        SetForegroundElement(28, 2, MapPattern.PipeLeft);
-        SetForegroundElement(29, 2, MapPattern.PipeRight);
-
-        SetForegroundElement(38, 3, MapPattern.PipeLeft);
-        SetForegroundElement(39, 3, MapPattern.PipeRight);
-
-        SetForegroundElement(46, 4, MapPattern.PipeLeft);
-        SetForegroundElement(47, 4, MapPattern.PipeRight);
-
-        SetForegroundElement(57, 4, MapPattern.PipeLeft);
-        SetForegroundElement(58, 4, MapPattern.PipeRight);
-
-        SetForegroundElement(64, 8, MapPattern.CoinBox);
-        
-        SetForegroundElement(69, 0, MapPattern.Hole);
-        SetForegroundElement(70, 0, MapPattern.Hole);
-
-        SetForegroundElement(77, 9, MapPattern.Brick);
-        SetForegroundElement(78, 9, MapPattern.CoinBox);
-        SetForegroundElement(79, 9, MapPattern.Brick);
-
-        SetForegroundElement(80, 5, MapPattern.Brick);
-        SetForegroundElement(81, 5, MapPattern.Brick);
-        SetForegroundElement(82, 5, MapPattern.Brick);
-        SetForegroundElement(83, 5, MapPattern.Brick);
-        SetForegroundElement(84, 5, MapPattern.Brick);
-        SetForegroundElement(85, 5, MapPattern.Brick);
-        SetForegroundElement(86, 5, MapPattern.Brick);
-        SetForegroundElement(86, 0, MapPattern.Hole);
-        SetForegroundElement(87, 5, MapPattern.Brick);
-        SetForegroundElement(87, 0, MapPattern.Hole);
-
-        SetForegroundElement(91, 5, MapPattern.Brick);
-        SetForegroundElement(92, 5, MapPattern.Brick);
-        SetForegroundElement(93, 5, MapPattern.Brick);
-        SetForegroundElement(94, 5, MapPattern.CoinBox);
-        SetForegroundElement(94, 9, MapPattern.CoinBox);
-
-        SetForegroundElement(100, 9, MapPattern.Brick);
-        SetForegroundElement(101, 9, MapPattern.CoinBox);
-        
-        SetForegroundElement(106, 9, MapPattern.CoinBox);
-        SetForegroundElement(109, 5, MapPattern.CoinBox);
-        SetForegroundElement(109, 9, MapPattern.CoinBox);
-        SetForegroundElement(112, 9, MapPattern.CoinBox);
-
-        SetForegroundElement(118, 9, MapPattern.Brick);
-        
-        SetForegroundElement(121, 5, MapPattern.Brick);
-        SetForegroundElement(122, 5, MapPattern.Brick);
-        SetForegroundElement(123, 5, MapPattern.Brick);
-        
-        SetForegroundElement(128, 5, MapPattern.Brick);
-        SetForegroundElement(129, 5, MapPattern.CoinBox);
-        SetForegroundElement(129, 9, MapPattern.Brick);
-        SetForegroundElement(130, 5, MapPattern.CoinBox);
-        SetForegroundElement(130, 9, MapPattern.Brick);
-        SetForegroundElement(131, 5, MapPattern.Brick);
-        
-        SetForegroundElement(134, 1, MapPattern.Block);
-        SetForegroundElement(135, 2, MapPattern.Block);
-        SetForegroundElement(136, 3, MapPattern.Block);
-        SetForegroundElement(137, 4, MapPattern.Block);
-
-        SetForegroundElement(140, 4, MapPattern.Block);
-        SetForegroundElement(141, 3, MapPattern.Block);
-        SetForegroundElement(142, 2, MapPattern.Block);
-        SetForegroundElement(143, 1, MapPattern.Block);
-
-        SetForegroundElement(148, 1, MapPattern.Block);
-        SetForegroundElement(149, 2, MapPattern.Block);
-        SetForegroundElement(150, 3, MapPattern.Block);
-        SetForegroundElement(151, 4, MapPattern.Block);
-        SetForegroundElement(152, 4, MapPattern.Block);
-
-        SetForegroundElement(153, 0, MapPattern.Hole);
-        SetForegroundElement(154, 0, MapPattern.Hole);
-
-        SetForegroundElement(155, 4, MapPattern.Block);
-        SetForegroundElement(156, 3, MapPattern.Block);
-        SetForegroundElement(157, 2, MapPattern.Block);
-        SetForegroundElement(158, 1, MapPattern.Block);
-
-        SetForegroundElement(163, 2, MapPattern.PipeLeft);
-        SetForegroundElement(164, 2, MapPattern.PipeRight);
-
-        SetForegroundElement(168, 9, MapPattern.Brick);
-        SetForegroundElement(169, 9, MapPattern.Brick);
-        SetForegroundElement(170, 9, MapPattern.CoinBox);
-        SetForegroundElement(171, 9, MapPattern.Brick);
-
-        SetForegroundElement(179, 2, MapPattern.PipeLeft);
-        SetForegroundElement(180, 2, MapPattern.PipeRight);
-
-        SetForegroundElement(181, 1, MapPattern.Block);
-        SetForegroundElement(182, 2, MapPattern.Block);
-        SetForegroundElement(183, 3, MapPattern.Block);
-        SetForegroundElement(184, 4, MapPattern.Block);
-        SetForegroundElement(185, 5, MapPattern.Block);
-        SetForegroundElement(186, 6, MapPattern.Block);
-        SetForegroundElement(187, 7, MapPattern.Block);
-        SetForegroundElement(188, 8, MapPattern.Block);
-        SetForegroundElement(189, 8, MapPattern.Block);
-        
-        SetForegroundElement(198, 0, MapPattern.Flag);
-        SetForegroundElement(198, 1, MapPattern.Block);
-        
-        SetForegroundElement(202, 0, MapPattern.CastleWall);
-        SetForegroundElement(203, 0, MapPattern.CastleWallLvl2Left);
-        SetForegroundElement(204, 0, MapPattern.CastleDoor);
-        SetForegroundElement(205, 0, MapPattern.CastleWallLvl2Right);
-        SetForegroundElement(206, 0, MapPattern.CastleWall);
-    }
-
-    #region Background Patterns
-
-    private static void SetBigHill(int x) => SetBackgroundPattern(x, MapPattern.HillStart, MapPattern.HillLeft1, MapPattern.HillTop2, MapPattern.HillRight1, MapPattern.HillEnd);
-    private static void SetSmallHill(int x) => SetBackgroundPattern(x, MapPattern.HillStart, MapPattern.HillTop1, MapPattern.HillEnd);
-    private static void SetBush(int x, int length) => SetBackgroundPatterns(x, length, MapPattern.BushStart, MapPattern.BushFull, MapPattern.BushEnd);
-    private static void SetCloud(int x, int length, int height) => SetBackgroundPatternsHeight(x, length, height, MapPattern.CloudStart, MapPattern.CloudFull, MapPattern.CloudEnd);
-
-    private static void SetBackgroundPattern(int x, params MapPattern[] patterns)
-    {
-        for (int i = 0; i < patterns.Length; i++) BackgroundPatterns.Add((patterns[i], x + i));
-    }
-
-    private static void SetBackgroundPatternHeight(int x, int height, params MapPattern[] patterns)
-    {
-        for (int i = 0; i < patterns.Length; i++) BackgroundPatternsHeight.Add((patterns[i], x + i, height));
-    }
-
-    private static void SetBackgroundPatterns(int x, int length, MapPattern patternStart, MapPattern patternMiddle, MapPattern patternEnd)
-    {
-        SetBackgroundPattern(x, patternStart);
-        for (int i = 0; i < length; i++) BackgroundPatterns.Add((patternMiddle, x + i + 1));
-        SetBackgroundPattern(x + length + 1, patternEnd);
-    }
-
-    private static void SetBackgroundPatternsHeight(int x, int length, int height, MapPattern patternStart, MapPattern patternMiddle, MapPattern patternEnd)
-    {
-        SetBackgroundPatternHeight(x, height, patternStart);
-        for (int i = 0; i < length; i++) BackgroundPatternsHeight.Add((patternMiddle, x + i + 1, height));
-        SetBackgroundPatternHeight(x + length + 1, height, patternEnd);
-    }
-
-    #endregion
-
-    #region Foreground map elements
-
-    private static void SetForegroundElement(int x, int height, MapPattern mapPattern) => ForegroundElements.Add((mapPattern, x, height));
-
-    #endregion
 }
