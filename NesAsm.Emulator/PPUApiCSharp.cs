@@ -97,6 +97,11 @@ public class PPUApiCSharp
 
     public static void WaitForVBlank()
     {
+        if (!_spriteZeroHitScanline.HasValue)
+            PPU.DrawScreen();
+        else
+            PPU.DrawScreen(startScanline: (byte)(_spriteZeroHitScanline.Value + 1), endScanline: 239);
+
         _nmiCallback?.Invoke();
     }
 
@@ -105,5 +110,20 @@ public class PPUApiCSharp
     internal static void SetNmiCallback(Action callback)
     {
         _nmiCallback = callback;
+    }
+
+    public static void WaitForSpriteZeroHit()
+    {
+        if (!_spriteZeroHitScanline.HasValue)
+            throw new InvalidOperationException("Need to SetSpriteZeroHitScanline");
+
+        PPU.DrawScreen(startScanline: 0, endScanline: _spriteZeroHitScanline.Value);
+    }
+
+    private static byte? _spriteZeroHitScanline = null;
+
+    public static void SetSpriteZeroHitScanline(byte scanline)
+    {
+        _spriteZeroHitScanline = scanline;
     }
 }

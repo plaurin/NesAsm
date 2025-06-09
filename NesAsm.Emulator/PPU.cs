@@ -131,12 +131,12 @@ public class PPU
                     _patternTables[i, j, k] = 0;
     }
 
-    public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true)
+    private static readonly byte[] screen = new byte[256 * 240];
+    public static byte[] GetScreen() => screen;
+    public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true, byte startScanline = 0, byte endScanline = 239)
     {
-        var screen = new byte[256 * 240]; // TODO no new!!
-
         if (setbackgroundcolor)
-            for (int y = 0; y < 240; y++)
+            for (int y = startScanline; y <= endScanline; y++)
                 for (int x = 0; x < 256; x++)
                     screen[x + y * 256] = _backgroundPalette[0, 0];
 
@@ -144,13 +144,14 @@ public class PPU
         for (int i = 0; i < 64; i++)
             if (_sprites[i].isBehindBackground)
                 for (int y = 0; y < 8; y++)
+                    if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
                     }
 
-        for (int y = 0; y < 240; y++)
+        for (int y = startScanline; y <= endScanline; y++)
             for (int x = 0; x < 256; x++)
             {
                 var screenIndex = x + y * 256;
@@ -161,6 +162,7 @@ public class PPU
         for (int i = 0; i < 64; i++)
             if (!_sprites[i].isBehindBackground && _sprites[i].y < 240)
                 for (int y = 0; y < 8; y++)
+                    if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;

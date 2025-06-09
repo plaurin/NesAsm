@@ -26,9 +26,9 @@ public class NesApiCSharp
             // Set PPU callback for nmi
             PPUApiCSharp.SetNmiCallback(() =>
             {
-                nmi?.Invoke();
-
                 draw.Invoke();
+
+                nmi?.Invoke();
             });
 
             reset.Invoke();

@@ -4,9 +4,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
-using NesAsm.Example.Game1;
 using NesAsm.Example.JumpMan;
-using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 using System.Linq;
@@ -16,6 +14,8 @@ namespace NesAsm.UI;
 public partial class MainWindow : Window
 {
     private readonly SKBitmap _bitmap;
+    private readonly SKCanvas _canvas2;
+    private readonly byte[] _screen;
     private readonly DispatcherTimer _timer = new();
     private readonly WriteableBitmap writeableBitmap;
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
@@ -33,6 +33,8 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _bitmap = new SKBitmap(256, 240);
+        _canvas2 = new SKCanvas(_bitmap);
+        _screen = PPU.GetScreen();
         _x = 10;
 
         writeableBitmap = new WriteableBitmap(
@@ -69,7 +71,8 @@ public partial class MainWindow : Window
 
     void Draw()
     {
-        while(!_canDraw)         {
+        while(!_canDraw)
+        {
             // Wait for the next frame to be ready
             Task.Delay(10).Wait();
         }
@@ -100,16 +103,11 @@ public partial class MainWindow : Window
             return;
         _isRendering = true;
 
-        using (var canvas = new SKCanvas(_bitmap))
-        {
-            var screen = PPU.DrawScreen();
-
-            for (int y = 0; y < 240; y++)
-                for (int x = 0; x < 256; x++)
-                {
-                    canvas.DrawPoint(x, y, _colorPalette[screen[x + y * 256]]);
-                }
-        }
+        for (int y = 0; y < 240; y++)
+            for (int x = 0; x < 256; x++)
+            {
+                _canvas2.DrawPoint(x, y, _colorPalette[_screen[x + y * 256]]);
+            }
 
         using (var frameBuffer = writeableBitmap.Lock())
         {
