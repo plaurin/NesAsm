@@ -77,6 +77,9 @@ public static partial class JumpManGame
         DrawColumn((WindowX / 16) + DrawAheadColumns);
     }
 
+    static byte Coins = 90;
+    static int Time = 400;
+
     private static void MainLoopAfterSpriteZeroHit()
     {
         // Scroll to game position
@@ -85,6 +88,19 @@ public static partial class JumpManGame
         SetScrollPosition(ScrollNametable, ScrollX, 0);
 
         WindowX += 1;
+
+        // Update HUD
+        if (FrameCount % 15 == 0) Time--;
+        if (Time < 0) Time = 0;
+
+        if (FrameCount % 20 == 0) Coins++;
+        if (Coins >= 100) Coins -= 100;
+
+        // Coin
+        DrawNumber(13, 3, Coins, 2);
+
+        // Time
+        DrawNumber(26, 3, Time);
     }
 
     static int FrameCount = 0;
