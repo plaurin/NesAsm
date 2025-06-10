@@ -27,6 +27,8 @@ public partial class MainWindow : Window
 
     private DateTimeOffset _startTime;
     private DateTimeOffset _nextFrameTime;
+    private int _startFrame;
+    private int _fps;
 
     public MainWindow()
     {
@@ -91,7 +93,8 @@ public partial class MainWindow : Window
 
         //NesApiCSharp.RunOnce(Game1.Reset);
 
-        if (_isRendering || _canDraw || DateTimeOffset.Now < _nextFrameTime) return;
+        if (_isRendering || _canDraw) return;
+        //if (DateTimeOffset.Now < _nextFrameTime) return;
         _canDraw = true;
         //DrawLoop();
         _nextFrameTime += _frameDuration;
@@ -127,8 +130,8 @@ public partial class MainWindow : Window
         if (_x > 200) _x = 10;
 
         _frameNumber++;
-        var elapsed = DateTimeOffset.Now - _startTime;
-        var fps = _frameNumber / elapsed.TotalSeconds;
-        FrameCounter.Content = $"FPS: {fps:N0} Frame: {_frameNumber}";
+        FrameCounter.Content = $"FPS: {_fps:N0} Frame: {_frameNumber}";
+
+        if (DateTimeOffset.Now.Second != _startTime.Second) { _fps = _frameNumber - _startFrame; _startFrame = _frameNumber; _startTime = DateTimeOffset.Now; }
     }
 }
