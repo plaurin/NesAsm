@@ -27,6 +27,8 @@ public class PPU
     private static byte ScrollX;
     private static byte ScrollY;
 
+    private const byte SpriteYOffset = 1; // The PPU adds 1 to the sprite Y position, so we need to subtract it when setting the sprite Y position.
+
     public static readonly (byte r, byte g, byte b)[] Colors =
     [
         new(102, 102, 102),
@@ -147,7 +149,7 @@ public class PPU
                     if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
-                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
+                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
                     }
 
@@ -165,7 +167,7 @@ public class PPU
                     if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
-                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y) * 256;
+                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
                     }
 
@@ -199,7 +201,11 @@ public class PPU
         var spriteData = _sprites[spriteIndex];
 
         var patternIndex = spriteData.tileIndex;
-        var colorIndex = _patternTables[1, (patternIndex % 16) * 8 + x, (patternIndex / 16) * 8 + y];
+
+        var actualX = spriteData.flipHorizontally ? 7 - x : x;
+        var actualY = spriteData.flipVertically ? 7 - y : y;
+
+        var colorIndex = _patternTables[1, (patternIndex % 16) * 8 + actualX, (patternIndex / 16) * 8 + actualY];
         if (colorIndex == 0)
         {
             return colorIndexIfTransparent;

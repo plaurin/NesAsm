@@ -11,7 +11,7 @@ public class PPUApiCSharp
     public static void SetSpritePaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3) =>
         PPU.SetSpritePaletteColors(paletteIndex, color0, color1, color2, color3);
 
-    public static void SetSpriteData(byte spriteIndex, byte x, byte y, byte tileIndex, byte paletteIndex, bool isBehindBackground, bool flipHorizontally, bool flipVertically) =>
+    public static void SetSpriteData(byte spriteIndex, byte x, byte y, byte tileIndex, byte paletteIndex, bool isBehindBackground = false, bool flipHorizontally = false, bool flipVertically = false) =>
         PPU.SetSpriteData(spriteIndex, x, y, tileIndex, paletteIndex, isBehindBackground, flipHorizontally, flipVertically);
 
     public static void SetPatternTablePixel(int tableNumber, int x, int y, byte colorIndex) =>

@@ -101,6 +101,14 @@ public static partial class JumpManGame
 
         // Time
         DrawNumber(26, 3, Time);
+
+        // Update Mario
+        byte marioX = 100;
+        byte marioY = 192;
+        SetSpriteData(1, marioX, marioY, MarioStanding[0], MarioPalette);
+        SetSpriteData(2, (byte)(marioX + 8), marioY, MarioStanding[1], MarioPalette);
+        SetSpriteData(3, marioX, (byte)(marioY + 8), MarioStanding[2], MarioPalette);
+        SetSpriteData(4, (byte)(marioX + 8), (byte)(marioY + 8), MarioStanding[3], MarioPalette, flipHorizontally: true);
     }
 
     static int FrameCount = 0;
@@ -119,7 +127,5 @@ public static partial class JumpManGame
             SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
         else
             SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
-
-        // TODO Update HUD (score, coins and time)
     }
 }
