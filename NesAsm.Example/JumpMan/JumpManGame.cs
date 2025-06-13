@@ -15,6 +15,7 @@ public static partial class JumpManGame
         SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
 
         SetSpritePaletteColors(0, 0x_22, 0x_16, 0x_27, 0x_18);
+        SetSpritePaletteColors(3, 0x_0F, 0x_0F, 0x_36, 0x_17);
 
         // Init;
         LoadImage(@"JumpMan\JumpMan.png", hasTileSeparator: false);
@@ -109,6 +110,14 @@ public static partial class JumpManGame
         SetSpriteData(2, (byte)(marioX + 8), marioY, MarioStanding[1], MarioPalette);
         SetSpriteData(3, marioX, (byte)(marioY + 8), MarioStanding[2], MarioPalette);
         SetSpriteData(4, (byte)(marioX + 8), (byte)(marioY + 8), MarioStanding[3], MarioPalette, flipHorizontally: true);
+
+        // Update Goomba
+        byte goombaX = 150;
+        byte goombaY = 192;
+        SetSpriteData(5, goombaX, goombaY, GoombaWalk[0], GoombaPalette);
+        SetSpriteData(6, (byte)(goombaX + 8), goombaY, GoombaWalk[1], GoombaPalette);
+        SetSpriteData(7, goombaX, (byte)(goombaY + 8), GoombaWalk[2], GoombaPalette);
+        SetSpriteData(8, (byte)(goombaX + 8), (byte)(goombaY + 8), GoombaWalk[3], GoombaPalette);
     }
 
     static int FrameCount = 0;
