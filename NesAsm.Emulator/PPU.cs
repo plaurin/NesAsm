@@ -2,6 +2,13 @@
 
 public class PPU
 {
+    private static readonly List<string> _ppuLogs = [];
+    public static IReadOnlyList<string> Logs => _ppuLogs.AsReadOnly();
+    public static void Log(string log)
+    {
+        _ppuLogs.Add($"{DateTime.Now.Second:00}:{DateTime.Now.Millisecond:000} {log}");
+    }
+
     private const byte BackgroundPatternTableIndex = 0;
     private const byte SpritePatternTableIndex = 1;
 
@@ -137,6 +144,7 @@ public class PPU
     public static byte[] GetScreen() => screen;
     public static byte[] DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true, byte startScanline = 0, byte endScanline = 239)
     {
+        //Log($"Begin DrawScreen scanline[{startScanline}-{endScanline}]");
         if (setbackgroundcolor)
             for (int y = startScanline; y <= endScanline; y++)
                 for (int x = 0; x < 256; x++)
@@ -171,6 +179,7 @@ public class PPU
                         screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
                     }
 
+        //Log($"End DrawScreen scanline[{startScanline}-{endScanline}");
         return screen;
     }
 
