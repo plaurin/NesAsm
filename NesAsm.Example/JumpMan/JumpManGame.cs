@@ -82,9 +82,9 @@ public static partial class JumpManGame
     static byte Coins = 90;
     static int Time = 400;
     static byte MarioX = 100;
-    static byte MarioY = 192;
+    static byte MarioY = 208;
     static byte GoombaX = 150;
-    static byte GoombaY = 192;
+    static byte GoombaY = 208;
 
     private static void MainLoopAfterSpriteZeroHit()
     {
@@ -119,16 +119,12 @@ public static partial class JumpManGame
         if (InputManager.Start) GoombaY += 1;
 
         // Update Mario
-        SetSpriteData(1, MarioX, MarioY, MarioStanding[0], MarioPalette);
-        SetSpriteData(2, (byte)(MarioX + 8), MarioY, MarioStanding[1], MarioPalette);
-        SetSpriteData(3, MarioX, (byte)(MarioY + 8), MarioStanding[2], MarioPalette);
-        SetSpriteData(4, (byte)(MarioX + 8), (byte)(MarioY + 8), MarioStanding[3], MarioPalette, flipHorizontally: true);
+        DrawMetaSpriteAnimation(1, MarioX, MarioY, MarioPalette, BigMarionRunning, FrameCount, 24);
 
         // Update Goomba
-        SetSpriteData(5, GoombaX, GoombaY, GoombaWalk[0], GoombaPalette);
-        SetSpriteData(6, (byte)(GoombaX + 8), GoombaY, GoombaWalk[1], GoombaPalette);
-        SetSpriteData(7, GoombaX, (byte)(GoombaY + 8), GoombaWalk[2], GoombaPalette);
-        SetSpriteData(8, (byte)(GoombaX + 8), (byte)(GoombaY + 8), GoombaWalk[3], GoombaPalette);
+        DrawMetaSpriteAnimation(10, GoombaX, GoombaY, GoombaPalette, GoombaWalkingFrames, FrameCount, 32);
+
+        DrawMetaSpriteAnimation(20, (byte)(GoombaX + 24), GoombaY, GoombaPalette, GoombaWalkingFrames, FrameCount, 32);
     }
 
     static int FrameCount = 0;
