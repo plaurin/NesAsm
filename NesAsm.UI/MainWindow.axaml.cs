@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -37,6 +38,10 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
+        var topLevel = TopLevel.GetTopLevel(this);
+        topLevel!.KeyDown += OnKeyDown;
+        topLevel!.KeyUp += OnKeyUp;
+
         _bitmap = new SKBitmap(256, 240);
         _screen = PPU.GetScreen();
 
@@ -63,6 +68,30 @@ public partial class MainWindow : Window
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
         Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi)).ConfigureAwait(false);
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.Right = true;
+        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.Left = true;
+        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.Up = true;
+        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.Down = true;
+        if (e.PhysicalKey == PhysicalKey.Z) InputManager.B = true;
+        if (e.PhysicalKey == PhysicalKey.X) InputManager.A = true;
+        if (e.PhysicalKey == PhysicalKey.A) InputManager.Select = true;
+        if (e.PhysicalKey == PhysicalKey.S) InputManager.Start = true;
+    }
+
+    private void OnKeyUp(object? sender, KeyEventArgs e)
+    {
+        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.Right = false;
+        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.Left = false;
+        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.Up = false;
+        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.Down = false;
+        if (e.PhysicalKey == PhysicalKey.Z) InputManager.B = false;
+        if (e.PhysicalKey == PhysicalKey.X) InputManager.A = false;
+        if (e.PhysicalKey == PhysicalKey.A) InputManager.Select = false;
+        if (e.PhysicalKey == PhysicalKey.S) InputManager.Start = false;
     }
 
     //public override void Render(DrawingContext context)

@@ -1,4 +1,5 @@
-﻿using static NesAsm.Emulator.PPUApiCSharp;
+﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.PPUApiCSharp;
 
 namespace NesAsm.Example.JumpMan;
 
@@ -80,6 +81,10 @@ public static partial class JumpManGame
 
     static byte Coins = 90;
     static int Time = 400;
+    static byte MarioX = 100;
+    static byte MarioY = 192;
+    static byte GoombaX = 150;
+    static byte GoombaY = 192;
 
     private static void MainLoopAfterSpriteZeroHit()
     {
@@ -87,8 +92,6 @@ public static partial class JumpManGame
         ScrollX = (byte)(WindowX % 256);
         ScrollNametable = (byte)((WindowX / 256) % 2);
         SetScrollPosition(ScrollNametable, ScrollX, 0);
-
-        WindowX += 1;
 
         // Update HUD
         if (FrameCount % 15 == 0) Time--;
@@ -103,21 +106,29 @@ public static partial class JumpManGame
         // Time
         DrawNumber(26, 3, Time);
 
+        WindowX += 1;
+
+        if (InputManager.Left) MarioX -= 1;
+        if (InputManager.Right) MarioX += 1;
+        if (InputManager.Up) MarioY -= 1;
+        if (InputManager.Down) MarioY += 1;
+
+        if (InputManager.B) GoombaX -= 1;
+        if (InputManager.A) GoombaX += 1;
+        if (InputManager.Select) GoombaY -= 1;
+        if (InputManager.Start) GoombaY += 1;
+
         // Update Mario
-        byte marioX = 100;
-        byte marioY = 192;
-        SetSpriteData(1, marioX, marioY, MarioStanding[0], MarioPalette);
-        SetSpriteData(2, (byte)(marioX + 8), marioY, MarioStanding[1], MarioPalette);
-        SetSpriteData(3, marioX, (byte)(marioY + 8), MarioStanding[2], MarioPalette);
-        SetSpriteData(4, (byte)(marioX + 8), (byte)(marioY + 8), MarioStanding[3], MarioPalette, flipHorizontally: true);
+        SetSpriteData(1, MarioX, MarioY, MarioStanding[0], MarioPalette);
+        SetSpriteData(2, (byte)(MarioX + 8), MarioY, MarioStanding[1], MarioPalette);
+        SetSpriteData(3, MarioX, (byte)(MarioY + 8), MarioStanding[2], MarioPalette);
+        SetSpriteData(4, (byte)(MarioX + 8), (byte)(MarioY + 8), MarioStanding[3], MarioPalette, flipHorizontally: true);
 
         // Update Goomba
-        byte goombaX = 150;
-        byte goombaY = 192;
-        SetSpriteData(5, goombaX, goombaY, GoombaWalk[0], GoombaPalette);
-        SetSpriteData(6, (byte)(goombaX + 8), goombaY, GoombaWalk[1], GoombaPalette);
-        SetSpriteData(7, goombaX, (byte)(goombaY + 8), GoombaWalk[2], GoombaPalette);
-        SetSpriteData(8, (byte)(goombaX + 8), (byte)(goombaY + 8), GoombaWalk[3], GoombaPalette);
+        SetSpriteData(5, GoombaX, GoombaY, GoombaWalk[0], GoombaPalette);
+        SetSpriteData(6, (byte)(GoombaX + 8), GoombaY, GoombaWalk[1], GoombaPalette);
+        SetSpriteData(7, GoombaX, (byte)(GoombaY + 8), GoombaWalk[2], GoombaPalette);
+        SetSpriteData(8, (byte)(GoombaX + 8), (byte)(GoombaY + 8), GoombaWalk[3], GoombaPalette);
     }
 
     static int FrameCount = 0;

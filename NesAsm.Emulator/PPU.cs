@@ -154,7 +154,7 @@ public class PPU
         for (int i = 0; i < 64; i++)
             if (_sprites[i].isBehindBackground)
                 for (int y = 0; y < 8; y++)
-                    if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
+                    if (_sprites[i].y + y + SpriteYOffset >= startScanline && _sprites[i].y + y + SpriteYOffset <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
@@ -172,7 +172,7 @@ public class PPU
         for (int i = 0; i < 64; i++)
             if (!_sprites[i].isBehindBackground && _sprites[i].y < 240)
                 for (int y = 0; y < 8; y++)
-                    if (_sprites[i].y + y >= startScanline && _sprites[i].y + y <= endScanline)
+                    if (_sprites[i].y + y + SpriteYOffset >= startScanline && _sprites[i].y + y + SpriteYOffset <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
