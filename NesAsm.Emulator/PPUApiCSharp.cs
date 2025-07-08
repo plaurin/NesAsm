@@ -5,6 +5,14 @@ namespace NesAsm.Emulator;
 
 public class PPUApiCSharp
 {
+    public static void SetGameHeader(bool isVerticalMirroring = true, string mapperName = "NROM")
+    {
+        if (isVerticalMirroring)
+            PPU.SetVerticalMirroring();
+        else
+            PPU.SetHorizontalMirroring();
+    }
+
     public static void SetBackgroundPaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3) =>
         PPU.SetBackgroundPaletteColors(paletteIndex, color0, color1, color2, color3);
 

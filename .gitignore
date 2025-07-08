@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # NesAsm
 *.nes
 /NesAsm.Example/JumpMan/JumpMan.png
+/NesAsm.Example/BoxingRPG/BoxingRPG.png

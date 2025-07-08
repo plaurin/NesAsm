@@ -12,6 +12,8 @@ public class PPU
     private const byte BackgroundPatternTableIndex = 0;
     private const byte SpritePatternTableIndex = 1;
 
+    private static bool VerticalMirroring = true; // Default mirroring mode, can be changed by the game.
+
     private static readonly byte[,] _backgroundPalette = new byte[4, 4];
     private static readonly byte[,] _spritePalette = new byte[4, 4];
     private static readonly byte[,,] _nametables = new byte[4, 32, 30];
@@ -187,7 +189,17 @@ public class PPU
     {
         var nametableIndex = ScrollNametable;
         var (nametableX, nametableY) = GetNametablePosition(x + ScrollX, y + ScrollY);
-        if (nametableX > 31) { nametableIndex = (byte)((nametableIndex + 1) % 2); nametableX -= 32; }
+        if (nametableX > 31) 
+        { 
+            if (VerticalMirroring) nametableIndex = (byte)((nametableIndex + 1) % 2);
+            nametableX -= 32;
+        }
+
+        if (nametableY > 29) 
+        { 
+            if (!VerticalMirroring) nametableIndex = (byte)((nametableIndex + 2) % 4);
+            nametableY -= 30;
+        }
 
         var patternIndex = _nametables[nametableIndex, nametableX, nametableY];
 
@@ -228,6 +240,9 @@ public class PPU
     private static (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
     private static (int patternX, int patternY) GetPatternTablePosition(int screenX, int screenY) => (screenX % 8, screenY % 8);
     private static (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 2, nametableY / 2);
+
+    internal static void SetVerticalMirroring() => VerticalMirroring = true;
+    internal static void SetHorizontalMirroring() => VerticalMirroring = false;
 
     internal static void SetBackgroundPaletteColors(int paletteIndex, byte color0, byte color1, byte color2, byte color3)
     {
