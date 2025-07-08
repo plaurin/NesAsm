@@ -1,6 +1,4 @@
-﻿using static NesAsm.Emulator.PPUApiCSharp;
-
-namespace NesAsm.Example.JumpMan;
+﻿namespace NesAsm.Example.JumpMan;
 
 public static partial class JumpManGame
 {

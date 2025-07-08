@@ -1,15 +1,19 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
 using NesAsm.Example.JumpMan;
+using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace NesAsm.UI;
@@ -33,6 +37,8 @@ public partial class MainWindow : Window
     private int _fps;
 
     const double FrameSpan = 1000 / 60;
+
+    private CancellationTokenSource _cancellationTokenSource = new();
 
     public MainWindow()
     {
@@ -64,10 +70,45 @@ public partial class MainWindow : Window
         _timer.Tick += Timer_Tick;
         _timer.Start();
 
+        var cancellationToken = _cancellationTokenSource.Token;
+
+        RunGame("Vertical Scrolling");
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
+        //Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: VerticalScrolling.Reset, nmi: VerticalScrolling.Nmi), cancellationToken).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
-        Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi)).ConfigureAwait(false);
+        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi)).ConfigureAwait(false);
+        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: BoxingRPGGame.Reset, nmi: BoxingRPGGame.Nmi)).ConfigureAwait(false);
+    }
+
+    private void MenuItem_Click(object? sender, RoutedEventArgs e)
+    {
+        var gameName = (e.Source as MenuItem)?.Header?.ToString();
+        if (gameName == null) return;
+
+        RunGame(gameName);
+    }
+
+    private void RunGame(string gameName)
+    {
+        _cancellationTokenSource.Cancel();
+        _cancellationTokenSource = new();
+        var cancellationToken = _cancellationTokenSource.Token;
+
+        switch (gameName)
+        {
+            case "Jump Man":
+                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi), cancellationToken).ConfigureAwait(false);
+                break;
+            case "Vertical Scrolling":
+                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: VerticalScrolling.Reset, nmi: VerticalScrolling.Nmi), cancellationToken).ConfigureAwait(false);
+                break;
+            case "Boxing Game":
+                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: BoxingRPGGame.Reset, nmi: BoxingRPGGame.Nmi)).ConfigureAwait(false);
+                break;
+            default:
+                throw new InvalidOperationException($"Game {gameName} is not implemented yet.");
+        }
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

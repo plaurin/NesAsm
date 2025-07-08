@@ -12,7 +12,7 @@ public class VerticalScrolling
 
     static byte ScrollNametable = 0;
 
-    public static void Reset()
+    public static void Reset(CancellationToken? cancellationToken = null)
     {
         SetGameHeader(isVerticalMirroring: false);
 
@@ -70,7 +70,7 @@ public class VerticalScrolling
         SetSpriteData(3, 50, 50, 1, 3, false, false, false);
 
         // Main Loop
-        while (true)
+        while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
         {
             WindowX += 1;
             WindowY += 1;

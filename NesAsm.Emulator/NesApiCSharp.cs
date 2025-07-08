@@ -38,4 +38,26 @@ public class NesApiCSharp
             Console.WriteLine(ex);
         }
     }
+
+    public static Task RunGame(CancellationToken? cancellationToken, Action draw, Action<CancellationToken?> reset, Action? nmi = null, Action? interrupt = null)
+    {
+        try
+        {
+            // Set PPU callback for nmi
+            PPUApiCSharp.SetNmiCallback(() =>
+            {
+                draw.Invoke();
+
+                nmi?.Invoke();
+            });
+
+            reset.Invoke(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        return Task.CompletedTask;
+    }
 }

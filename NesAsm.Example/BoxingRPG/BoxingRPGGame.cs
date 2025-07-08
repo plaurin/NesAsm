@@ -3,14 +3,16 @@ using static NesAsm.Emulator.PPUApiCSharp;
 
 namespace NesAsm.Example.JumpMan;
 
-public static partial class JumpManGame
+public static partial class BoxingRPGGame
 {
     public static void Reset(CancellationToken? cancellationToken = null)
     {
+        SetGameHeader(isVerticalMirroring: false);
+
         SetSpriteZeroHitScanline(31);
 
         // Background palette
-        SetBackgroundPaletteColors(0, 0x_22, 0x_29, 0x_1A, 0X_0F);
+        SetBackgroundPaletteColors(0, 0x_12, 0x_29, 0x_1A, 0X_0F);
         SetBackgroundPaletteColors(1, 0x_0F, 0x_36, 0x_17, 0x_0F);
         SetBackgroundPaletteColors(2, 0x_0F, 0x_30, 0x_21, 0x_0F);
         SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
@@ -19,9 +21,9 @@ public static partial class JumpManGame
         SetSpritePaletteColors(3, 0x_0F, 0x_0F, 0x_36, 0x_17);
 
         // Init;
-        LoadImage(@"JumpMan\JumpMan.png", hasTileSeparator: false);
+        LoadImage(@"BoxingRPG\BoxingRPG.png", hasTileSeparator: false);
 
-        LoadLevel("1-1");
+        LoadFightWith("Slime");
 
         // Hide sprites
         for (byte i = 0; i < 64; i++)
@@ -30,10 +32,10 @@ public static partial class JumpManGame
         }
 
         // Draw first screen columns ++
-        for (int i = WindowX / 16; i < (WindowX / 16) + DrawAheadColumns; i++)
-        {
-            DrawColumn(i);
-        }
+        //for (int i = WindowX / 16; i < (WindowX / 16) + DrawAheadColumns; i++)
+        //{
+        //    DrawColumn(i);
+        //}
 
         // Draw HUD
         for (int i = 0; i < 32; i++)
@@ -76,7 +78,7 @@ public static partial class JumpManGame
         SetScrollPosition(0, 0, 0);
 
         // Do light weight stuff that we are sure will complete before the hud in the top finish to draw
-        DrawColumn((WindowX / 16) + DrawAheadColumns);
+        //DrawColumn((WindowX / 16) + DrawAheadColumns);
     }
 
     static byte Coins = 90;

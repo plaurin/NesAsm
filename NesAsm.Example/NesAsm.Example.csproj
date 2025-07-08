@@ -13,6 +13,9 @@
 </ItemGroup>
 
   <ItemGroup>
+    <None Update="BoxingRPG\BoxingRPG.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="JumpMan\JumpMan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
