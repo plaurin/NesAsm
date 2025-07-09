@@ -178,7 +178,8 @@ public class PPU
                     for (int x = 0; x < 8; x++)
                     {
                         var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
-                        screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
+                        if (screenIndex < screen.Length)
+                            screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
                     }
 
         //Log($"End DrawScreen scanline[{startScanline}-{endScanline}");
