@@ -70,6 +70,7 @@ public static partial class BoxingRPGGame
     }
 
     static int WindowX = 0000;
+    static int WindowY = 0000;
     const int DrawAheadColumns = 20;
 
     private static void MainLoopBeforeSpriteZeroHit()
@@ -90,10 +91,20 @@ public static partial class BoxingRPGGame
 
     private static void MainLoopAfterSpriteZeroHit()
     {
+        if (InputManager.Left) WindowX -= 1;
+        if (InputManager.Right) WindowX += 1;
+        if (InputManager.Up) WindowY -= 1;
+        if (InputManager.Down) WindowY += 1;
+
+        if (WindowY < 0) WindowY = 0;
+        if (WindowY > 50) WindowY = 50;
+
         // Scroll to game position
         ScrollX = (byte)(WindowX % 256);
-        ScrollNametable = (byte)((WindowX / 256) % 2);
-        SetScrollPosition(ScrollNametable, ScrollX, 0);
+        ScrollY = (byte)(WindowY % 240);
+
+        ScrollNametable = (byte)(((WindowY / 240) % 2) * 2);
+        SetScrollPosition(ScrollNametable, ScrollX, ScrollY);
 
         // Update HUD
         if (FrameCount % 15 == 0) Time--;
@@ -107,8 +118,6 @@ public static partial class BoxingRPGGame
 
         // Time
         DrawNumber(26, 3, Time);
-
-        WindowX += 1;
 
         if (InputManager.Left) MarioX -= 1;
         if (InputManager.Right) MarioX += 1;
@@ -131,6 +140,7 @@ public static partial class BoxingRPGGame
 
     static int FrameCount = 0;
     static byte ScrollX = 0;
+    static byte ScrollY = 0;
     static byte ScrollNametable = 0;
     public static void Nmi()
     {
