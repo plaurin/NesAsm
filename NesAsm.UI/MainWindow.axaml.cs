@@ -72,21 +72,11 @@ public partial class MainWindow : Window
 
         var cancellationToken = _cancellationTokenSource.Token;
 
-        RunGame("Vertical Scrolling");
+        //RunGame("Vertical Scrolling");
+        RunGame("Boxing Game");
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
-        //Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: VerticalScrolling.Reset, nmi: VerticalScrolling.Nmi), cancellationToken).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
-        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi)).ConfigureAwait(false);
-        //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: BoxingRPGGame.Reset, nmi: BoxingRPGGame.Nmi)).ConfigureAwait(false);
-    }
-
-    private void MenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        var gameName = (e.Source as MenuItem)?.Header?.ToString();
-        if (gameName == null) return;
-
-        RunGame(gameName);
     }
 
     private void RunGame(string gameName)

@@ -7,13 +7,6 @@
         x:Class="NesAsm.UI.MainWindow"
         Title="NesAsm.UI">
     <StackPanel>
-        <Menu>
-            <MenuItem Header="Games">
-                <MenuItem Header="Jump Man" Click="MenuItem_Click" />
-                <MenuItem Header="Vertical Scrolling" Click="MenuItem_Click" />
-                <MenuItem Header="Boxing Game" Click="MenuItem_Click" />
-            </MenuItem>
-        </Menu>
         <Label Name="FrameCounter" />
         <Image Name="Image" Width="768" Height="720" RenderOptions.BitmapInterpolationMode="None" />
     </StackPanel>
