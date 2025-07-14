@@ -1,17 +1,30 @@
-﻿using static NesAsm.Emulator.PPUApiCSharp;
+﻿using NesAsm.Emulator;
+using static NesAsm.Emulator.PPUApiCSharp;
 
 namespace NesAsm.Example.JumpMan;
 
 public static partial class BoxingRPGGame
 {
+    private static void SetSpritePaletteColors(int index, byte[] colors)
+    {
+        if (colors.Length != 3)
+        {
+            throw new ArgumentException("Sprite palette must have exactly 3 colors.");
+        }
+
+        PPUApiCSharp.SetSpritePaletteColors(index, 0x_0F, colors[0], colors[1], colors[2]);
+    }
+
     private static void DrawTile(int x, int y, byte tileIndex)
     {
-        SetNametableTile((x % 64) / 32, x % 32, y, tileIndex);
+        //SetNametableTile((x % 64) / 32, x % 32, y, tileIndex);
+        SetNametableTile((y % 60) / 30 * 2, x % 32, y % 30, tileIndex);
     }
 
     private static void SetPalette(int x, int y, byte paletteIndex)
     {
-        SetAttributeTablePalette((x % 32) / 16, x % 16, y, paletteIndex);
+        //SetAttributeTablePalette((x % 32) / 16, x % 16, y, paletteIndex);
+        SetAttributeTablePalette((y % 30) / 15 * 2, x % 16, y % 15, paletteIndex);
     }
 
     private static void DrawWord(int x, int y, string word)
@@ -74,179 +87,7 @@ public static partial class BoxingRPGGame
         for (int i = 0; i < width; i++) for (int j = 0; j < height; j++) DrawBlock(x + i, y + j, tileIndexes, backgroundPalette);
     }
 
-    private static void DrawBlockStretch(int leftX, int topY, int width, int height, byte[][] tileIndexes, byte backgroundPalette)
-    {
-        DrawBlock(leftX, topY, tileIndexes[0], backgroundPalette);
-        DrawBlockRow(leftX + 1, topY, width - 2, tileIndexes[1], backgroundPalette);
-        DrawBlock(leftX + width - 1, topY, tileIndexes[2], backgroundPalette);
-
-        DrawBlockColumn(leftX, topY + 1, height - 2, tileIndexes[3], backgroundPalette);
-        DrawBlockFill(leftX + 1, topY + 1, width - 2, height - 2, tileIndexes[4], backgroundPalette);
-        DrawBlockColumn(leftX + width - 1, topY + 1, height - 2, tileIndexes[5], backgroundPalette);
-
-        DrawBlock(leftX, topY + height - 1, tileIndexes[6], backgroundPalette);
-        DrawBlockRow(leftX + 1, topY + height - 1, width - 2, tileIndexes[7], backgroundPalette);
-        DrawBlock(leftX + width - 1, topY + height - 1, tileIndexes[8], backgroundPalette);
-    }
-
     static int LastDrawnColumn = 255;
     static readonly byte[][] ColumnBlocks = new byte[15][];
     static readonly byte[] ColumnPalettes = new byte[15];
-    private static void DrawColumn(int x)
-    {
-        if (x == LastDrawnColumn) return;
-        LastDrawnColumn = x;
-
-        // Default to sky
-        for (int i = 2; i < 15; i++)
-        {
-            SetColumnBlocks(i, SkyPalette, SkyTiles);
-        }
-
-        // Repeating patterns
-        foreach (var (pattern, index) in BackgroundPatterns)
-        {
-            if (x % PatternLegth == index)
-            {
-                switch (pattern)
-                {
-                    case MapPattern.HillStart:
-                        SetColumnBlocks(12, HillPalette, HillLeftTiles);
-                        break;
-                    case MapPattern.HillLeft1:
-                        SetColumnBlocks(11, HillPalette, HillLeftTiles, HillSpotTiles);
-                        break;
-                    case MapPattern.HillTop1:
-                        SetColumnBlocks(11, HillPalette, HillTopTiles, HillSpotTiles);
-                        break;
-                    case MapPattern.HillTop2:
-                        SetColumnBlocks(10, HillPalette, HillTopTiles, HillSpotTiles, HillEmptyTiles);
-                        break;
-                    case MapPattern.HillRight1:
-                        SetColumnBlocks(11, HillPalette, HillRightTiles, HillSpotTiles);
-                        break;
-                    case MapPattern.HillEnd:
-                        SetColumnBlocks(12, HillPalette, HillRightTiles);
-                        break;
-
-                    case MapPattern.BushStart:
-                        SetColumnBlocks(12, BushPalette, BushLeftTiles);
-                        break;
-                    case MapPattern.BushFull:
-                        SetColumnBlocks(12, BushPalette, BushTiles);
-                        break;
-                    case MapPattern.BushEnd:
-                        SetColumnBlocks(12, BushPalette, BushRightTiles);
-                        break;
-                }
-            }
-        }
-
-        // Repeating patterns with heights
-        foreach (var (pattern, index, height) in BackgroundPatternsHeight)
-        {
-            if (x % PatternLegth == index)
-            {
-                switch (pattern)
-                {
-                    case MapPattern.CloudStart:
-                        SetColumnBlocks(height, CloudPalette, CloudTopLeftTiles, CloudBottomLeftTiles);
-                        break;
-                    case MapPattern.CloudFull:
-                        SetColumnBlocks(height, CloudPalette, CloudTopTiles, CloudBottomTiles);
-                        break;
-                    case MapPattern.CloudEnd:
-                        SetColumnBlocks(height, CloudPalette, CloudTopRightTiles, CloudBottomRightTiles);
-                        break;
-                }
-            }
-        }
-
-        // Ground
-        FillColumnBlocks(13, 2, GroundPalette, GroundTiles);
-
-        // Foreground elements
-        foreach (var (pattern, index, height) in ForegroundElements)
-        {
-            if (x == index)
-            {
-                switch (pattern)
-                {
-                    case MapPattern.CoinBox:
-                        SetColumnBlocks(height, QuestionPalette, QuestionTiles);
-                        break;
-                    case MapPattern.Brick:
-                        SetColumnBlocks(height, BrickPalette, BrickTiles);
-                        break;
-                    case MapPattern.EmptyBox:
-                        SetColumnBlocks(height, EmptyPalette, EmptyTiles);
-                        break;
-                    case MapPattern.Block:
-                        FillColumnBlocks(13 - height, height, BlockPalette, BlockTiles);
-                        break;
-
-                    case MapPattern.PipeLeft:
-                        FillColumnBlocks(13 - height, height, PipePalette, PipeTopLeftTiles, PipeTubeLeftTiles);
-                        break;
-                    case MapPattern.PipeRight:
-                        FillColumnBlocks(13 - height, height, PipePalette, PipeTopRightTiles, PipeTubeRightTiles);
-                        break;
-
-                    case MapPattern.Hole:
-                        FillColumnBlocks(13, 2, SkyPalette, SkyTiles);
-                        break;
-
-                    case MapPattern.Flag:
-                        FillColumnBlocks(2, 10, FlagPalette, PoleTopTiles, PoleTiles);
-                        break;
-
-                    case MapPattern.CastleWall:
-                        SetColumnBlocks(10, CastlePalette, CastleRempart, CastleBrick, CastleBrick);
-                        break;
-                    case MapPattern.CastleWallLvl2Left:
-                        SetColumnBlocks(8, CastlePalette, CastleRempart, CastleWindowRight, CastleRempartFront, CastleBrick, CastleBrick);
-                        break;
-                    case MapPattern.CastleWallLvl2Right:
-                        SetColumnBlocks(8, CastlePalette, CastleRempart, CastleWindowLeft, CastleRempartFront, CastleBrick, CastleBrick);
-                        break;
-                    case MapPattern.CastleDoor:
-                        SetColumnBlocks(8, CastlePalette, CastleRempart, CastleBrick, CastleRempartFront, CastleDoorTop, CastleDoorBottom);
-                        break;
-                }
-            }
-        }
-
-
-        // Draw
-        for (int i = 2; i < 15; i++)
-        {
-            DrawBlock(x, i, ColumnBlocks[i], ColumnPalettes[i]);
-        }
-    }
-
-    private static void SetColumnBlocks(int y, byte paletteIndex, params byte[][] tileIndexes)
-    {
-        for (int i = 0; i < tileIndexes.Length; i++)
-        {
-            ColumnBlocks[y + i] = tileIndexes[i];
-            ColumnPalettes[y + i] = paletteIndex;
-        }
-    }
-
-    private static void FillColumnBlocks(int y, int length, byte paletteIndex, byte[] tileIndex)
-    {
-        for (int i = 0; i < length; i++)
-        {
-            ColumnBlocks[y + i] = tileIndex;
-            ColumnPalettes[y + i] = paletteIndex;
-        }
-    }
-
-    private static void FillColumnBlocks(int y, int length, byte paletteIndex, byte[] startTileIndex, byte[]? fillTileIndex)
-    {
-        ColumnBlocks[y] = startTileIndex;
-        for (int i = 1; i < length; i++) ColumnBlocks[y + i] = fillTileIndex!;
-
-        for (int i = 0; i < length; i++) ColumnPalettes[y + i] = paletteIndex;
-    }
 }

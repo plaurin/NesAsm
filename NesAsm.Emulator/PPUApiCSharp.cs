@@ -31,38 +31,58 @@ public class PPUApiCSharp
     public static void SetAttributeTablePalette(int tableNumber, int x, int y, byte paletteIndex) =>
         PPU.SetAttributeTablePalette(tableNumber, x, y, paletteIndex);
 
+    public static void LoadImage(string filePath, byte[] importColors, bool hasTileSeparator = true)
+    {
+        if (importColors.Length != 4)
+            throw new ArgumentException("Import colors must have exactly 4 colors.");
+
+        NesColorPalette[] backgroundPalettes = new NesColorPalette[4];
+        NesColorPalette[] spritePalettes = new NesColorPalette[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            backgroundPalettes[i] = new NesColorPalette([importColors[0], importColors[1], importColors[2], importColors[3]]);
+            spritePalettes[i] = new NesColorPalette([importColors[0], importColors[1], importColors[2], importColors[3]]);
+        }
+
+
+        LoadImage(filePath, backgroundPalettes, spritePalettes, hasTileSeparator);
+    }
+
     public static void LoadImage(string filePath, bool hasTileSeparator = true)
+    {
+        NesColorPalette[] backgroundPalettes = new NesColorPalette[4];
+        NesColorPalette[] spritePalettes = new NesColorPalette[4];
+
+        for (int i = 0; i < 4; i++)
+        {
+            backgroundPalettes[i] = new NesColorPalette(
+            [
+                PPU.BackgroundPalettes[i, 0],
+                PPU.BackgroundPalettes[i, 1],
+                PPU.BackgroundPalettes[i, 2],
+                PPU.BackgroundPalettes[i, 3],
+            ]);
+
+            spritePalettes[i] = new NesColorPalette(
+            [
+                PPU.SpritePalettes[i, 0],
+                PPU.SpritePalettes[i, 1],
+                PPU.SpritePalettes[i, 2],
+                PPU.SpritePalettes[i, 3],
+            ]);
+        }
+
+        LoadImage(filePath, backgroundPalettes, spritePalettes, hasTileSeparator);
+    }
+
+    private static void LoadImage(string filePath, NesColorPalette[] backgroundPalettes, NesColorPalette[] spritePalettes, bool hasTileSeparator)
     {
         var outputFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
         var path = Path.Combine(outputFolder!, filePath);
 
         if (File.Exists(path))
         {
-            NesColorPalette[] backgroundPalettes = new NesColorPalette[4];
-            NesColorPalette[] spritePalettes = new NesColorPalette[4];
-
-            for (int i = 0; i < 4; i++)
-            {
-                backgroundPalettes[i] = new NesColorPalette(
-                [
-                    PPU.BackgroundPalettes[i, 0],
-                    PPU.BackgroundPalettes[i, 1],
-                    PPU.BackgroundPalettes[i, 2],
-                    PPU.BackgroundPalettes[i, 3],
-                ]);
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                spritePalettes[i] = new NesColorPalette(
-                [
-                    PPU.SpritePalettes[i, 0],
-                    PPU.SpritePalettes[i, 1],
-                    PPU.SpritePalettes[i, 2],
-                    PPU.SpritePalettes[i, 3],
-                ]);
-            }
-
             var charData = CharHelpers.LoadImage(path, hasTileSeparator, backgroundPalettes, spritePalettes);
 
             if (charData.HasValue)

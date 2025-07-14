@@ -47,9 +47,9 @@ public static partial class BoxingRPGGame
     private static void LoadFightWith(string monster)
     {
         // Draw Background
-        DrawBlock(0, 12, QuestionTiles, QuestionPalette);
-        DrawBlock(5, 10, HudCoinTiles, HudCoinPalette);
-        DrawBlock(15, 10, HudCoinTiles, HudCoinPalette);
+        //DrawBlock(0, 12, QuestionTiles, QuestionPalette);
+        //DrawBlock(5, 10, HudCoinTiles, HudCoinPalette);
+        //DrawBlock(15, 10, HudCoinTiles, HudCoinPalette);
 
         //// Repeating background patterns
         //PatternLegth = 48;
