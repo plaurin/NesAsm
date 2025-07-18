@@ -5,6 +5,18 @@ namespace NesAsm.Example.JumpMan;
 
 public static partial class BoxingRPGGame
 {
+    private static void SetBackgroundPaletteColors(int index, byte[] colors)
+    {
+        if (colors.Length != 3)
+        {
+            throw new ArgumentException("Sprite palette must have exactly 3 colors.");
+        }
+
+        var color0 = index == 0 ? BackgroundColor : (byte)0x_0F; // Use BackgroundColor for index 0, otherwise use 0x_0F
+
+        PPUApiCSharp.SetBackgroundPaletteColors(index, color0, colors[0], colors[1], colors[2]);
+    }
+
     private static void SetSpritePaletteColors(int index, byte[] colors)
     {
         if (colors.Length != 3)
@@ -90,4 +102,15 @@ public static partial class BoxingRPGGame
     static int LastDrawnColumn = 255;
     static readonly byte[][] ColumnBlocks = new byte[15][];
     static readonly byte[] ColumnPalettes = new byte[15];
+
+    private static void DrawMetaTile(byte x, byte y, byte palette, byte[,] tileIndexes, bool[,]? flipHorizontals = null, bool[,]? flipVerticals = null)
+    {
+        for (int i = 0; i < tileIndexes.GetLength(1); i++)
+            for (int j = 0; j < tileIndexes.GetLength(0); j++)
+            {
+                DrawTile(x + i, y + j, tileIndexes[j, i]);
+                SetPalette((x + i) / 2, (y + j) / 2, palette);
+            }
+
+    }
 }

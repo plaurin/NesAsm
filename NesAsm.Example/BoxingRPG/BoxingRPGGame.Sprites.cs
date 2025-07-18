@@ -10,7 +10,7 @@ public static partial class BoxingRPGGame
         new(8, BoxerIdle1),
     ];
 
-    static byte[] BoxerPalette = [0x_2A, 0x_37, 0x_0F];
+    static byte[] BoxerPalette = [0x_0F, 0x2A, 0x_37];
     const byte BoxerPaletteIndex = 0;
 
     static readonly byte[,] SlimeIdle1 = { { 0x70, 0x71 }, { 0x72, 0x73 } };
@@ -22,6 +22,6 @@ public static partial class BoxingRPGGame
         new(16, SlimeIdle2, flipHorizontals: new bool[,] { { true, true }, { true, true } })
     ];
 
-    static byte[] SlimePalette = [0x_16, 0x_20, 0x_1C];
+    static byte[] SlimePalette = [0x_1C, 0x_16, 0x_20];
     const byte SlimePaletteIndex = 3;
 }

@@ -12,16 +12,16 @@ public static partial class BoxingRPGGame
         SetSpriteZeroHitScanline(31);
 
         // Background palette
-        SetBackgroundPaletteColors(0, 0x_12, 0x_29, 0x_1A, 0X_0F); // SkyPalette
-        SetBackgroundPaletteColors(1, 0x_0F, 0x_29, 0x_29, 0x_29); // GroundPalette
-        SetBackgroundPaletteColors(2, 0x_0F, 0x_30, 0x_21, 0x_0F);
-        SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
+        SetBackgroundPaletteColors(GroundPaletteIndex, GroundPalette);
+        SetBackgroundPaletteColors(SkyPaletteIndex, SkyPalette);
+        SetBackgroundPaletteColors(BBoxerPaletteIndex, BBoxerPalette);
+        SetBackgroundPaletteColors(HillPaletteIndex, HillPalette);
 
         SetSpritePaletteColors(BoxerPaletteIndex, BoxerPalette);
         SetSpritePaletteColors(SlimePaletteIndex, SlimePalette);
 
         // Init;
-        byte[] importColors = [0x_22, 0x_16, 0x_27, 0x_18];
+        byte[] importColors = [0x_22, 0x_2D, 0x_10, 0x_20];
         LoadImage(@"BoxingRPG\BoxingRPG.png", importColors, hasTileSeparator: false);
 
         LoadFightWith("Slime");
@@ -33,24 +33,24 @@ public static partial class BoxingRPGGame
         }
 
         // Draw Field
-        DrawBlockFill(0, 0, 16, 11, SkyTiles, SkyPalette);
-        DrawBlockFill(0, 11, 16, 15, GroundTiles, GroundPalette);
+        DrawBlockFill(0, 0, 16, 11, SkyTiles, SkyPaletteIndex);
+        DrawBlockFill(0, 11, 16, 15, GroundTiles, GroundPaletteIndex);
 
-        DrawBlock(1, 10, BushLeftTiles, BushPalette);
-        DrawBlock(2, 10, BushTiles, BushPalette);
-        DrawBlock(3, 10, BushRightTiles, BushPalette);
+        DrawBlock(1, 10, BushLeftTiles, BushPaletteIndex);
+        DrawBlock(2, 10, BushTiles, BushPaletteIndex);
+        DrawBlock(3, 10, BushRightTiles, BushPaletteIndex);
 
-        DrawBlock(11, 10, HillLeftTiles, HillPalette);
-        DrawBlock(12, 10, HillSpotTiles, HillPalette);
-        DrawBlock(12, 9, HillTopTiles, HillPalette);
-        DrawBlock(13, 10, HillRightTiles, HillPalette);
+        DrawBlock(11, 10, HillLeftTiles, HillPaletteIndex);
+        DrawBlock(12, 10, HillSpotTiles, HillPaletteIndex);
+        DrawBlock(12, 9, HillTopTiles, HillPaletteIndex);
+        DrawBlock(13, 10, HillRightTiles, HillPaletteIndex);
 
-        DrawBlock(5, 6, CloudTopLeftTiles, CloudPalette);
-        DrawBlock(5, 7, CloudBottomLeftTiles, CloudPalette);
-        DrawBlock(6, 6, CloudTopTiles, CloudPalette);
-        DrawBlock(6, 7, CloudBottomTiles, CloudPalette);
-        DrawBlock(7, 6, CloudTopRightTiles, CloudPalette);
-        DrawBlock(7, 7, CloudBottomRightTiles, CloudPalette);
+        DrawBlock(5, 6, CloudTopLeftTiles, CloudPaletteIndex);
+        DrawBlock(5, 7, CloudBottomLeftTiles, CloudPaletteIndex);
+        DrawBlock(6, 6, CloudTopTiles, CloudPaletteIndex);
+        DrawBlock(6, 7, CloudBottomTiles, CloudPaletteIndex);
+        DrawBlock(7, 6, CloudTopRightTiles, CloudPaletteIndex);
+        DrawBlock(7, 7, CloudBottomRightTiles, CloudPaletteIndex);
 
         // Draw HUD
         //for (int i = 0; i < 32; i++)
@@ -74,6 +74,9 @@ public static partial class BoxingRPGGame
 
         //DrawWord(25, 2, "TIME");
         //DrawNumber(26, 3, 297);
+
+        // DrawBoxer
+        DrawMetaTile(15, 24, BBoxerPaletteIndex, BoxerTiles);
 
         // Main Loop
         while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
@@ -146,7 +149,7 @@ public static partial class BoxingRPGGame
         if (InputManager.Start) SlimeY += 1;
 
         // Update Boxer
-        DrawMetaSpriteAnimation(1, BoxerX, BoxerY, BoxerPaletteIndex, BoxerIdle, FrameCount, 16);
+        //DrawMetaSpriteAnimation(1, BoxerX, BoxerY, BoxerPaletteIndex, BoxerIdle, FrameCount, 16);
 
         // Update Goomba
         DrawMetaSpriteAnimation(30, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32);
@@ -162,14 +165,14 @@ public static partial class BoxingRPGGame
     {
         FrameCount++;
 
-        var colorAnimFrame = FrameCount % 48;
-        if (colorAnimFrame < 8)
-            SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
-        else if (colorAnimFrame < 16)
-            SetBackgroundPaletteColors(3, 0x_0F, 0x_07, 0x_17, 0x_0F);
-        else if (colorAnimFrame < 24)
-            SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
-        else
-            SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
+        //var colorAnimFrame = FrameCount % 48;
+        //if (colorAnimFrame < 8)
+        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
+        //else if (colorAnimFrame < 16)
+        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_07, 0x_17, 0x_0F);
+        //else if (colorAnimFrame < 24)
+        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
+        //else
+        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
     }
 }
