@@ -125,10 +125,15 @@ public class PPUApiCSharp
 
     public static void WaitForVBlank()
     {
-        if (!_spriteZeroHitScanline.HasValue)
+        if (!_spriteZeroHitScanline.HasValue && !_irqAtScanline.HasValue)
             PPU.DrawScreen();
-        else
+        else if (_spriteZeroHitScanline.HasValue)
             PPU.DrawScreen(startScanline: (byte)(_spriteZeroHitScanline.Value + 1), endScanline: 239);
+        else if (_irqAtScanline.HasValue)
+        {
+            PPU.DrawScreen(startScanline: _lastIrqAtScanline, endScanline: 239);
+            _lastIrqAtScanline = 0;
+        }
 
         _nmiCallback?.Invoke();
     }
@@ -142,10 +147,23 @@ public class PPUApiCSharp
 
     public static void WaitForSpriteZeroHit()
     {
+        // TODO Validate than Sprite0 indeed is possitioned to hit at _spriteZeroHitScanline
+
         if (!_spriteZeroHitScanline.HasValue)
             throw new InvalidOperationException("Need to SetSpriteZeroHitScanline");
 
         PPU.DrawScreen(startScanline: 0, endScanline: _spriteZeroHitScanline.Value);
+    }
+
+    public static void WaitForIrq(Action interrupt)
+    {
+        if (!_irqAtScanline.HasValue)
+            throw new InvalidOperationException("Need to SetIRQAtScanline");
+
+        PPU.DrawScreen(startScanline: _lastIrqAtScanline, endScanline: _irqAtScanline.Value);
+        _lastIrqAtScanline = _irqAtScanline.Value;
+
+        interrupt.Invoke();
     }
 
     private static byte? _spriteZeroHitScanline = null;
@@ -153,5 +171,13 @@ public class PPUApiCSharp
     public static void SetSpriteZeroHitScanline(byte scanline)
     {
         _spriteZeroHitScanline = scanline;
+    }
+
+    private static byte? _irqAtScanline = null;
+    private static byte _lastIrqAtScanline = 0;
+
+    public static void SetIRQAtScanline(byte scanline)
+    {
+        _irqAtScanline = scanline;
     }
 }

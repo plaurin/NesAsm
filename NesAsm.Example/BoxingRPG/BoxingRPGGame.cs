@@ -9,8 +9,6 @@ public static partial class BoxingRPGGame
     {
         SetGameHeader(isVerticalMirroring: false);
 
-        SetSpriteZeroHitScanline(31);
-
         // Background palette
         SetBackgroundPaletteColors(GroundPaletteIndex, GroundPalette);
         SetBackgroundPaletteColors(SkyPaletteIndex, SkyPalette);
@@ -52,6 +50,10 @@ public static partial class BoxingRPGGame
         DrawBlock(7, 6, CloudTopRightTiles, CloudPaletteIndex);
         DrawBlock(7, 7, CloudBottomRightTiles, CloudPaletteIndex);
 
+        DrawWord(0, 21, "PING");
+        DrawWord(0, 22, "PONG");
+        SetPalette(0, 11, HillPaletteIndex);
+
         // Draw HUD
         //for (int i = 0; i < 32; i++)
         //{
@@ -81,9 +83,12 @@ public static partial class BoxingRPGGame
         // Main Loop
         while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
         {
-            MainLoopBeforeSpriteZeroHit();
-            WaitForSpriteZeroHit();
-            MainLoopAfterSpriteZeroHit();
+            //MainLoopBeforeSpriteZeroHit();
+            //WaitForSpriteZeroHit();
+            MainLoop();
+            WaitForIrq(Irq); // After Header
+            WaitForIrq(Irq); // After Sky
+            WaitForIrq(Irq); // After Ground
             WaitForVBlank();
         }
     }
@@ -92,24 +97,20 @@ public static partial class BoxingRPGGame
     static int WindowY = 0050;
     const int DrawAheadColumns = 20;
 
-    private static void MainLoopBeforeSpriteZeroHit()
-    {
-        // Scroll to draw static HUD
-        SetScrollPosition(0, 0, 0);
-
-        // Do light weight stuff that we are sure will complete before the hud in the top finish to draw
-        //DrawColumn((WindowX / 16) + DrawAheadColumns);
-    }
-
     static byte Coins = 90;
     static int Time = 400;
     static byte BoxerX = 100;
     static byte BoxerY = 208;
-    static byte SlimeX = 150;
-    static byte SlimeY = 208;
+    static byte SlimeX = 132;
+    static byte SlimeY = 94 + 32;
 
-    private static void MainLoopAfterSpriteZeroHit()
+    private static void MainLoop()
     {
+        SetIRQAtScanline(32);
+
+        // Scroll to draw static HUD
+        SetScrollPosition(0, 0, 0);
+
         if (InputManager.Left) WindowX -= 1;
         if (InputManager.Right) WindowX += 1;
         if (InputManager.Up) WindowY -= 1;
@@ -117,13 +118,6 @@ public static partial class BoxingRPGGame
 
         if (WindowY < 0) WindowY = 0;
         if (WindowY > 50) WindowY = 50;
-
-        // Scroll to game position
-        ScrollX = (byte)(WindowX % 256);
-        ScrollY = (byte)(WindowY % 240);
-
-        ScrollNametable = (byte)(((WindowY / 240) % 2) * 2);
-        SetScrollPosition(ScrollNametable, ScrollX, ScrollY);
 
         // Update HUD
         if (FrameCount % 15 == 0) Time--;
@@ -152,9 +146,8 @@ public static partial class BoxingRPGGame
         //DrawMetaSpriteAnimation(1, BoxerX, BoxerY, BoxerPaletteIndex, BoxerIdle, FrameCount, 16);
 
         // Update Goomba
+        SlimeY = (byte)(94 + 32 + 50 - WindowY);
         DrawMetaSpriteAnimation(30, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32);
-
-        DrawMetaSpriteAnimation(34, (byte)(SlimeX + 24), SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32);
     }
 
     static int FrameCount = 0;
@@ -174,5 +167,36 @@ public static partial class BoxingRPGGame
         //    SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
         //else
         //    SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
+    }
+
+    static byte IrqCount = 0;
+    public static void Irq()
+    {
+        switch (IrqCount)
+        {
+            case 0: // After Header
+                // Scroll to game position
+                ScrollX = (byte)(WindowX % 256);
+                ScrollY = (byte)(WindowY % 240);
+
+                ScrollNametable = (byte)(((WindowY / 240) % 2) * 2);
+                SetScrollPosition(ScrollNametable, ScrollX, ScrollY);
+
+                IrqCount++;
+                SetIRQAtScanline((byte)(176 - ScrollY));
+                break;
+            case 1: // After Sky 
+                SetScrollPosition(0, 0, (byte)(ScrollY + (50 - ScrollY) / 4));
+
+                IrqCount++;
+                SetIRQAtScanline(240 - 32);
+                break;
+            case 2: // After Ground
+                SetScrollPosition(2, 128, 32);
+
+                IrqCount = 0;
+                break;
+        }
+
     }
 }
