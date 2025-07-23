@@ -152,16 +152,22 @@ public class PPU
                 for (int x = 0; x < 256; x++)
                     screen[x + y * 256] = _backgroundPalette[0, 0];
 
-        if (drawSprites)
-        for (int i = 0; i < 64; i++)
-            if (_sprites[i].isBehindBackground)
-                for (int y = 0; y < 8; y++)
-                    if (_sprites[i].y + y + SpriteYOffset >= startScanline && _sprites[i].y + y + SpriteYOffset <= endScanline)
+        void drawSprite(int index)
+        {
+            for (int y = 0; y < 8; y++)
+                if (_sprites[index].y + y + SpriteYOffset >= startScanline && _sprites[index].y + y + SpriteYOffset <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
-                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
-                        screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
+                        var screenIndex = (_sprites[index].x + x) + (_sprites[index].y + y + SpriteYOffset) * 256;
+                        if (screenIndex < screen.Length)
+                            screen[screenIndex] = DrawSpritePixel(index, x, y, screen[screenIndex]);
                     }
+        }
+
+        if (drawSprites)
+            for (int i = 0; i < 64; i++)
+                if (_sprites[i].isBehindBackground)
+                    drawSprite(i);
 
         for (int y = startScanline; y <= endScanline; y++)
             for (int x = 0; x < 256; x++)
@@ -171,16 +177,9 @@ public class PPU
             }
 
         if (drawSprites)
-        for (int i = 0; i < 64; i++)
-            if (!_sprites[i].isBehindBackground && _sprites[i].y < 240)
-                for (int y = 0; y < 8; y++)
-                    if (_sprites[i].y + y + SpriteYOffset >= startScanline && _sprites[i].y + y + SpriteYOffset <= endScanline)
-                    for (int x = 0; x < 8; x++)
-                    {
-                        var screenIndex = (_sprites[i].x + x) + (_sprites[i].y + y + SpriteYOffset) * 256;
-                        if (screenIndex < screen.Length)
-                            screen[screenIndex] = DrawSpritePixel(i, x, y, screen[screenIndex]);
-                    }
+            for (int i = 0; i < 64; i++)
+                if (!_sprites[i].isBehindBackground && _sprites[i].y < 240)
+                    drawSprite(i);
 
         //Log($"End DrawScreen scanline[{startScanline}-{endScanline}");
         return screen;
@@ -190,14 +189,14 @@ public class PPU
     {
         var nametableIndex = ScrollNametable;
         var (nametableX, nametableY) = GetNametablePosition(x + ScrollX, y + ScrollY);
-        if (nametableX > 31) 
-        { 
+        if (nametableX > 31)
+        {
             if (VerticalMirroring) nametableIndex = (byte)((nametableIndex + 1) % 2);
             nametableX -= 32;
         }
 
-        if (nametableY > 29) 
-        { 
+        if (nametableY > 29)
+        {
             if (!VerticalMirroring) nametableIndex = (byte)((nametableIndex + 2) % 4);
             nametableY -= 30;
         }

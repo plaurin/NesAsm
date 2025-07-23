@@ -5,6 +5,12 @@ namespace NesAsm.Example.JumpMan;
 
 public static partial class BoxingRPGGame
 {
+    const byte SplitSkyGround = 94;
+    const byte SkyScrollMax = 50;
+    const byte HeaderHeight = 32;
+    const byte FooterHeight = 32;
+    const byte SplitSkyGroundMemory = SplitSkyGround + HeaderHeight + SkyScrollMax;
+
     public static void Reset(CancellationToken? cancellationToken = null)
     {
         SetGameHeader(isVerticalMirroring: false);
@@ -12,10 +18,10 @@ public static partial class BoxingRPGGame
         // Background palette
         SetBackgroundPaletteColors(GroundPaletteIndex, GroundPalette);
         SetBackgroundPaletteColors(SkyPaletteIndex, SkyPalette);
-        SetBackgroundPaletteColors(BBoxerPaletteIndex, BBoxerPalette);
+        SetBackgroundPaletteColors(BoxerPaletteIndex, BoxerPalette);
         SetBackgroundPaletteColors(HillPaletteIndex, HillPalette);
 
-        SetSpritePaletteColors(BoxerPaletteIndex, BoxerPalette);
+        SetSpritePaletteColors(ShadowPaletteIndex, ShadowPalette);
         SetSpritePaletteColors(SlimePaletteIndex, SlimePalette);
 
         // Init;
@@ -55,36 +61,17 @@ public static partial class BoxingRPGGame
         SetPalette(0, 11, HillPaletteIndex);
 
         // Draw HUD
-        //for (int i = 0; i < 32; i++)
-        //{
-        //    DrawBlock(i, 0, SkyTiles, HudPalette);
-        //    DrawBlock(i, 1, SkyTiles, HudPalette);
-        //}
-
         DrawWord(3, 2, "HERO");
-        //DrawNumber(3, 3, 300, 6);
-
-        //DrawBlock(5, 1, HudCoinTiles, HudCoinPalette);
-        //DrawTile(12, 3, HudXTile);
-        //DrawNumber(13, 3, 2, 2);
 
         DrawWord(18, 2, "HP");
         DrawNumber(19, 3, 99);
-        //DrawDigit(19, 3, '1');
-        //DrawCharacter(20, 3, '-');
-        //DrawDigit(21, 3, '1');
-
-        //DrawWord(25, 2, "TIME");
-        //DrawNumber(26, 3, 297);
 
         // DrawBoxer
-        DrawMetaTile(15, 24, BBoxerPaletteIndex, BoxerTiles);
+        DrawMetaTile(15, 24, BoxerPaletteIndex, BoxerTiles);
 
         // Main Loop
         while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
         {
-            //MainLoopBeforeSpriteZeroHit();
-            //WaitForSpriteZeroHit();
             MainLoop();
             WaitForIrq(Irq); // After Header
             WaitForIrq(Irq); // After Sky
@@ -94,19 +81,16 @@ public static partial class BoxingRPGGame
     }
 
     static int WindowX = 0000;
-    static int WindowY = 0050;
-    const int DrawAheadColumns = 20;
+    static int WindowY = SkyScrollMax;
 
-    static byte Coins = 90;
-    static int Time = 400;
     static byte BoxerX = 100;
     static byte BoxerY = 208;
     static byte SlimeX = 132;
-    static byte SlimeY = 94 + 32;
+    static byte SlimeY = SplitSkyGround + HeaderHeight;
 
     private static void MainLoop()
     {
-        SetIRQAtScanline(32);
+        SetIRQAtScanline(HeaderHeight);
 
         // Scroll to draw static HUD
         SetScrollPosition(0, 0, 0);
@@ -117,20 +101,11 @@ public static partial class BoxingRPGGame
         if (InputManager.Down) WindowY += 1;
 
         if (WindowY < 0) WindowY = 0;
-        if (WindowY > 50) WindowY = 50;
+        if (WindowY > SkyScrollMax) WindowY = SkyScrollMax;
 
         // Update HUD
-        if (FrameCount % 15 == 0) Time--;
-        if (Time < 0) Time = 0;
 
-        if (FrameCount % 20 == 0) Coins++;
-        if (Coins >= 100) Coins -= 100;
-
-        // Coin
-        //DrawNumber(13, 3, Coins, 2);
-
-        // Time
-        //DrawNumber(26, 3, Time);
+        // Input Update
 
         if (InputManager.Left) BoxerX -= 1;
         if (InputManager.Right) BoxerX += 1;
@@ -142,14 +117,18 @@ public static partial class BoxingRPGGame
         if (InputManager.Select) SlimeY -= 1;
         if (InputManager.Start) SlimeY += 1;
 
-        // Update Boxer
-        //DrawMetaSpriteAnimation(1, BoxerX, BoxerY, BoxerPaletteIndex, BoxerIdle, FrameCount, 16);
+        // Update Sprites
+        
+        SpriteIndex = 0;
 
-        // Update Goomba
-        SlimeY = (byte)(94 + 32 + 50 - WindowY);
-        DrawMetaSpriteAnimation(30, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32);
+        // Update Slime
+        SlimeY = (byte)(8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY);
+        DrawMetaSprite(ref SpriteIndex, (byte)(SlimeX + 3), (byte)(SlimeY + 3), ShadowPaletteIndex, SlimeShadow, drawBehindBackground: false);
+
+        DrawMetaSpriteAnimation(ref SpriteIndex, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32, drawBehindBackground: false);
     }
 
+    static byte SpriteIndex = 0;
     static int FrameCount = 0;
     static byte ScrollX = 0;
     static byte ScrollY = 0;
@@ -157,16 +136,6 @@ public static partial class BoxingRPGGame
     public static void Nmi()
     {
         FrameCount++;
-
-        //var colorAnimFrame = FrameCount % 48;
-        //if (colorAnimFrame < 8)
-        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
-        //else if (colorAnimFrame < 16)
-        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_07, 0x_17, 0x_0F);
-        //else if (colorAnimFrame < 24)
-        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_17, 0x_17, 0x_0F);
-        //else
-        //    SetBackgroundPaletteColors(3, 0x_0F, 0x_27, 0x_17, 0x_0F);
     }
 
     static byte IrqCount = 0;
@@ -183,16 +152,16 @@ public static partial class BoxingRPGGame
                 SetScrollPosition(ScrollNametable, ScrollX, ScrollY);
 
                 IrqCount++;
-                SetIRQAtScanline((byte)(176 - ScrollY));
+                SetIRQAtScanline((byte)(SplitSkyGroundMemory - ScrollY));
                 break;
             case 1: // After Sky 
-                SetScrollPosition(0, 0, (byte)(ScrollY + (50 - ScrollY) / 4));
+                SetScrollPosition(0, 0, (byte)(ScrollY + (SkyScrollMax - ScrollY) / 4));
 
                 IrqCount++;
-                SetIRQAtScanline(240 - 32);
+                SetIRQAtScanline(240 - FooterHeight);
                 break;
             case 2: // After Ground
-                SetScrollPosition(2, 128, 32);
+                SetScrollPosition(2, 123, FooterHeight);
 
                 IrqCount = 0;
                 break;
