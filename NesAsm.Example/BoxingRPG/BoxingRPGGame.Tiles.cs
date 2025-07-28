@@ -6,13 +6,12 @@ public static partial class BoxingRPGGame
 
     static readonly byte[,] BoxerTiles = { { 0x80, 0x81, 0x82 }, { 0x90, 0x91, 0x92 }, { 0xA0, 0xA1, 0xA2 }, { 0xB0, 0xB1, 0xB2 }, { 0xC0, 0xC1, 0xC2 }, { 0xD0, 0xD1, 0xD2 }, { 0xE0, 0xE1, 0xE2 }, { 0xF0, 0xF1, 0xF2 } };
     static byte[] BoxerPalette = [0x_0F, 0x2A, 0x_37];
-    const byte BoxerPaletteIndex = 2;
+    const byte BoxerPaletteIndex = 0;
 
-    //const byte HudXTile = 0x29;
-    //const byte HudPalette = 2;
-
-    //static readonly byte[] HudCoinTiles = [0x24, 0x24, 0x24, 0x2E];
-    //const byte HudCoinPalette = 3;
+    const byte HudTile = 0x27;
+    static readonly byte[] HudTiles = [HudTile, HudTile, HudTile, HudTile];
+    static byte[] HudPalette = [0x_0F, 0x10, 0x_20];
+    const byte HudPaletteIndex = 3;
 
     const byte SkyTile = 0x26;
     static readonly byte[] SkyTiles = [SkyTile, SkyTile, SkyTile, SkyTile];
@@ -24,7 +23,7 @@ public static partial class BoxingRPGGame
 
     const byte GroundTile = 0x24;
     static readonly byte[] GroundTiles = [GroundTile, GroundTile, GroundTile, GroundTile];
-    static byte[] GroundPalette = [0x_29, 0x29, 0x_29];
+    //static byte[] GroundPalette = [0x_29, 0x29, 0x_29];
     const byte GroundPaletteIndex = 0;
 
     //static readonly byte[] QuestionTiles = [0x53, 0x54, 0x55, 0x56];
@@ -56,7 +55,7 @@ public static partial class BoxingRPGGame
     static readonly byte[] BushLeftTiles = [SkyTile, SkyTile, SkyTile, 0x35];
     static readonly byte[] BushTiles = [0x36, 0x37, 0x25, 0x25];
     static readonly byte[] BushRightTiles = [SkyTile, SkyTile, 0x38, SkyTile];
-    const byte BushPaletteIndex = 3;
+    const byte BushPaletteIndex = 2;
 
     static readonly byte[] HillLeftTiles = [SkyTile, 0x30, 0x30, 0x25];
     static readonly byte[] HillEmptyTiles = [0x25, 0x25, 0x25, 0x25];
@@ -64,7 +63,7 @@ public static partial class BoxingRPGGame
     static readonly byte[] HillTopTiles = [SkyTile, SkyTile, 0x31, 0x32];
     static readonly byte[] HillRightTiles = [0x33, SkyTile, 0x25, 0x33];
     static byte[] HillPalette = [0x_0F, 0x1A, 0x_12]; // 0x_29, 0x_1A, 0X_0F
-    const byte HillPaletteIndex = 3;
+    const byte HillPaletteIndex = 2;
 
     static readonly byte[] CloudTopLeftTiles = BushLeftTiles;
     static readonly byte[] CloudTopTiles = BushTiles;

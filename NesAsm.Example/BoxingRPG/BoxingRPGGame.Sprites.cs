@@ -15,6 +15,6 @@ public static partial class BoxingRPGGame
     static byte[] SlimePalette = [0x_1C, 0x_16, 0x_20];
     const byte SlimePaletteIndex = 3;
 
-    static byte[] ShadowPalette = [0x_0F, 0x_0F, 0x_0F];
+    static byte[] ShadowPalette = [0x_10, 0x_10, 0x_10];
     const byte ShadowPaletteIndex = 2;
 }

@@ -5,8 +5,8 @@ namespace NesAsm.Example.JumpMan;
 
 public static partial class BoxingRPGGame
 {
-    const byte SplitSkyGround = 94;
-    const byte SkyScrollMax = 50;
+    const byte SplitSkyGround = 96 - 16;
+    const byte SkyScrollMax = 48;
     const byte HeaderHeight = 32;
     const byte FooterHeight = 32;
     const byte SplitSkyGroundMemory = SplitSkyGround + HeaderHeight + SkyScrollMax;
@@ -16,10 +16,10 @@ public static partial class BoxingRPGGame
         SetGameHeader(isVerticalMirroring: false);
 
         // Background palette
-        SetBackgroundPaletteColors(GroundPaletteIndex, GroundPalette);
+        SetBackgroundPaletteColors(GroundPaletteIndex, BoxerPalette); // And ground
         SetBackgroundPaletteColors(SkyPaletteIndex, SkyPalette);
-        SetBackgroundPaletteColors(BoxerPaletteIndex, BoxerPalette);
         SetBackgroundPaletteColors(HillPaletteIndex, HillPalette);
+        SetBackgroundPaletteColors(HudPaletteIndex, HudPalette);
 
         SetSpritePaletteColors(ShadowPaletteIndex, ShadowPalette);
         SetSpritePaletteColors(SlimePaletteIndex, SlimePalette);
@@ -28,7 +28,7 @@ public static partial class BoxingRPGGame
         byte[] importColors = [0x_22, 0x_2D, 0x_10, 0x_20];
         LoadImage(@"BoxingRPG\BoxingRPG.png", importColors, hasTileSeparator: false);
 
-        LoadFightWith("Slime");
+        LoadFightWith("Slime", "Field");
 
         // Hide sprites
         for (byte i = 0; i < 64; i++)
@@ -36,38 +36,27 @@ public static partial class BoxingRPGGame
             SetSpriteData(i, 0, 250, 0, 0, false, false, false);
         }
 
-        // Draw Field
-        DrawBlockFill(0, 0, 16, 11, SkyTiles, SkyPaletteIndex);
-        DrawBlockFill(0, 11, 16, 15, GroundTiles, GroundPaletteIndex);
+        // Debug
+        DrawWord(0, 19, "PING");
+        DrawWord(0, 20, "PONG");
+        SetPalette(0, 10, HillPaletteIndex);
 
-        DrawBlock(1, 10, BushLeftTiles, BushPaletteIndex);
-        DrawBlock(2, 10, BushTiles, BushPaletteIndex);
-        DrawBlock(3, 10, BushRightTiles, BushPaletteIndex);
+        // Draw Top HUD
+        DrawBlockFill(0, 0, 16, 2, HudTiles, HudPaletteIndex);
 
-        DrawBlock(11, 10, HillLeftTiles, HillPaletteIndex);
-        DrawBlock(12, 10, HillSpotTiles, HillPaletteIndex);
-        DrawBlock(12, 9, HillTopTiles, HillPaletteIndex);
-        DrawBlock(13, 10, HillRightTiles, HillPaletteIndex);
+        DrawWord(3, 2, "SLIME");
+        DrawWord(10, 2, "HP");
+        //DrawNumber(10, 3, Scroll);
 
-        DrawBlock(5, 6, CloudTopLeftTiles, CloudPaletteIndex);
-        DrawBlock(5, 7, CloudBottomLeftTiles, CloudPaletteIndex);
-        DrawBlock(6, 6, CloudTopTiles, CloudPaletteIndex);
-        DrawBlock(6, 7, CloudBottomTiles, CloudPaletteIndex);
-        DrawBlock(7, 6, CloudTopRightTiles, CloudPaletteIndex);
-        DrawBlock(7, 7, CloudBottomRightTiles, CloudPaletteIndex);
+        // Draw Bottom HUD
+        DrawBlockFill(0, 18, 16, 12, HudTiles, HudPaletteIndex);
 
-        DrawWord(0, 21, "PING");
-        DrawWord(0, 22, "PONG");
-        SetPalette(0, 11, HillPaletteIndex);
-
-        // Draw HUD
-        DrawWord(3, 2, "HERO");
-
-        DrawWord(18, 2, "HP");
-        DrawNumber(19, 3, 99);
+        DrawWord(3, 37, "HERO");
+        DrawWord(10, 37, "HP");
+        DrawNumber(10, 38, 99);
 
         // DrawBoxer
-        DrawMetaTile(15, 24, BoxerPaletteIndex, BoxerTiles);
+        DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerTiles);
 
         // Main Loop
         while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
@@ -86,7 +75,12 @@ public static partial class BoxingRPGGame
     static byte BoxerX = 100;
     static byte BoxerY = 208;
     static byte SlimeX = 132;
-    static byte SlimeY = SplitSkyGround + HeaderHeight;
+    static byte SlimeY = 0;
+    static byte SlimeShadowY = 0;
+    static int SlimeJumpVelocity = 0;
+    static int SlimeJumpDelta = 0;
+
+    static byte DebugCount = 0;
 
     private static void MainLoop()
     {
@@ -114,16 +108,25 @@ public static partial class BoxingRPGGame
 
         if (InputManager.B) SlimeX -= 1;
         if (InputManager.A) SlimeX += 1;
-        if (InputManager.Select) SlimeY -= 1;
-        if (InputManager.Start) SlimeY += 1;
+        if (InputManager.Select && SlimeJumpDelta == 0) SlimeJumpVelocity = 4;
+        if (InputManager.Start) DebugCount += 1;
+
+        // Update Game States
+        SlimeJumpDelta += SlimeJumpVelocity;
+        if (SlimeJumpDelta > 0 && FrameCount % 4 == 0) SlimeJumpVelocity--;
+        if (SlimeJumpDelta <= 0) { SlimeJumpVelocity = 0; SlimeJumpDelta = 0; }
+
+        SlimeShadowY = (byte)(3 + 8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY);
+        SlimeY = (byte)(8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY - SlimeJumpDelta);
+
+        // Update HUD
+        DrawNumber(10, 3, DebugCount);
 
         // Update Sprites
-        
         SpriteIndex = 0;
 
         // Update Slime
-        SlimeY = (byte)(8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY);
-        DrawMetaSprite(ref SpriteIndex, (byte)(SlimeX + 3), (byte)(SlimeY + 3), ShadowPaletteIndex, SlimeShadow, drawBehindBackground: false);
+        DrawMetaSprite(ref SpriteIndex, (byte)(SlimeX + 3), SlimeShadowY, ShadowPaletteIndex, SlimeShadow, drawBehindBackground: true);
 
         DrawMetaSpriteAnimation(ref SpriteIndex, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32, drawBehindBackground: false);
     }
@@ -161,7 +164,7 @@ public static partial class BoxingRPGGame
                 SetIRQAtScanline(240 - FooterHeight);
                 break;
             case 2: // After Ground
-                SetScrollPosition(2, 123, FooterHeight);
+                SetScrollPosition(0, 123, FooterHeight + SkyScrollMax);
 
                 IrqCount = 0;
                 break;
