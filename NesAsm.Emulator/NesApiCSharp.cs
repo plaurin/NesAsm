@@ -29,6 +29,8 @@ public class NesApiCSharp
                 draw.Invoke();
 
                 nmi?.Invoke();
+
+                InputManager.FrameUpdate();
             });
 
             reset.Invoke();
@@ -49,6 +51,8 @@ public class NesApiCSharp
                 draw.Invoke();
 
                 nmi?.Invoke();
+
+                InputManager.FrameUpdate();
             });
 
             reset.Invoke(cancellationToken);

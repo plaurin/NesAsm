@@ -93,8 +93,10 @@ public static partial class BoxingRPGGame
 
         // Input Update
 
-        if (InputManager.Left) BoxerX -= 1;
-        if (InputManager.Right) BoxerX += 1;
+        if (InputManager.LeftDoubleTap) BoxerX -= 1;
+        if (InputManager.RightDoubleTap) BoxerX += 1;
+        //if (InputManager.LeftJustRelease) BoxerX -= 5;
+        //if (InputManager.RightJustRelease) BoxerX += 5;
         if (InputManager.Up) WindowY -= 1;
         if (InputManager.Down) WindowY += 1;
 
@@ -172,6 +174,16 @@ public static partial class BoxingRPGGame
                 IrqCount = 0;
                 break;
         }
+    }
+
+    public enum BoxerStates { Idle, JumpLeft, JumpRight }
+    public static BoxerStates BoxerState = BoxerStates.Idle;
+    private static void UpdateBoxerStatemachine()
+    {
+        if (InputManager.Left) BoxerX -= 1;
+        if (InputManager.Right) BoxerX += 1;
+        if (InputManager.Up) WindowY -= 1;
+        if (InputManager.Down) WindowY += 1;
 
     }
 }

@@ -103,26 +103,26 @@ public partial class MainWindow : Window
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.Right = true;
-        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.Left = true;
-        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.Up = true;
-        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.Down = true;
-        if (e.PhysicalKey == PhysicalKey.Z) InputManager.B = true;
-        if (e.PhysicalKey == PhysicalKey.X) InputManager.A = true;
-        if (e.PhysicalKey == PhysicalKey.A) InputManager.Select = true;
-        if (e.PhysicalKey == PhysicalKey.S) InputManager.Start = true;
+        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
+        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, true);
+        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.SetState(2, true);
+        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.SetState(3, true);
+        if (e.PhysicalKey == PhysicalKey.Z) InputManager.SetState(4, true);
+        if (e.PhysicalKey == PhysicalKey.X) InputManager.SetState(5, true);
+        if (e.PhysicalKey == PhysicalKey.A) InputManager.SetState(6, true);
+        if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, true);
     }
 
     private void OnKeyUp(object? sender, KeyEventArgs e)
     {
-        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.Right = false;
-        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.Left = false;
-        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.Up = false;
-        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.Down = false;
-        if (e.PhysicalKey == PhysicalKey.Z) InputManager.B = false;
-        if (e.PhysicalKey == PhysicalKey.X) InputManager.A = false;
-        if (e.PhysicalKey == PhysicalKey.A) InputManager.Select = false;
-        if (e.PhysicalKey == PhysicalKey.S) InputManager.Start = false;
+        if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, false);
+        if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, false); 
+        if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.SetState(2, false);
+        if (e.PhysicalKey == PhysicalKey.ArrowDown) InputManager.SetState(3, false);
+        if (e.PhysicalKey == PhysicalKey.Z) InputManager.SetState(4, false);
+        if (e.PhysicalKey == PhysicalKey.X) InputManager.SetState(5, false);
+        if (e.PhysicalKey == PhysicalKey.A) InputManager.SetState(6, false);
+        if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, false);
     }
 
     //public override void Render(DrawingContext context)
