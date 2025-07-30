@@ -72,9 +72,9 @@ public static partial class BoxingRPGGame
     static int WindowX = 0000;
     static int WindowY = SkyScrollMax;
 
-    static byte BoxerX = 100;
+    static int BoxerX = 0;
     static byte BoxerY = 208;
-    static byte SlimeX = 132;
+    static int SlimeX = 0;
     static byte SlimeY = 0;
     static byte SlimeShadowY = 0;
     static int SlimeJumpVelocity = 0;
@@ -89,29 +89,26 @@ public static partial class BoxingRPGGame
         // Scroll to draw static HUD
         SetScrollPosition(0, 0, 0);
 
-        if (InputManager.Left) WindowX -= 1;
-        if (InputManager.Right) WindowX += 1;
-        if (InputManager.Up) WindowY -= 1;
-        if (InputManager.Down) WindowY += 1;
-
-        if (WindowY < 0) WindowY = 0;
-        if (WindowY > SkyScrollMax) WindowY = SkyScrollMax;
-
         // Update HUD
 
         // Input Update
 
         if (InputManager.Left) BoxerX -= 1;
         if (InputManager.Right) BoxerX += 1;
-        if (InputManager.Up) BoxerY -= 1;
-        if (InputManager.Down) BoxerY += 1;
+        if (InputManager.Up) WindowY -= 1;
+        if (InputManager.Down) WindowY += 1;
 
         if (InputManager.B) SlimeX -= 1;
         if (InputManager.A) SlimeX += 1;
         if (InputManager.Select && SlimeJumpDelta == 0) SlimeJumpVelocity = 4;
         if (InputManager.Start) DebugCount += 1;
 
+        if (WindowY < 0) WindowY = 0;
+        if (WindowY > SkyScrollMax) WindowY = SkyScrollMax;
+
         // Update Game States
+        WindowX = BoxerX / 4;
+
         SlimeJumpDelta += SlimeJumpVelocity;
         if (SlimeJumpDelta > 0 && FrameCount % 4 == 0) SlimeJumpVelocity--;
         if (SlimeJumpDelta <= 0) { SlimeJumpVelocity = 0; SlimeJumpDelta = 0; }
@@ -119,16 +116,18 @@ public static partial class BoxingRPGGame
         SlimeShadowY = (byte)(3 + 8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY);
         SlimeY = (byte)(8 + SplitSkyGround + HeaderHeight + SkyScrollMax - WindowY - SlimeJumpDelta);
 
-        // Update HUD
-        DrawNumber(10, 3, DebugCount);
-
         // Update Sprites
         SpriteIndex = 0;
 
         // Update Slime
-        DrawMetaSprite(ref SpriteIndex, (byte)(SlimeX + 3), SlimeShadowY, ShadowPaletteIndex, SlimeShadow, drawBehindBackground: true);
+        var windowSlimeX = 128 + (SlimeX - BoxerX) / 2;
+        DrawMetaSprite(ref SpriteIndex, (byte)(windowSlimeX + 3), SlimeShadowY, ShadowPaletteIndex, SlimeShadow, drawBehindBackground: true);
 
-        DrawMetaSpriteAnimation(ref SpriteIndex, SlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32, drawBehindBackground: false);
+        DrawMetaSpriteAnimation(ref SpriteIndex, (byte)windowSlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32, drawBehindBackground: false);
+
+        // Update HUD
+        DrawNumber(10, 3, (byte)windowSlimeX, paddingZeros: 3);
+        DrawNumber(4, 3, (byte)SlimeX, paddingZeros: 3);
     }
 
     static byte SpriteIndex = 0;
@@ -158,7 +157,11 @@ public static partial class BoxingRPGGame
                 SetIRQAtScanline((byte)(SplitSkyGroundMemory - ScrollY));
                 break;
             case 1: // After Sky 
-                SetScrollPosition(0, 0, (byte)(ScrollY + (SkyScrollMax - ScrollY) / 4));
+                var windowsBoxerX = -(BoxerX - SlimeX) / 2;
+                SetScrollPosition(0, (byte)windowsBoxerX, (byte)(ScrollY + (SkyScrollMax - ScrollY) / 4));
+
+                DrawNumber(10, 38, (byte)windowsBoxerX, paddingZeros: 3);
+                DrawNumber(4, 38, (byte)BoxerX, paddingZeros: 3);
 
                 IrqCount++;
                 SetIRQAtScanline(240 - FooterHeight);
