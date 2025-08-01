@@ -55,9 +55,6 @@ public static partial class BoxingRPGGame
         DrawWord(10, 37, "HP");
         DrawNumber(10, 38, 99);
 
-        // DrawBoxer
-        DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerTiles);
-
         // Main Loop
         while (cancellationToken == null || !cancellationToken.Value.IsCancellationRequested)
         {
@@ -73,7 +70,7 @@ public static partial class BoxingRPGGame
     static int WindowY = SkyScrollMax;
 
     static int BoxerX = 0;
-    static byte BoxerY = 208;
+    static int BoxerY = 0;
     static int SlimeX = 0;
     static byte SlimeY = 0;
     static byte SlimeShadowY = 0;
@@ -84,21 +81,15 @@ public static partial class BoxingRPGGame
 
     private static void MainLoop()
     {
+        // Scroll to draw static HUD -> Header
         SetIRQAtScanline(HeaderHeight);
-
-        // Scroll to draw static HUD
         SetScrollPosition(0, 0, 0);
 
         // Update HUD
 
         // Input Update
 
-        if (InputManager.LeftDoubleTap) BoxerX -= 1;
-        if (InputManager.RightDoubleTap) BoxerX += 1;
-        //if (InputManager.LeftJustRelease) BoxerX -= 5;
-        //if (InputManager.RightJustRelease) BoxerX += 5;
-        if (InputManager.Up) WindowY -= 1;
-        if (InputManager.Down) WindowY += 1;
+        UpdateBoxerStateMachine();
 
         if (InputManager.B) SlimeX -= 1;
         if (InputManager.A) SlimeX += 1;
@@ -147,8 +138,7 @@ public static partial class BoxingRPGGame
     {
         switch (IrqCount)
         {
-            case 0: // After Header
-                // Scroll to game position
+            case 0: // After Header -> Sky
                 ScrollX = (byte)(WindowX % 256);
                 ScrollY = (byte)(WindowY % 240);
 
@@ -158,9 +148,9 @@ public static partial class BoxingRPGGame
                 IrqCount++;
                 SetIRQAtScanline((byte)(SplitSkyGroundMemory - ScrollY));
                 break;
-            case 1: // After Sky 
+            case 1: // After Sky -> Ground + Boxer
                 var windowsBoxerX = -(BoxerX - SlimeX) / 2;
-                SetScrollPosition(0, (byte)windowsBoxerX, (byte)(ScrollY + (SkyScrollMax - ScrollY) / 4));
+                SetScrollPosition(0, (byte)windowsBoxerX, (byte)(ScrollY + BoxerY + (SkyScrollMax - ScrollY) / 4));
 
                 DrawNumber(10, 38, (byte)windowsBoxerX, paddingZeros: 3);
                 DrawNumber(4, 38, (byte)BoxerX, paddingZeros: 3);
@@ -168,7 +158,7 @@ public static partial class BoxingRPGGame
                 IrqCount++;
                 SetIRQAtScanline(240 - FooterHeight);
                 break;
-            case 2: // After Ground
+            case 2: // After Ground -> Footer
                 SetScrollPosition(0, 123, FooterHeight + SkyScrollMax);
 
                 IrqCount = 0;
@@ -178,12 +168,54 @@ public static partial class BoxingRPGGame
 
     public enum BoxerStates { Idle, JumpLeft, JumpRight }
     public static BoxerStates BoxerState = BoxerStates.Idle;
-    private static void UpdateBoxerStatemachine()
+    public static int BoxerAnimFrames;
+    private static void UpdateBoxerStateMachine()
     {
-        if (InputManager.Left) BoxerX -= 1;
-        if (InputManager.Right) BoxerX += 1;
+        if (BoxerAnimFrames > 0) BoxerAnimFrames--;
+
+        if ((BoxerState == BoxerStates.JumpLeft || BoxerState == BoxerStates.JumpRight) && BoxerAnimFrames == 0)
+        {
+            BoxerState = BoxerStates.Idle;
+            BoxerY = 0;
+        }
+
+        if (InputManager.LeftJustDoubleTap && BoxerState == BoxerStates.Idle)
+        {
+            BoxerState = BoxerStates.JumpLeft;
+            BoxerAnimFrames = 30;
+        }
+
+        if (InputManager.RightJustDoubleTap && BoxerState == BoxerStates.Idle)
+        {
+            BoxerState = BoxerStates.JumpRight;
+            BoxerAnimFrames = 30;
+        }
+
         if (InputManager.Up) WindowY -= 1;
         if (InputManager.Down) WindowY += 1;
 
+        if (InputManager.Left && BoxerState == BoxerStates.Idle) BoxerX -= 1;
+        if (InputManager.Right && BoxerState == BoxerStates.Idle) BoxerX += 1;
+
+        if (BoxerState == BoxerStates.JumpLeft)
+        {
+            BoxerX -= 2;
+            if (BoxerAnimFrames > 15 && BoxerAnimFrames % 2 == 0) BoxerY += 1;
+            if (BoxerAnimFrames < 15 && BoxerAnimFrames % 2 == 0) BoxerY -= 1;
+            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerJumpLeftTiles);
+        }
+
+        if (BoxerState == BoxerStates.JumpRight)
+        {
+            BoxerX += 2;
+            if (BoxerAnimFrames > 15 && BoxerAnimFrames % 2 == 0) BoxerY += 1;
+            if (BoxerAnimFrames < 15 && BoxerAnimFrames % 2 == 0) BoxerY -= 1;
+            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerJumpRightTiles);
+        }
+
+        if (BoxerState == BoxerStates.Idle)
+        {
+            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerIdleTiles);
+        }
     }
 }

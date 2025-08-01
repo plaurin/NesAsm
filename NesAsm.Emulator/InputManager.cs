@@ -11,6 +11,7 @@ public static class InputManager
 
     private static readonly bool[] DoubleTapStart = new bool[8];
     private static readonly bool[] DoubleTap = new bool[8];
+    private static readonly bool[] IsJustDoubleTap = new bool[8];
     private static int MaxFirstPress = 16;
     private static int MaxReleaseLength = 16;
 
@@ -68,6 +69,15 @@ public static class InputManager
     public static bool SelectDoubleTap { get => DoubleTap[6]; }
     public static bool StartDoubleTap { get => DoubleTap[7]; }
 
+    public static bool LeftJustDoubleTap { get => IsJustDoubleTap[0]; }
+    public static bool RightJustDoubleTap { get => IsJustDoubleTap[1]; }
+    public static bool UpJustDoubleTap { get => IsJustDoubleTap[2]; }
+    public static bool DownJustDoubleTap { get => IsJustDoubleTap[3]; }
+    public static bool BJustDoubleTap { get => IsJustDoubleTap[4]; }
+    public static bool AJustDoubleTap { get => IsJustDoubleTap[5]; }
+    public static bool SelectJustDoubleTap { get => IsJustDoubleTap[6]; }
+    public static bool StartJustDoubleTap { get => IsJustDoubleTap[7]; }
+
     public static void SetState(int index, bool state) => IsPress[index] = state;
     public static void SetDoubleTapLengths(int maxFirstPress, int maxReleaseLength)
     {
@@ -81,11 +91,12 @@ public static class InputManager
         {
             IsJustPress[i] = !WasPress[i] && IsPress[i];
             IsJustRelease[i] = WasPress[i] && !IsPress[i];
+            IsJustDoubleTap[i] = false;
 
             if (DoubleTapStart[i])
             {
                 if (ReleaseLength[i] > MaxReleaseLength) DoubleTapStart[i] = false;
-                if (IsJustPress[i]) { DoubleTap[i] = true; DoubleTapStart[i] = false; }
+                if (IsJustPress[i]) { DoubleTap[i] = true; IsJustDoubleTap[i] = true; DoubleTapStart[i] = false; }
             }
             if (IsJustRelease[i] && PressLength[i] <= MaxFirstPress) { DoubleTapStart[i] = true; }
             if (DoubleTap[i] && !IsPress[i]) DoubleTap[i] = false;

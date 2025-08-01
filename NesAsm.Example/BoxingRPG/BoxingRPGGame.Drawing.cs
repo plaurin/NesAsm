@@ -103,7 +103,7 @@ public static partial class BoxingRPGGame
     static readonly byte[][] ColumnBlocks = new byte[15][];
     static readonly byte[] ColumnPalettes = new byte[15];
 
-    private static void DrawMetaTile(byte x, byte y, byte palette, byte[,] tileIndexes, bool[,]? flipHorizontals = null, bool[,]? flipVerticals = null)
+    private static void DrawMetaTile(byte x, byte y, byte palette, byte[,] tileIndexes)
     {
         for (int i = 0; i < tileIndexes.GetLength(1); i++)
             for (int j = 0; j < tileIndexes.GetLength(0); j++)
