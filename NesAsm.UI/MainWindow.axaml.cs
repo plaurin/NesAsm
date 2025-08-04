@@ -1,18 +1,17 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
+using NesAsm.Example.BoxingRPG;
 using NesAsm.Example.JumpMan;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 

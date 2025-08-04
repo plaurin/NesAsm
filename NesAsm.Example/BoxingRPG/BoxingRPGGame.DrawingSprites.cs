@@ -1,6 +1,6 @@
 ﻿using static NesAsm.Emulator.PPUApiCSharp;
 
-namespace NesAsm.Example.JumpMan;
+namespace NesAsm.Example.BoxingRPG;
 
 public static partial class BoxingRPGGame
 {

@@ -1,8 +1,7 @@
 ﻿using NesAsm.Emulator;
 using static NesAsm.Emulator.PPUApiCSharp;
 
-namespace NesAsm.Example.JumpMan;
-
+namespace NesAsm.Example.BoxingRPG;
 public static partial class BoxingRPGGame
 {
     const byte SplitSkyGround = 96 - 16;
@@ -69,8 +68,8 @@ public static partial class BoxingRPGGame
     static int WindowX = 0000;
     static int WindowY = SkyScrollMax;
 
-    static int BoxerX = 0;
-    static int BoxerY = 0;
+    //static int BoxerX = 0;
+    //static int BoxerY = 0;
     static int SlimeX = 0;
     static byte SlimeY = 0;
     static byte SlimeShadowY = 0;
@@ -88,8 +87,7 @@ public static partial class BoxingRPGGame
         // Update HUD
 
         // Input Update
-
-        UpdateBoxerStateMachine();
+        Boxer.Update();
 
         if (InputManager.B) SlimeX -= 1;
         if (InputManager.A) SlimeX += 1;
@@ -100,7 +98,7 @@ public static partial class BoxingRPGGame
         if (WindowY > SkyScrollMax) WindowY = SkyScrollMax;
 
         // Update Game States
-        WindowX = BoxerX / 4;
+        WindowX = Boxer.X / 4;
 
         SlimeJumpDelta += SlimeJumpVelocity;
         if (SlimeJumpDelta > 0 && FrameCount % 4 == 0) SlimeJumpVelocity--;
@@ -113,7 +111,7 @@ public static partial class BoxingRPGGame
         SpriteIndex = 0;
 
         // Update Slime
-        var windowSlimeX = 128 + (SlimeX - BoxerX) / 2;
+        var windowSlimeX = 128 + (SlimeX - Boxer.X) / 2;
         DrawMetaSprite(ref SpriteIndex, (byte)(windowSlimeX + 3), SlimeShadowY, ShadowPaletteIndex, SlimeShadow, drawBehindBackground: true);
 
         DrawMetaSpriteAnimation(ref SpriteIndex, (byte)windowSlimeX, SlimeY, SlimePaletteIndex, SlimeIdleFrames, FrameCount, 32, drawBehindBackground: false);
@@ -149,11 +147,11 @@ public static partial class BoxingRPGGame
                 SetIRQAtScanline((byte)(SplitSkyGroundMemory - ScrollY));
                 break;
             case 1: // After Sky -> Ground + Boxer
-                var windowsBoxerX = -(BoxerX - SlimeX) / 2;
-                SetScrollPosition(0, (byte)windowsBoxerX, (byte)(ScrollY + BoxerY + (SkyScrollMax - ScrollY) / 4));
+                var windowsBoxerX = -(Boxer.X - SlimeX) / 2;
+                SetScrollPosition(0, (byte)windowsBoxerX, (byte)(ScrollY + Boxer.Y + (SkyScrollMax - ScrollY) / 4));
 
                 DrawNumber(10, 38, (byte)windowsBoxerX, paddingZeros: 3);
-                DrawNumber(4, 38, (byte)BoxerX, paddingZeros: 3);
+                DrawNumber(4, 38, (byte)Boxer.X, paddingZeros: 3);
 
                 IrqCount++;
                 SetIRQAtScanline(240 - FooterHeight);
@@ -169,53 +167,12 @@ public static partial class BoxingRPGGame
     public enum BoxerStates { Idle, JumpLeft, JumpRight }
     public static BoxerStates BoxerState = BoxerStates.Idle;
     public static int BoxerAnimFrames;
-    private static void UpdateBoxerStateMachine()
-    {
-        if (BoxerAnimFrames > 0) BoxerAnimFrames--;
-
-        if ((BoxerState == BoxerStates.JumpLeft || BoxerState == BoxerStates.JumpRight) && BoxerAnimFrames == 0)
-        {
-            BoxerState = BoxerStates.Idle;
-            BoxerY = 0;
-        }
-
-        if (InputManager.LeftJustDoubleTap && BoxerState == BoxerStates.Idle)
-        {
-            BoxerState = BoxerStates.JumpLeft;
-            BoxerAnimFrames = 30;
-        }
-
-        if (InputManager.RightJustDoubleTap && BoxerState == BoxerStates.Idle)
-        {
-            BoxerState = BoxerStates.JumpRight;
-            BoxerAnimFrames = 30;
-        }
-
-        if (InputManager.Up) WindowY -= 1;
-        if (InputManager.Down) WindowY += 1;
-
-        if (InputManager.Left && BoxerState == BoxerStates.Idle) BoxerX -= 1;
-        if (InputManager.Right && BoxerState == BoxerStates.Idle) BoxerX += 1;
-
-        if (BoxerState == BoxerStates.JumpLeft)
-        {
-            BoxerX -= 2;
-            if (BoxerAnimFrames > 15 && BoxerAnimFrames % 2 == 0) BoxerY += 1;
-            if (BoxerAnimFrames < 15 && BoxerAnimFrames % 2 == 0) BoxerY -= 1;
-            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerJumpLeftTiles);
-        }
-
-        if (BoxerState == BoxerStates.JumpRight)
-        {
-            BoxerX += 2;
-            if (BoxerAnimFrames > 15 && BoxerAnimFrames % 2 == 0) BoxerY += 1;
-            if (BoxerAnimFrames < 15 && BoxerAnimFrames % 2 == 0) BoxerY -= 1;
-            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerJumpRightTiles);
-        }
-
-        if (BoxerState == BoxerStates.Idle)
-        {
-            DrawMetaTile(15, 22, BoxerPaletteIndex, BoxerIdleTiles);
-        }
-    }
 }
+
+public interface IState
+{
+    virtual void Enter() { }
+    virtual void Exit() { }
+    virtual void Update() { }
+}
+
