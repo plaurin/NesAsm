@@ -6,6 +6,7 @@ using Avalonia.Platform;
 using Avalonia.Threading;
 using NesAsm.Emulator;
 using NesAsm.Example.BoxingRPG;
+using NesAsm.Example.FPS;
 using NesAsm.Example.JumpMan;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
@@ -72,7 +73,8 @@ public partial class MainWindow : Window
         var cancellationToken = _cancellationTokenSource.Token;
 
         //RunGame("Vertical Scrolling");
-        RunGame("Boxing Game");
+        //RunGame("Boxing Game");
+        RunGame("FPS Game");
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
@@ -94,6 +96,9 @@ public partial class MainWindow : Window
                 break;
             case "Boxing Game":
                 Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: BoxingRPGGame.Reset, nmi: BoxingRPGGame.Nmi)).ConfigureAwait(false);
+                break;
+            case "FPS Game":
+                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: FPSGame.Reset, nmi: FPSGame.Nmi)).ConfigureAwait(false);
                 break;
             default:
                 throw new InvalidOperationException($"Game {gameName} is not implemented yet.");
