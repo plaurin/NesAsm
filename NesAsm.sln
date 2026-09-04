@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.8.34322.80
+# Visual Studio Version 18
+VisualStudioVersion = 18.10.12106.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.Emulator", "NesAsm.Emulator\NesAsm.Emulator.csproj", "{211658F4-879A-472B-8F9B-8EB84F68E760}"
 EndProject
@@ -26,6 +26,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NesAsm.UI", "NesAsm.UI\NesAsm.UI.csproj", "{9767B04E-8EBE-4D82-B977-22AE85B28DE4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesAsm.Utilities", "NesAsm.Utilities\NesAsm.Utilities.csproj", "{95836849-1A54-447B-9094-7D482CC4E518}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NesAsm.Recompiler", "NesAsm.Recompiler\NesAsm.Recompiler.csproj", "{2AA68D6B-2B37-49D8-B6BB-B932400B7FAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,6 +71,10 @@ Global
 		{95836849-1A54-447B-9094-7D482CC4E518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95836849-1A54-447B-9094-7D482CC4E518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95836849-1A54-447B-9094-7D482CC4E518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AA68D6B-2B37-49D8-B6BB-B932400B7FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AA68D6B-2B37-49D8-B6BB-B932400B7FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AA68D6B-2B37-49D8-B6BB-B932400B7FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AA68D6B-2B37-49D8-B6BB-B932400B7FAC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

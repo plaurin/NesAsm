@@ -366,3 +366,6 @@ FodyWeavers.xsd
 *.nes
 /NesAsm.Example/JumpMan/JumpMan.png
 /NesAsm.Example/BoxingRPG/BoxingRPG.png
+*NOTES.md
+/NesAsm.Recompiler/args
+/NesAsm.Recompiler/output/
