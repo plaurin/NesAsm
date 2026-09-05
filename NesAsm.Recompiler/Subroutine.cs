@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record Function(ICollection<Instruction> Instructions, IReadOnlyCollection<Jump> Jumps)
+public record Subroutine(ICollection<Instruction> Instructions, IReadOnlyCollection<Jump> Jumps)
 {
     public int Address => Instructions.First().Address;
     public int LastInstructionAddress => Instructions.Last().Address;
@@ -8,6 +8,6 @@ public record Function(ICollection<Instruction> Instructions, IReadOnlyCollectio
 
     public override string ToString()
     {
-        return $"- Func at ${Address:X4}";
+        return $"- Sub at ${Address:X4}";
     }
 }

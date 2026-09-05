@@ -53,26 +53,27 @@ internal class Program
         Console.WriteLine($"Reset: ${reset:X4}");
         Console.WriteLine($"IRQ: ${irq:X4}");
 
-        var functions = Parser.ParsePrgRom(prgRom, reset, nmi);
+        var subroutines = Parser.ParsePrgRom(prgRom, reset, nmi);
 
-        OutputFunctions(outputPath, functions);
-        OutputInstructions(outputPath, functions);
-        OutputFunctionsWithUnknown(outputPath, functions);
+        OutputSubroutines(outputPath, subroutines);
+        OutputInstructions(outputPath, subroutines);
+        OutputSubroutinesWithUnknown(outputPath, subroutines);
 
-        Console.WriteLine($"Total functions: {functions.Count}");
-        Console.WriteLine($"Total instructions: {functions.SelectMany(f => f.Instructions).Count()}");
-        Console.WriteLine($"Total size: {functions.Sum(f => f.Size)}");
+        Console.WriteLine($"Total subroutines: {subroutines.Count}");
+        Console.WriteLine($"Total instructions: {subroutines.SelectMany(f => f.Instructions).Count()}");
+        Console.WriteLine($"Total size: {subroutines.Sum(f => f.Size)}");
 
-        MermaidGenerator.Generate(outputPath, functions);
+        MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
+        MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, prgSize * 16 * 1024);
     }
 
-    private static void OutputInstructions(string outputPath, IEnumerable<Function> functions)
+    private static void OutputInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
-        foreach (var func in functions)
+        foreach (var sub in subroutines)
         {
-            sb.AppendLine(func.ToString());
-            foreach (var instruction in func.Instructions)
+            sb.AppendLine(sub.ToString());
+            foreach (var instruction in sub.Instructions)
             {
                 sb.AppendLine(instruction.ToString());
             }
@@ -81,27 +82,27 @@ internal class Program
         File.WriteAllText(Path.Combine(outputPath, "instructions.txt"), sb.ToString());
     }
 
-    private static void OutputFunctions(string outputPath, IEnumerable<Function> functions)
+    private static void OutputSubroutines(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
-        foreach (var func in functions)
+        foreach (var sub in subroutines)
         {
-            sb.AppendLine($"{func.ToString()} to {func.LastInstructionAddress:X4} (Size: {func.Size})");
-            sb.AppendLine($"Nb Instructions: {func.Instructions.Count}");
+            sb.AppendLine($"{sub.ToString()} to {sub.LastInstructionAddress:X4} (Size: {sub.Size})");
+            sb.AppendLine($"Nb Instructions: {sub.Instructions.Count}");
             sb.AppendLine();
         }
-        File.WriteAllText(Path.Combine(outputPath, "functions.txt"), sb.ToString());
+        File.WriteAllText(Path.Combine(outputPath, "subroutines.txt"), sb.ToString());
     }
 
-    private static void OutputFunctionsWithUnknown(string outputPath, IEnumerable<Function> functions)
+    private static void OutputSubroutinesWithUnknown(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
-        foreach (var func in functions)
+        foreach (var sub in subroutines)
         {
-            if (func.Instructions.Any(i => i.Mnemonic.Contains("Unknown")))
+            if (sub.Instructions.Any(i => i.Mnemonic.Contains("Unknown")))
             {
-                sb.AppendLine(func.ToString());
-                foreach (var instruction in func.Instructions)
+                sb.AppendLine(sub.ToString());
+                foreach (var instruction in sub.Instructions)
                 {
                     sb.AppendLine(instruction.ToString());
                 }

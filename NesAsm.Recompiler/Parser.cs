@@ -2,14 +2,14 @@
 
 public class Parser
 {
-    public static IReadOnlyCollection<Function> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector)
+    public static IReadOnlyCollection<Subroutine> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector)
     {
         var addressesToParse = new Queue<int>();
         addressesToParse.Enqueue(resetVector);
         addressesToParse.Enqueue(nmiVector);
         addressesToParse.Enqueue(0xAEDC);
 
-        var functions = new List<Function>();
+        var subroutines = new List<Subroutine>();
 
         while (addressesToParse.Count > 0)
         {
@@ -20,21 +20,21 @@ public class Parser
                 continue;
             }
 
-            if (functions.Any(f => f.Address >= address && f.LastInstructionAddress <= address))
+            if (subroutines.Any(f => f.Address >= address && f.LastInstructionAddress <= address))
             {
-                Console.WriteLine($"Function at ${address:X4} already parsed, skipping");
+                Console.WriteLine($"Subroutine at ${address:X4} already parsed, skipping");
                 continue;
             }
 
-            functions.Add(ParseFunc(prgRom, addressesToParse, address));
+            subroutines.Add(ParseSub(prgRom, addressesToParse, address));
         }
 
-        return functions.OrderBy(f => f.Address).ToList();
+        return subroutines.OrderBy(f => f.Address).ToList();
     }
 
-    private static Function ParseFunc(byte[] prgRom, Queue<int> addressesToParse, int address)
+    private static Subroutine ParseSub(byte[] prgRom, Queue<int> addressesToParse, int address)
     {
-        Console.WriteLine($"Parsing func at ${address:X4}");
+        Console.WriteLine($"Parsing sub at ${address:X4}");
 
         var instructions = new List<Instruction>();
         var jumps = new List<Jump>();
@@ -55,12 +55,12 @@ public class Parser
 
             if (ins.Mnemonic == "JMP" || ins.Mnemonic == "RTS" || ins.Mnemonic == "RTI")
             {
-                Console.WriteLine($"Found {ins.Mnemonic} at ${ins.Address:X4} : end of func ({instructions.Count} instructions)");
+                Console.WriteLine($"Found {ins.Mnemonic} at ${ins.Address:X4} : end of sub ({instructions.Count} instructions)");
                 break;
             }
         }
 
-        return new Function(instructions, jumps);
+        return new Subroutine(instructions, jumps);
     }
 
     public static Instruction GetInstruction(byte[] prgRom, int address)
