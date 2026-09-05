@@ -37,6 +37,7 @@ public class Parser
         Console.WriteLine($"Parsing func at ${address:X4}");
 
         var instructions = new List<Instruction>();
+        var jumps = new List<Jump>();
         for (int i = 0; i < 500; i++)
         {
             var ins = GetInstruction(prgRom, address);
@@ -49,6 +50,7 @@ public class Parser
             {
                 Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
                 addressesToParse.Enqueue(ins.Argument!.Value);
+                jumps.Add(new Jump(ins.Address, ins.Argument!.Value));
             }
 
             if (ins.Mnemonic == "JMP" || ins.Mnemonic == "RTS" || ins.Mnemonic == "RTI")
@@ -58,7 +60,7 @@ public class Parser
             }
         }
 
-        return new Function(instructions);
+        return new Function(instructions, jumps);
     }
 
     public static Instruction GetInstruction(byte[] prgRom, int address)
@@ -181,3 +183,5 @@ public class Parser
         };
     }
 }
+
+public record Jump(int Address, int TargetAddress);

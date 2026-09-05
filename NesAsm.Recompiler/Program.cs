@@ -62,6 +62,8 @@ internal class Program
         Console.WriteLine($"Total functions: {functions.Count}");
         Console.WriteLine($"Total instructions: {functions.SelectMany(f => f.Instructions).Count()}");
         Console.WriteLine($"Total size: {functions.Sum(f => f.Size)}");
+
+        MermaidGenerator.Generate(outputPath, functions);
     }
 
     private static void OutputInstructions(string outputPath, IEnumerable<Function> functions)

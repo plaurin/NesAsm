@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record Function(ICollection<Instruction> Instructions)
+public record Function(ICollection<Instruction> Instructions, IReadOnlyCollection<Jump> Jumps)
 {
     public int Address => Instructions.First().Address;
     public int LastInstructionAddress => Instructions.Last().Address;
