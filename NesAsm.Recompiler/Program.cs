@@ -88,7 +88,6 @@ internal class Program
         foreach (var sub in subroutines)
         {
             sb.AppendLine($"- {sub.ToString()}");
-            sb.AppendLine();
         }
         File.WriteAllText(Path.Combine(outputPath, "subroutines.txt"), sb.ToString());
     }

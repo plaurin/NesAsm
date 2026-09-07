@@ -8,11 +8,15 @@ public class Parser
         
         addressesToParse.Enqueue(resetVector);
         addressesToParse.Enqueue(nmiVector);
-        Labels.AddRomLabel(resetVector, "Reset");
-        Labels.AddRomLabel(nmiVector, "NMI");
+        Labels.AddMemoryLabel(resetVector, "Reset");
+        Labels.AddMemoryLabel(nmiVector, "NMI");
+        Labels.AddMemoryLabel(0x90CC, "InitializeMemory");
 
         // Custom dispatch subroutine addresses to parse
         addressesToParse.Enqueue(0xAEDC);
+        addressesToParse.Enqueue(0xAEEA);
+        addressesToParse.Enqueue(0xB0E9);
+        addressesToParse.Enqueue(0xB35A);
 
         var subroutines = new List<Subroutine>();
 
@@ -124,6 +128,7 @@ public class Parser
             0x40 => Ins("RTI", 1, Implicit()),
             0x45 => Ins("EOR", 2, ZeroPage()),
             0x48 => Ins("PHA", 1, Implicit()),
+            0x49 => Ins("EOR", 2, Immediate()),
             0x4A => Ins("LSR", 1, Accumulator()),
             0x4C => Ins("JMP", 3, Absolute()),
 
@@ -131,7 +136,7 @@ public class Parser
             0x65 => Ins("ADC", 2, ZeroPage()),
             0x68 => Ins("PLA", 1, Implicit()),
             0x69 => Ins("ADC", 2, Immediate()),
-            0x6C => Ins("JMP", 3, IndirectIndexed()), // Based on memory!! we need to emulate the memory to get the correct address
+            0x6C => Ins("JMP", 3, Indirect()), // Based on memory!! we need to emulate the memory to get the correct address
             0x6D => Ins("ADC", 3, Absolute()),
 
             0x78 => Ins("SEI", 1, Implicit()),
@@ -176,6 +181,7 @@ public class Parser
 
             0xC0 => Ins("CPY", 2, Immediate()),
             0xC5 => Ins("CMP", 2, ZeroPage()),
+            0xC6 => Ins("DEC", 2, ZeroPage()),
             0xC8 => Ins("INY", 1, Implicit()),
             0xC9 => Ins("CMP", 2, Immediate()),
             0xCA => Ins("DEX", 1, Implicit()),

@@ -6,6 +6,11 @@ public class Labels
 
     public static string GetLabelOrMemoryAddress(int? address)
     {
+        if (address.HasValue && _romLabels.TryGetValue(address.Value, out var label))
+        {
+            return label;
+        }
+
         return address switch
         {
             0x2000 => "PpuControl_2000",
@@ -28,12 +33,12 @@ public class Labels
         };
     }
 
-    public static void AddRomLabel(int address, string label)
+    public static void AddMemoryLabel(int address, string label)
     {
         _romLabels.Add(address, label);
     }
 
-    public static string GetRomLabel(int address)
+    public static string GetLabel(int address)
     {
         if (_romLabels.TryGetValue(address, out var label))
         {

@@ -9,21 +9,22 @@ public record Instruction(int Address, byte Opcode, string Mnemonic, int Bytes, 
 
     public override string ToString()
     {
-
-        return Mode switch
+        var argument = Mode switch
         {
-            AddressingMode.Implicit => $"${Address:X4}: {Mnemonic}",
-            AddressingMode.Accumulator => $"${Address:X4}: {Mnemonic} A",
-            AddressingMode.Immediate => $"${Address:X4}: {Mnemonic} #${Argument:X2}",
-            AddressingMode.ZeroPage => $"${Address:X4}: {Mnemonic} ${Argument:X2}",
-            AddressingMode.ZeroPageX => $"${Address:X4}: {Mnemonic} ${Argument:X2}, X",
-            AddressingMode.Absolute => $"${Address:X4}: {Mnemonic} {Labels.GetLabelOrMemoryAddress(Argument)}",
-            AddressingMode.AbsoluteX => $"${Address:X4}: {Mnemonic} {Labels.GetLabelOrMemoryAddress(Argument)}, X",
-            AddressingMode.AbsoluteY => $"${Address:X4}: {Mnemonic} {Labels.GetLabelOrMemoryAddress(Argument)}, Y",
-            AddressingMode.Relative => $"${Address:X4}: {Mnemonic} {Labels.GetLabelOrMemoryAddress(Argument)}",
-            AddressingMode.IndirectIndexed => $"${Address:X4}: {Mnemonic} (${Argument:X2}), Y",
-            AddressingMode.Indirect => $"${Address:X4}: {Mnemonic} ({Labels.GetLabelOrMemoryAddress(Argument)})",
-            _ => $"${Address:X4}: {Mnemonic} {Labels.GetLabelOrMemoryAddress(Argument)}"
+            AddressingMode.Implicit => string.Empty,
+            AddressingMode.Accumulator => "A",
+            AddressingMode.Immediate => $"#{Argument:X2}",
+            AddressingMode.ZeroPage => $"${Argument:X2}",
+            AddressingMode.ZeroPageX => $"${Argument:X2}, X",
+            AddressingMode.Absolute => Labels.GetLabelOrMemoryAddress(Argument),
+            AddressingMode.AbsoluteX => $"{Labels.GetLabelOrMemoryAddress(Argument)}, X",
+            AddressingMode.AbsoluteY => $"{Labels.GetLabelOrMemoryAddress(Argument)}, Y",
+            AddressingMode.Relative => Labels.GetLabelOrMemoryAddress(Argument),
+            AddressingMode.IndirectIndexed => $"(${Argument:X2}), Y",
+            AddressingMode.Indirect => $"({Labels.GetLabelOrMemoryAddress(Argument)})",
+            _ => Labels.GetLabelOrMemoryAddress(Argument)
         };
+
+        return $"${Address:X4} [{Opcode:X2}] {Mnemonic} {argument}".Trim();
     }
 }
