@@ -25,7 +25,7 @@ public class Parser
                 continue;
             }
 
-            if (subroutines.Any(f => f.Address >= address && f.LastInstructionAddress <= address))
+            if (subroutines.Any(f => address >= f.Address && address <= f.LastInstructionAddress))
             {
                 Console.WriteLine($"Subroutine at ${address:X4} already parsed, skipping");
                 continue;

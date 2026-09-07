@@ -16,6 +16,8 @@ public record Subroutine(ICollection<Instruction> Instructions)
 
     public override string ToString()
     {
-        return $"- Sub {Labels.GetRomLabel(Address)} at ${Address:X4}";
+        var label = Labels.GetRomLabel(Address);
+        label = !string.IsNullOrWhiteSpace(label) ? $"{label} at " : string.Empty;
+        return $"Sub {label}${Address:X4} to ${LastInstructionAddress:X4} (Instructions: {Instructions.Count}, Size: {Size})";
     }
 }
