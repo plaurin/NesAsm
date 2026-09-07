@@ -5,8 +5,13 @@ public class Parser
     public static IReadOnlyCollection<Subroutine> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector)
     {
         var addressesToParse = new Queue<int>();
+        
         addressesToParse.Enqueue(resetVector);
         addressesToParse.Enqueue(nmiVector);
+        Labels.AddRomLabel(resetVector, "Reset");
+        Labels.AddRomLabel(nmiVector, "NMI");
+
+        // Custom dispatch subroutine addresses to parse
         addressesToParse.Enqueue(0xAEDC);
 
         var subroutines = new List<Subroutine>();

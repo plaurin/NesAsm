@@ -87,7 +87,7 @@ internal class Program
         var sb = new StringBuilder();
         foreach (var sub in subroutines)
         {
-            sb.AppendLine($"{sub.ToString()} to {sub.LastInstructionAddress:X4} (Size: {sub.Size})");
+            sb.AppendLine($"{sub.ToString()} to ${sub.LastInstructionAddress:X4} (Size: {sub.Size})");
             sb.AppendLine($"Nb Instructions: {sub.Instructions.Count}");
             sb.AppendLine();
         }

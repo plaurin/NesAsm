@@ -2,6 +2,8 @@
 
 public class Labels
 {
+    private static readonly Dictionary<int, string> _romLabels = [];
+
     public static string GetLabelOrMemoryAddress(int? address)
     {
         return address switch
@@ -24,5 +26,20 @@ public class Labels
             0x4017 => "Ctrl2FrameCounter_4017",
             _ => $"${address:X4}",
         };
+    }
+
+    public static void AddRomLabel(int address, string label)
+    {
+        _romLabels.Add(address, label);
+    }
+
+    public static string GetRomLabel(int address)
+    {
+        if (_romLabels.TryGetValue(address, out var label))
+        {
+            return label;
+        }
+
+        return string.Empty;
     }
 }

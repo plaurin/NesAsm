@@ -8,6 +8,6 @@ public record Subroutine(ICollection<Instruction> Instructions, IReadOnlyCollect
 
     public override string ToString()
     {
-        return $"- Sub at ${Address:X4}";
+        return $"- Sub {Labels.GetRomLabel(Address)} at ${Address:X4}";
     }
 }
