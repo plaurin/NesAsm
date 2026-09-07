@@ -41,31 +41,44 @@ public class Parser
     {
         Console.WriteLine($"Parsing sub at ${address:X4}");
 
+        var branchesToParse = new Queue<int>();
+        branchesToParse.Enqueue(address);
+
         var instructions = new List<Instruction>();
-        var jumps = new List<Jump>();
-        for (int i = 0; i < 500; i++)
+
+        while (branchesToParse.TryDequeue(out address))
         {
-            var ins = GetInstruction(prgRom, address);
-            instructions.Add(ins);
-            address += ins.Bytes;
-
-            //Console.WriteLine(ins.ToString());
-
-            if (ins.Mnemonic == "JSR" || ins.Mnemonic == "JMP")
+            for (int i = 0; i < 500; i++)
             {
-                Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
-                addressesToParse.Enqueue(ins.Argument!.Value);
-                jumps.Add(new Jump(ins.Address, ins.Argument!.Value));
-            }
+                if (instructions.Any(f => f.Address == address)) break; // Already parsed this instruction, exit
 
-            if (ins.Mnemonic == "JMP" || ins.Mnemonic == "RTS" || ins.Mnemonic == "RTI")
-            {
-                Console.WriteLine($"Found {ins.Mnemonic} at ${ins.Address:X4} : end of sub ({instructions.Count} instructions)");
-                break;
+                var ins = GetInstruction(prgRom, address);
+                instructions.Add(ins);
+                address += ins.Bytes;
+
+                //Console.WriteLine(ins.ToString());
+
+                if (Instruction.IsBranch(ins.Mnemonic))
+                {
+                    //Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
+                    branchesToParse.Enqueue(ins.Argument!.Value);
+                }
+
+                if (Instruction.IsJump(ins.Mnemonic))
+                {
+                    Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
+                    addressesToParse.Enqueue(ins.Argument!.Value);
+                }
+
+                if (Instruction.IsEndOfSubroutine(ins.Mnemonic))
+                {
+                    Console.WriteLine($"Found {ins.Mnemonic} at ${ins.Address:X4} : end of sub ({instructions.Count} instructions)");
+                    break;
+                }
             }
         }
 
-        return new Subroutine(instructions, jumps);
+        return new Subroutine(instructions.OrderBy(i => i.Address).ToList());
     }
 
     public static Instruction GetInstruction(byte[] prgRom, int address)
@@ -190,3 +203,5 @@ public class Parser
 }
 
 public record Jump(int Address, int TargetAddress);
+
+public record Branch(int Address, int TargetAddress);
