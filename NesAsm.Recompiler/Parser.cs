@@ -19,40 +19,134 @@ public class Parser
         addressesToParse.Enqueue(0xB35A);
 
         var subroutines = new List<Subroutine>();
+        var returnAfterJSR = new Stack<ReturnAfterJSR>();
+        var parsedAddresses = new HashSet<int>();
 
-        while (addressesToParse.Count > 0)
+        while (addressesToParse.Count > 0 || returnAfterJSR.Count > 0)
         {
-            var address = addressesToParse.Dequeue();
-            if (address < 0x8000 || address >= 0x8000 + prgRom.Length)
+            if (addressesToParse.Count > 0)
             {
-                Console.WriteLine($"Address ${address:X4} is out of bounds, skipping");
-                continue;
-            }
+                var address = addressesToParse.Dequeue();
+                if (address < 0x8000 || address >= 0x8000 + prgRom.Length)
+                {
+                    Console.WriteLine($"Address ${address:X4} is out of bounds, skipping");
+                    continue;
+                }
 
-            if (subroutines.Any(f => address >= f.Address && address <= f.LastInstructionAddress))
+                if (parsedAddresses.Contains(address))
+                {
+                    Console.WriteLine($"Subroutine at ${address:X4} already parsed, skipping");
+                    continue;
+                }
+
+                var sub = ParseNewSub(prgRom, address);
+                subroutines.Add(sub);
+                parsedAddresses.Add(address);
+
+                foreach (var jump in sub.Jumps)
+                {
+                    if (!parsedAddresses.Contains(jump.TargetAddress))
+                        addressesToParse.Enqueue(jump.TargetAddress);
+                }
+
+                if (sub.EndsWithJSR)
+                {
+                    returnAfterJSR.Push(new ReturnAfterJSR(sub, sub.Instructions.Last().Argument!.Value));
+                }
+            } 
+            else if (returnAfterJSR.Count > 0)
             {
-                Console.WriteLine($"Subroutine at ${address:X4} already parsed, skipping");
-                continue;
-            }
+                var ret = returnAfterJSR.Pop();
+                if (ret.TargetAddress < 0x8000 || ret.TargetAddress >= 0x8000 + prgRom.Length)
+                {
+                    Console.WriteLine($"Address ${ret.TargetAddress:X4} is out of bounds, skipping");
+                    continue;
+                }
 
-            subroutines.Add(ParseSub(prgRom, addressesToParse, address));
+                var targetSub = FindSubroutineAtAddress(subroutines, ret.TargetAddress);
+                if (targetSub == null)
+                {
+                    Console.WriteLine($"Subroutine at ${ret.TargetAddress:X4} not found but referenced!!");
+                    continue;
+                }
+
+                if (IsSubroutineReturns(subroutines, targetSub))
+                {
+                    ContinueParsingSub(prgRom, ret.Sub);
+
+                    foreach (var jump in ret.Sub.Jumps)
+                    {
+                        if (!parsedAddresses.Contains(jump.TargetAddress))
+                            addressesToParse.Enqueue(jump.TargetAddress);
+                    }
+
+                    if (ret.Sub.EndsWithJSR)
+                    {
+                        returnAfterJSR.Push(new ReturnAfterJSR(ret.Sub, ret.Sub.Instructions.Last().Argument!.Value));
+                    }
+                }
+            }
         }
 
         return subroutines.OrderBy(f => f.Address).ToList();
     }
 
-    private static Subroutine ParseSub(byte[] prgRom, Queue<int> addressesToParse, int address)
+    private static Subroutine? FindSubroutineAtAddress(IReadOnlyCollection<Subroutine> subroutines, int address) 
+        => subroutines.FirstOrDefault(f => address >= f.Address && address <= f.LastInstructionAddress);
+
+    private static bool IsSubroutineReturns(IReadOnlyCollection<Subroutine> subroutines, Subroutine sub)
+    {
+        var lastInstruction = sub.Instructions.Last();
+        if (Instruction.IsJump(lastInstruction.Mnemonic))
+        {
+            var targetSub = FindSubroutineAtAddress(subroutines, lastInstruction.Argument!.Value);
+            if (targetSub == null)
+            {
+                Console.WriteLine($"Subroutine at ${lastInstruction.Argument!.Value:X4} not found but referenced!!");
+                return false;
+            }
+
+            return IsSubroutineReturns(subroutines, targetSub);
+        }
+        else if (Instruction.IsReturnInstruction(lastInstruction.Mnemonic))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static void ContinueParsingSub(byte[] prgRom, Subroutine sub)
+    {
+        Console.WriteLine($"Continuing parsing sub after JSR ${sub.LastInstructionAddress:X4}");
+
+        var address = sub.LastInstructionAddress + sub.Instructions.Last().Bytes;
+        ParseSub(prgRom, sub, address);
+    }
+
+    private static Subroutine ParseNewSub(byte[] prgRom, int address)
     {
         Console.WriteLine($"Parsing sub at ${address:X4}");
 
+        var instructions = new List<Instruction>();
+        var sub = new Subroutine(instructions);
+
+        ParseSub(prgRom, sub, address);
+
+        instructions.Sort((a, b) => a.Address.CompareTo(b.Address));
+        return sub;
+    }
+
+    private static void ParseSub(byte[] prgRom, Subroutine sub, int address)
+    {
         var branchesToParse = new Queue<int>();
         branchesToParse.Enqueue(address);
 
-        var instructions = new List<Instruction>();
+        var instructions = sub.Instructions;
 
         while (branchesToParse.TryDequeue(out address))
         {
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 500; i++) // Limit to avoid infinite loops in case of bad parsing
             {
                 if (instructions.Any(f => f.Address == address)) break; // Already parsed this instruction, exit
 
@@ -71,7 +165,7 @@ public class Parser
                 if (Instruction.IsJump(ins.Mnemonic))
                 {
                     Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
-                    addressesToParse.Enqueue(ins.Argument!.Value);
+                    //addressesToParse.Enqueue(ins.Argument!.Value);
                 }
 
                 if (Instruction.IsEndOfSubroutine(ins.Mnemonic))
@@ -81,8 +175,6 @@ public class Parser
                 }
             }
         }
-
-        return new Subroutine(instructions.OrderBy(i => i.Address).ToList());
     }
 
     public static Instruction GetInstruction(byte[] prgRom, int address)
@@ -111,15 +203,18 @@ public class Parser
             0x08 => Ins("PHP", 1, Implicit()),
             0x09 => Ins("ORA", 2, Immediate()),
             0x0A => Ins("ASL", 1, Accumulator()),
+            0x0E => Ins("ASL", 3, Absolute()),
 
             0x10 => Ins("BPL", 2, Relative()),
             0x18 => Ins("CLC", 1, Implicit()),
 
             0x20 => Ins("JSR", 3, Absolute()),
+            0x25 => Ins("AND", 2, ZeroPage()),
             0x29 => Ins("AND", 2, Immediate()),
             0x2A => Ins("ROL", 1, Accumulator()),
             0x2C => Ins("BIT", 3, Absolute()),
             0x2D => Ins("AND", 3, Absolute()),
+            0x2E => Ins("ROL", 3, Absolute()),
 
             0x30 => Ins("BMI", 2, Relative()),
             0x38 => Ins("SEC", 1, Implicit()),
@@ -127,6 +222,7 @@ public class Parser
 
             0x40 => Ins("RTI", 1, Implicit()),
             0x45 => Ins("EOR", 2, ZeroPage()),
+            0x46 => Ins("LSR", 2, ZeroPage()),
             0x48 => Ins("PHA", 1, Implicit()),
             0x49 => Ins("EOR", 2, Immediate()),
             0x4A => Ins("LSR", 1, Accumulator()),
@@ -136,9 +232,11 @@ public class Parser
             0x65 => Ins("ADC", 2, ZeroPage()),
             0x68 => Ins("PLA", 1, Implicit()),
             0x69 => Ins("ADC", 2, Immediate()),
+            0x6A => Ins("ROR", 1, Accumulator()),
             0x6C => Ins("JMP", 3, Indirect()), // Based on memory!! we need to emulate the memory to get the correct address
             0x6D => Ins("ADC", 3, Absolute()),
 
+            0x75 => Ins("ADC", 2, ZeroPageX()),
             0x78 => Ins("SEI", 1, Implicit()),
             0x79 => Ins("ADC", 3, AbsoluteY()),
             0x7D => Ins("ADC", 3, AbsoluteX()),
@@ -155,6 +253,7 @@ public class Parser
 
             0x90 => Ins("BCC", 2, Relative()),
             0x91 => Ins("STA", 2, IndirectIndexed()),
+            0x95 => Ins("STA", 2, ZeroPageX()),
             0x98 => Ins("TYA", 1, Implicit()),
             0x99 => Ins("STA", 3, AbsoluteY()),
             0x9A => Ins("TXS", 1, Implicit()),
@@ -185,11 +284,13 @@ public class Parser
             0xC8 => Ins("INY", 1, Implicit()),
             0xC9 => Ins("CMP", 2, Immediate()),
             0xCA => Ins("DEX", 1, Implicit()),
+            0xCD => Ins("CMP", 3, Absolute()),
             0xCE => Ins("DEC", 3, Absolute()),
 
             0xD0 => Ins("BNE", 2, Relative()),
             0xD8 => Ins("CLD", 1, Implicit()),
             0xD9 => Ins("CMP", 3, AbsoluteY()),
+            0xDD => Ins("CMP", 3, AbsoluteX()),
             0xDE => Ins("DEC", 3, AbsoluteX()),
 
             0xE0 => Ins("CPX", 2, Immediate()),
@@ -211,3 +312,5 @@ public class Parser
 public record Jump(int Address, int TargetAddress);
 
 public record Branch(int Address, int TargetAddress);
+
+public record ReturnAfterJSR(Subroutine Sub, int TargetAddress);
