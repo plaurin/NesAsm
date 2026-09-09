@@ -2,7 +2,7 @@
 
 public class Parser
 {
-    public static IReadOnlyCollection<Subroutine> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector)
+    public static IReadOnlyCollection<Subroutine> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector, IEnumerable<int> dynamicDispatchAddresses)
     {
         var addressesToParse = new Queue<int>();
         
@@ -10,13 +10,12 @@ public class Parser
         addressesToParse.Enqueue(nmiVector);
         Labels.AddMemoryLabel(resetVector, "Reset");
         Labels.AddMemoryLabel(nmiVector, "NMI");
-        Labels.AddMemoryLabel(0x90CC, "InitializeMemory");
 
         // Custom dispatch subroutine addresses to parse
-        addressesToParse.Enqueue(0xAEDC);
-        addressesToParse.Enqueue(0xAEEA);
-        addressesToParse.Enqueue(0xB0E9);
-        addressesToParse.Enqueue(0xB35A);
+        foreach (var addr in dynamicDispatchAddresses)
+        {
+            addressesToParse.Enqueue(addr);
+        }
 
         var subroutines = new List<Subroutine>();
         var returnAfterJSR = new Stack<ReturnAfterJSR>();

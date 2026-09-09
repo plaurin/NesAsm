@@ -13,6 +13,9 @@ internal class Program
 
         Directory.CreateDirectory(outputPath);
 
+        LoadCustomLabels(outputPath);
+        var dynamicDispatchAddresses = LoadDynamicDispatchs(outputPath);
+
         var rom = File.ReadAllBytes(romPath);
 
         if (!(rom[0] == 0x4E && rom[1] == 0x45 && rom[2] == 0x53 && rom[3] == 0x1A))
@@ -53,7 +56,7 @@ internal class Program
         Console.WriteLine($"Reset: ${reset:X4}");
         Console.WriteLine($"IRQ: ${irq:X4}");
 
-        var subroutines = Parser.ParsePrgRom(prgRom, reset, nmi);
+        var subroutines = Parser.ParsePrgRom(prgRom, reset, nmi, dynamicDispatchAddresses);
 
         OutputSubroutines(outputPath, subroutines);
         OutputInstructions(outputPath, subroutines);
@@ -65,6 +68,54 @@ internal class Program
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
         MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, prgSize * 16 * 1024);
+    }
+
+    private static void LoadCustomLabels(string outputPath)
+    {
+        var labelsFilePath = Path.Combine(outputPath, "labels.txt");
+        if (File.Exists(labelsFilePath))
+        { 
+            var lines = File.ReadAllLines(labelsFilePath);
+            foreach (var line in lines)
+            {
+                var address = line[0..4];
+                var label = line[5..].Trim();
+                if (int.TryParse(address, System.Globalization.NumberStyles.HexNumber, null, out var addr))
+                {
+                    Labels.AddMemoryLabel(addr, label);
+                }
+            }
+        }
+        else
+        {
+            File.Create(labelsFilePath);
+        }
+    }
+
+    private static IEnumerable<int> LoadDynamicDispatchs(string outputPath)
+    {
+        var dispatchs = new List<int>();
+
+        var labelsFilePath = Path.Combine(outputPath, "dispatchs.txt");
+        if (File.Exists(labelsFilePath))
+        {
+            var lines = File.ReadAllLines(labelsFilePath);
+            foreach (var line in lines)
+            {
+                var sourceAddress = line[0..4];
+                var targetAddress = line[5..].Trim();
+                if (int.TryParse(targetAddress, System.Globalization.NumberStyles.HexNumber, null, out var addr))
+                {
+                    dispatchs.Add(addr);
+                }
+            }
+        }
+        else
+        {
+            File.Create(labelsFilePath);
+        }
+
+        return dispatchs;
     }
 
     private static void OutputInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
