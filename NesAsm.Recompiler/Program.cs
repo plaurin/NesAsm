@@ -68,6 +68,8 @@ internal class Program
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
         MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, prgSize * 16 * 1024);
+
+        new Runner().Run(subroutines, reset, nmi);
     }
 
     private static void LoadCustomLabels(string outputPath)

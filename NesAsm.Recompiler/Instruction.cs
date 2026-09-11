@@ -2,6 +2,9 @@
 
 public record Instruction(int Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, int? Argument = null)
 {
+    public byte ByteArgument => (byte)Argument!;
+    public ushort UShortArgument => (ushort)Argument!;
+
     public static bool IsEndOfSubroutine(string mnemonic) => mnemonic == "JMP" || mnemonic == "RTS" || mnemonic == "RTI" || mnemonic == "JSR";
 
     public static bool IsBranch(string mnemonic) => mnemonic == "BPL" || mnemonic == "BMI" || mnemonic == "BVC" || mnemonic == "BVS"
