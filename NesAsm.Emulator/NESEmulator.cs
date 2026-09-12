@@ -31,28 +31,28 @@ public class NESEmulator
     // --- Access ---
 
     // LDA
-    public void LDAi(byte value) => _a = value; // Immediate
-    public void LDA(byte address) => _a = _memory[address]; // Zero Page
-    public void LDA(ushort address) => _a = _memory[address]; // Absolute
-    public void LDA(byte[] baseAddress, Register register) => _a = baseAddress[register]; // Absolute Indexed (X or Y)
+    public void LDAi(byte value) { _a = value; FlagNZ(_a); } // Immediate
+    public void LDA(byte address) { _a = _memory[address]; FlagNZ(_a); } // Zero Page
+    public void LDA(ushort address) { _a = _memory[address]; FlagNZ(_a); } // Absolute
+    public void LDA(byte[] baseAddress, Register register) { _a = baseAddress[register]; FlagNZ(_a); } // Absolute Indexed (X or Y) CSharp
 
     // STA
     public void STA(byte address) => _memory[address] = _a; // Zero Page
     public void STA(ushort address) => _memory[address] = _a; // Absolute
 
     // LDX
-    public void LDXi(byte value) => _x = value; // Immediate
-    public void LDX(byte address) => _x = _memory[address]; // Zero Page
-    public void LDX(ushort address) => _x = _memory[address]; // Absolute
+    public void LDXi(byte value) { _x = value; FlagNZ(_x); } // Immediate
+    public void LDX(byte address) { _x = _memory[address]; FlagNZ(_x); } // Zero Page
+    public void LDX(ushort address) { _x = _memory[address]; FlagNZ(_x); } // Absolute
 
     // STX
     public void STX(byte address) => _memory[address] = _x; // Zero Page
     public void STX(ushort address) => _memory[address] = _x; // Absolute
 
     // LDY
-    public void LDYi(byte value) => _y = value; // Immediate
-    public void LDY(byte address) => _y = _memory[address]; // Zero Page
-    public void LDY(ushort address) => _y = _memory[address]; // Absolute
+    public void LDYi(byte value) { _y = value; FlagNZ(_y); } // Immediate
+    public void LDY(byte address) { _y = _memory[address]; FlagNZ(_y); } // Zero Page
+    public void LDY(ushort address) { _y = _memory[address]; FlagNZ(_y); } // Absolute
 
     // STY
     public void STY(byte address) => _memory[address] = _y; // Zero Page
@@ -61,44 +61,47 @@ public class NESEmulator
 
     // --- Transfert ---
 
-    public void TAX() => _x = _a;
-    public void TXA() => _a = _x;
-    public void TAY() => _y = _a;
-    public void TYA() => _a = _y;
+    public void TAX() { _x = _a; FlagNZ(_x); }
+    public void TXA() { _a = _x; FlagNZ(_a); }
+    public void TAY() { _y = _a; FlagNZ(_y); }
+    public void TYA() { _a = _y; FlagNZ(_a); }
 
 
     // --- Arithmetic
 
     // ADC
-    public void ADCi(byte value)
+    public void ADCi(byte value) // Immediate
     {
         var res = _a + value + (_carry ? 1 : 0);
         _a = (byte)(res % 0xFF);
-        _carry = res > 0xFF;
-        _zero = _a == 0;
         // _overflow = (res ^ A) & (res ^ value) & 0x80; ??
-        _negative = _a >= 0x80;
+        FlagNZC(res);
     }
 
     public void ADC(byte value) // Zero Page
     {
         var res = _a + _memory[value] + (_carry ? 1 : 0);
         _a = (byte)(res % 0xFF);
-        _carry = res > 0xFF;
-        _zero = _a == 0;
-        // _overflow = (res ^ A) & (res ^ value) & 0x80; ??
-        _negative = _a >= 0x80;
+        FlagNZC(res);
     }
 
     public void ADC(ushort value) // Absolute
     {
         var res = _a + _memory[value] + (_carry ? 1 : 0);
         _a = (byte)(res % 0xFF);
-        _carry = res > 0xFF;
-        _zero = _a == 0;
-        // _overflow = (res ^ A) & (res ^ value) & 0x80; ??
-        _negative = _a >= 0x80;
+        FlagNZC(res);
     }
+
+    // SBC
+    public void SBCi(byte value) // Immediate
+    {
+        var res = _a - value - (_carry ? 0 : 1);
+        _a = (byte)(res & 0xFF);
+        FlagNZC(res); // Need Sub!
+    }
+
+    // INC
+    public void INC() => _a++;
 
     // INX
     public void INX() => _x++;
@@ -107,15 +110,18 @@ public class NESEmulator
     public void INY() => _y++;
 
     // DEX
+    public void DEC() => _a--;
+
+    // DEX
     public void DEX() => _x--;
 
     // DEY
     public void DEY() => _y--;
 
-
     // --- Shift ---
 
-    // LSR
+    // ASL
+    public void ASL() { _carry = (_a >> 7) == 1; _a = (byte)(_a << 1); FlagNZ(_a); } // Accumulator
 
     /// <summary>
     /// Logical Shift Right. Shift one bit right in the Accumulator
@@ -130,8 +136,7 @@ public class NESEmulator
         _carry = (value & 0x01) != 0;
         value >>= 1;
         _memory[address] = value;
-        _negative = (value & 0x80) != 0;
-        _zero = value == 0;
+        FlagNZ(value);
     } // memory operand
 
     /// <summary>
@@ -146,15 +151,32 @@ public class NESEmulator
     /// <remarks>Rotates the bits of the specified byte by one bit to the left. The new value of bit #0 comes from the Carry flag, and then the old value of bit #7 is used to update the Carry flag.</remarks>
     public void ROL(ushort address) { var c = _carry; _carry = (_memory[address] & 0x80) > 0; _memory[address] <<= 1; if (c) _memory[address] += 1; }
 
+    public void ROR()
+    {
+        var oldCarry = _carry;
+        _carry = (_a & 0x01) != 0;
+        _a = (byte)((_a >> 1) | (oldCarry ? 0x80 : 0x00));
+        FlagNZ(_a);
+    }
+
     // --- Bitwise ---
 
+    // AND
+    public void ANDi(byte value) { _a &= value; FlagNZ(_a); } // Immediate
+    public void AND(byte address) { _a &= _memory[address]; FlagNZ(_a); } // Zero Page
+
+    // ORA
     public void ORA(byte address) { _a |= _memory[address]; _zero = _a == 0; _negative = _a >= 128; }
 
+    // EOR
+    public void EORi(byte value) { _a ^= value; FlagNZ(_a); } // Immediate
+    public void EOR(byte address) { _a ^= _memory[address]; FlagNZ(_a); } // Zero Page
+
+    // BIT
     public void BIT(ushort address)
     {
         var value = _memory[address];
-        _zero = (_a & value) == 0;
-        _negative = (value & 0x80) != 0;
+        FlagNZ(value);
         _overflow = (value & 0x40) != 0;
     }
 
@@ -219,19 +241,15 @@ public class NESEmulator
     /// Branch on Overflow clear
     /// </summary>
     /// <remarks>Only branches if the Overflow flag is not set.</remarks>
-    public void BVC(/* Goto Label */)
-    {
-        // Branch on overflow clear - no PC in this emulator stub
-    }
+    public bool BVC(/* Goto Label */) { return !_overflow; }
 
     /// <summary>
     /// Branch on Overflow set
     /// </summary>
     /// <remarks>Only branches if the Overflow flag is set.</remarks>
-    public void BVS(/* Goto Label */)
+    public bool BVS(/* Goto Label */)
     {
-        // Branch on overflow set - no PC in this emulator stub, just leave flags available
-        // This method exists to reflect the instruction; actual branching handled by caller using Overflow property
+        return _overflow;
     }
 
     // --- Jump ---
@@ -265,19 +283,30 @@ public class NESEmulator
 
     // --- Stack ---
 
+    public void PHA() { }
+    public void PLA() { }
+    public void PHP() { }
+    public void PLP() { }
     public void TXS() { _sp = _x; }
+    public void TSX() { _x = _sp; }
 
 
     // --- Flags ---
 
+    public void CLC() { }
+    public void SEC() { }
+    public void CLI() { }
     /// <summary>
     /// Set Interrupt disable flag (I)
     /// </summary>
     public void SEI() => _interrupt = true;
 
     public void CLD() { _decimal = false; }
+    public void SED() { _decimal = true; }
+    public void CLV() { _overflow = false; }
 
     // --- Other ---
+    public void NOP() { }
 
 
     // --- Private implementation ---
@@ -289,5 +318,18 @@ public class NESEmulator
         _negative = (result & 0x80) > 0 && result != 0;
         _carry = result >= 0;
         _zero = result == 0;
+    }
+
+    private void FlagNZ(byte value)
+    {
+        _zero = value == 0;
+        _negative = (value >> 7) == 1;
+    }
+
+    private void FlagNZC(int value)
+    {
+        _zero = value == 0;
+        _negative = (value >> 7) == 1;
+        _carry = value > 0xFF;
     }
 }
