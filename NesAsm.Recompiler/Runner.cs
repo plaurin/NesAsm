@@ -35,46 +35,46 @@ public class Runner
             {
                 case 0x00: _emulator.BRK(); break;
                 case 0x05: _emulator.ORA(instruction.ByteArgument); break;
-                case 0x08: throw new NotImplementedException("PHP"); break;
-                case 0x09: throw new NotImplementedException("ORA Immediate"); break;
-                case 0x0A: throw new NotImplementedException("ASL Accumulator"); break;
-                case 0x0E: throw new NotImplementedException("ASL Absolute"); break;
+                case 0x08: _emulator.PHP(); break;
+                case 0x09: _emulator.ORAi(instruction.ByteArgument); break;
+                case 0x0A: _emulator.ASL(); break;
+                case 0x0E: _emulator.ASL(instruction.UShortArgument); break;
 
                 case 0x10: _emulator.BPL(); break;
-                case 0x18: throw new NotImplementedException("CLC"); break;
+                case 0x18: _emulator.CLC(); break;
 
                 case 0x20: _emulator.JSR(); break;
-                case 0x25: throw new NotImplementedException("AND ZeroPage"); break;
-                case 0x29: throw new NotImplementedException("AND Immediate"); break;
+                case 0x25: _emulator.AND(instruction.ByteArgument); break;
+                case 0x29: _emulator.ANDi(instruction.ByteArgument); break;
                 case 0x2A: _emulator.ROL(); break;
                 case 0x2C: _emulator.BIT(instruction.UShortArgument); break;
-                case 0x2D: throw new NotImplementedException("AND Absolute"); break;
+                case 0x2D: _emulator.AND(instruction.UShortArgument); break;
                 case 0x2E: _emulator.ROL(instruction.UShortArgument); break;
 
                 case 0x30: _emulator.BMI(); break;
-                case 0x38: throw new NotImplementedException("SEC"); break;
-                case 0x3D: throw new NotImplementedException("AND AbsoluteX"); break;
+                case 0x38: _emulator.SEC(); break;
+                case 0x3D: _emulator.ANDax(instruction.UShortArgument); break;
 
                 case 0x40: _emulator.RTI(); break;
-                case 0x45: throw new NotImplementedException("EOR ZeroPage"); break;
-                case 0x46: throw new NotImplementedException("LSR ZeroPage"); break;
-                case 0x48: throw new NotImplementedException("PHA"); break;
-                case 0x49: throw new NotImplementedException("EOR Immediate"); break;
+                case 0x45: _emulator.EOR(instruction.ByteArgument); break;
+                case 0x46: _emulator.LSR(instruction.ByteArgument); break;
+                case 0x48: _emulator.PHA(); break;
+                case 0x49: _emulator.EORi(instruction.ByteArgument); break;
                 case 0x4A: _emulator.LSR(); break;
                 case 0x4C: _emulator.JMP(); break;
 
                 case 0x60: _emulator.RTS(); break;
-                case 0x65: throw new NotImplementedException("ADC ZeroPage"); break;
-                case 0x68: throw new NotImplementedException("PLA"); break;
-                case 0x69: throw new NotImplementedException("ADC Immediate"); break;
-                case 0x6A: throw new NotImplementedException("ROR Accumulator"); break;
+                case 0x65: _emulator.ADC(instruction.ByteArgument); break;
+                case 0x68: _emulator.PLA(); break;
+                case 0x69: _emulator.ADCi(instruction.ByteArgument); break;
+                case 0x6A: _emulator.ROR(); break;
                 case 0x6C: _emulator.JMP(); break;
-                case 0x6D: throw new NotImplementedException("ADC Absolute"); break;
+                case 0x6D: _emulator.ADC(instruction.UShortArgument); break;
 
-                case 0x75: throw new NotImplementedException("ADC ZeroPageX"); break;
-                case 0x79: throw new NotImplementedException("ADC AbsoluteY"); break;
-                case 0x7D: throw new NotImplementedException("ADC AbsoluteX"); break;
-                case 0x7E: throw new NotImplementedException("ROR AbsoluteX"); break;
+                case 0x75: _emulator.ADCx(instruction.ByteArgument); break;
+                case 0x79: _emulator.ADCy(instruction.UShortArgument); break;
+                case 0x7D: _emulator.ADCx(instruction.UShortArgument); break;
+                case 0x7E: _emulator.RORx(instruction.UShortArgument); break;
 
                 case 0x84: _emulator.STY(instruction.ByteArgument); break;
                 case 0x85: _emulator.STA(instruction.ByteArgument); break;

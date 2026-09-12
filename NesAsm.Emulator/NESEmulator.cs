@@ -92,6 +92,11 @@ public class NESEmulator
         FlagNZC(res);
     }
 
+    public void ADCx(byte address) { var res = _a + _memory[address + _x] + (_carry ? 1 : 0); _a = (byte)(res % 0xFF); FlagNZC(res); } // Zero Page X
+    public void ADCy(byte address) { var res = _a + _memory[address + _y] + (_carry ? 1 : 0); _a = (byte)(res % 0xFF); FlagNZC(res); } // Zero Page Y
+    public void ADCx(ushort address) { var res = _a + _memory[address + _x] + (_carry ? 1 : 0); _a = (byte)(res % 0xFF); FlagNZC(res); } // Absolute X
+    public void ADCy(ushort address) { var res = _a + _memory[address + _y] + (_carry ? 1 : 0); _a = (byte)(res % 0xFF); FlagNZC(res); } // Absolute Y
+
     // SBC
     public void SBCi(byte value) // Immediate
     {
@@ -122,6 +127,7 @@ public class NESEmulator
 
     // ASL
     public void ASL() { _carry = (_a >> 7) == 1; _a = (byte)(_a << 1); FlagNZ(_a); } // Accumulator
+    public void ASL(ushort address) { byte res = _memory[address]; _carry = (res >> 7) == 1; res = (byte)(res << 1); _memory[address] = res; FlagNZ(res); } // Absolute
 
     /// <summary>
     /// Logical Shift Right. Shift one bit right in the Accumulator
@@ -151,22 +157,23 @@ public class NESEmulator
     /// <remarks>Rotates the bits of the specified byte by one bit to the left. The new value of bit #0 comes from the Carry flag, and then the old value of bit #7 is used to update the Carry flag.</remarks>
     public void ROL(ushort address) { var c = _carry; _carry = (_memory[address] & 0x80) > 0; _memory[address] <<= 1; if (c) _memory[address] += 1; }
 
-    public void ROR()
-    {
-        var oldCarry = _carry;
-        _carry = (_a & 0x01) != 0;
-        _a = (byte)((_a >> 1) | (oldCarry ? 0x80 : 0x00));
-        FlagNZ(_a);
-    }
+    public void ROR() { var oldCarry = _carry; _carry = (_a & 0x01) != 0; _a = (byte)((_a >> 1) | (oldCarry ? 0x80 : 0x00)); FlagNZ(_a); } // Accumulator
+    public void ROR(byte address) { var oldCarry = _carry; _carry = (_memory[address] & 0x01) != 0; _a = (byte)((_memory[address] >> 1) | (oldCarry ? 0x80 : 0x00)); FlagNZ(_a); } // Zero Page
+    public void ROR(ushort address) { var oldCarry = _carry; _carry = (_memory[address] & 0x01) != 0; _a = (byte)((_memory[address] >> 1) | (oldCarry ? 0x80 : 0x00)); FlagNZ(_a); } // Absolute
+    public void RORx(byte address) { var oldCarry = _carry; _carry = (_memory[address + _x] & 0x01) != 0; _a = (byte)((_memory[address + _x] >> 1) | (oldCarry ? 0x80 : 0x00)); FlagNZ(_a); } // Zero Page
+    public void RORx(ushort address) { var oldCarry = _carry; _carry = (_memory[address + _x] & 0x01) != 0; _a = (byte)((_memory[address + _x] >> 1) | (oldCarry ? 0x80 : 0x00)); FlagNZ(_a); } // Absolute
 
     // --- Bitwise ---
 
     // AND
     public void ANDi(byte value) { _a &= value; FlagNZ(_a); } // Immediate
     public void AND(byte address) { _a &= _memory[address]; FlagNZ(_a); } // Zero Page
+    public void AND(ushort address) { _a &= _memory[address]; FlagNZ(_a); } // Absolute
+    public void ANDax(ushort address) { _a &= _memory[address + _x]; FlagNZ(_a); } // Absolute
 
     // ORA
-    public void ORA(byte address) { _a |= _memory[address]; _zero = _a == 0; _negative = _a >= 128; }
+    public void ORAi(byte value) { _a |= value; FlagNZ(_a); } // Immediate
+    public void ORA(byte address) { _a |= _memory[address]; FlagNZ(_a); } // Zero Page
 
     // EOR
     public void EORi(byte value) { _a ^= value; FlagNZ(_a); } // Immediate
