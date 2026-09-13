@@ -1,0 +1,13 @@
+﻿using NesAsm.Emulator.AddressModes;
+
+namespace NesAsm.Emulator.Instructions;
+
+public record PLA : Instruction
+{
+    public PLA(CPU cpu)
+        : base(cpu, 0x68, "PLA", new Implied(), 4)
+    {
+    }
+
+    protected override void Execute() => throw new NotImplementedException();
+}
