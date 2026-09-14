@@ -1,15 +1,17 @@
-﻿namespace NesAsm.Recompiler;
+﻿using NesAsm.Emulator;
+
+namespace NesAsm.Recompiler;
 
 public class Parser
 {
-    public static IReadOnlyCollection<Subroutine> ParsePrgRom(byte[] prgRom, int resetVector, int nmiVector, IEnumerable<int> dynamicDispatchAddresses)
+    public static IReadOnlyCollection<Subroutine> ParsePrgRom(Cart cart, IEnumerable<int> dynamicDispatchAddresses)
     {
         var addressesToParse = new Queue<int>();
         
-        addressesToParse.Enqueue(resetVector);
-        addressesToParse.Enqueue(nmiVector);
-        Labels.AddMemoryLabel(resetVector, "Reset");
-        Labels.AddMemoryLabel(nmiVector, "NMI");
+        addressesToParse.Enqueue(cart.ResetAddress);
+        addressesToParse.Enqueue(cart.NmiAddress);
+        Labels.AddMemoryLabel(cart.ResetAddress, "Reset");
+        Labels.AddMemoryLabel(cart.NmiAddress, "NMI");
 
         // Custom dispatch subroutine addresses to parse
         foreach (var addr in dynamicDispatchAddresses)
@@ -26,7 +28,7 @@ public class Parser
             if (addressesToParse.Count > 0)
             {
                 var address = addressesToParse.Dequeue();
-                if (address < 0x8000 || address >= 0x8000 + prgRom.Length)
+                if (address < 0x8000 || address >= 0x8000 + cart.PrgSize)
                 {
                     Console.WriteLine($"Address ${address:X4} is out of bounds, skipping");
                     continue;
@@ -38,7 +40,7 @@ public class Parser
                     continue;
                 }
 
-                var sub = ParseNewSub(prgRom, address);
+                var sub = ParseNewSub(cart.PrgRom, address);
                 subroutines.Add(sub);
                 parsedAddresses.Add(address);
 
@@ -56,7 +58,7 @@ public class Parser
             else if (returnAfterJSR.Count > 0)
             {
                 var ret = returnAfterJSR.Pop();
-                if (ret.TargetAddress < 0x8000 || ret.TargetAddress >= 0x8000 + prgRom.Length)
+                if (ret.TargetAddress < 0x8000 || ret.TargetAddress >= 0x8000 + cart.PrgSize)
                 {
                     Console.WriteLine($"Address ${ret.TargetAddress:X4} is out of bounds, skipping");
                     continue;
@@ -71,7 +73,7 @@ public class Parser
 
                 if (IsSubroutineReturns(subroutines, targetSub))
                 {
-                    ContinueParsingSub(prgRom, ret.Sub);
+                    ContinueParsingSub(cart.PrgRom, ret.Sub);
 
                     foreach (var jump in ret.Sub.Jumps)
                     {
@@ -115,7 +117,7 @@ public class Parser
         return false;
     }
 
-    private static void ContinueParsingSub(byte[] prgRom, Subroutine sub)
+    private static void ContinueParsingSub(ReadOnlySpan<byte> prgRom, Subroutine sub)
     {
         Console.WriteLine($"Continuing parsing sub after JSR ${sub.LastInstructionAddress:X4}");
 
@@ -123,7 +125,7 @@ public class Parser
         ParseSub(prgRom, sub, address);
     }
 
-    private static Subroutine ParseNewSub(byte[] prgRom, int address)
+    private static Subroutine ParseNewSub(ReadOnlySpan<byte> prgRom, int address)
     {
         Console.WriteLine($"Parsing sub at ${address:X4}");
 
@@ -136,7 +138,7 @@ public class Parser
         return sub;
     }
 
-    private static void ParseSub(byte[] prgRom, Subroutine sub, int address)
+    private static void ParseSub(ReadOnlySpan<byte> prgRom, Subroutine sub, int address)
     {
         var branchesToParse = new Queue<int>();
         branchesToParse.Enqueue(address);
@@ -176,24 +178,27 @@ public class Parser
         }
     }
 
-    public static Instruction GetInstruction(byte[] prgRom, int address)
+    public static Instruction GetInstruction(ReadOnlySpan<byte> prgRom, int address)
     {
         var romIndex = address - 0x8000;
         var opcode = prgRom[romIndex];
 
         Instruction Ins(string mnemonic, int bytes, (AddressingMode mode, int? argument) args) => new(address, opcode, mnemonic, bytes, args.mode, args.argument);
 
+        var firstByte = prgRom[romIndex + 1];
+        var secondByte = prgRom[romIndex + 2];
+
         (AddressingMode, int?) Implicit() => (AddressingMode.Implicit, null);
         (AddressingMode, int?) Accumulator() => (AddressingMode.Accumulator, null);
-        (AddressingMode, int?) Immediate() => (AddressingMode.Immediate, prgRom[romIndex + 1]);
-        (AddressingMode, int?) ZeroPage() => (AddressingMode.ZeroPage, prgRom[romIndex + 1]);
-        (AddressingMode, int?) ZeroPageX() => (AddressingMode.ZeroPageX, prgRom[romIndex + 1]);
-        (AddressingMode, int?) Absolute() => (AddressingMode.Absolute, prgRom[romIndex + 2] * 256 + prgRom[romIndex + 1]);
-        (AddressingMode, int?) AbsoluteX() => (AddressingMode.AbsoluteX, prgRom[romIndex + 2] * 256 + prgRom[romIndex + 1]);
-        (AddressingMode, int?) AbsoluteY() => (AddressingMode.AbsoluteY, prgRom[romIndex + 2] * 256 + prgRom[romIndex + 1]);
-        (AddressingMode, int?) Relative() => (AddressingMode.Relative, address + 2 + (sbyte)prgRom[romIndex + 1]);
-        (AddressingMode, int?) Indirect() => (AddressingMode.Indirect, prgRom[romIndex + 1]);
-        (AddressingMode, int?) IndirectIndexed() => (AddressingMode.IndirectIndexed, prgRom[romIndex + 1]);
+        (AddressingMode, int?) Immediate() => (AddressingMode.Immediate, firstByte);
+        (AddressingMode, int?) ZeroPage() => (AddressingMode.ZeroPage, firstByte);
+        (AddressingMode, int?) ZeroPageX() => (AddressingMode.ZeroPageX, firstByte);
+        (AddressingMode, int?) Absolute() => (AddressingMode.Absolute, secondByte * 256 + firstByte);
+        (AddressingMode, int?) AbsoluteX() => (AddressingMode.AbsoluteX, secondByte * 256 + firstByte);
+        (AddressingMode, int?) AbsoluteY() => (AddressingMode.AbsoluteY, secondByte * 256 + firstByte);
+        (AddressingMode, int?) Relative() => (AddressingMode.Relative, address + 2 + (sbyte)firstByte);
+        (AddressingMode, int?) Indirect() => (AddressingMode.Indirect, firstByte);
+        (AddressingMode, int?) IndirectIndexed() => (AddressingMode.IndirectIndexed, firstByte);
 
         return opcode switch
         {

@@ -86,3 +86,6 @@ https://github.com/NesHacker
 https://github.com/Xyene/Emulator.NES/tree/master
 https://www.middle-engine.com/blog/posts/2020/06/23/programming-the-nes-the-6502-in-detail
 https://github.com/EliotJones/BigGustave
+https://github.com/BotRandomness/NET-NES
+https://github.com/mstan/SuperMarioBrosNESRecomp
+https://github.com/threecreepio/smb-disassembly

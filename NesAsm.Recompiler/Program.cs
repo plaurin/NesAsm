@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using NesAsm.Emulator;
+using System.Text;
 
 namespace NesAsm.Recompiler;
 
@@ -16,47 +17,9 @@ internal class Program
         LoadCustomLabels(outputPath);
         var dynamicDispatchAddresses = LoadDynamicDispatchs(outputPath);
 
-        var rom = File.ReadAllBytes(romPath);
+        var cart = new Cart(romPath);
 
-        if (!(rom[0] == 0x4E && rom[1] == 0x45 && rom[2] == 0x53 && rom[3] == 0x1A))
-        {
-            Console.WriteLine("NES ROM not detected!");
-            return;
-        }
-
-        Console.WriteLine("NES ROM detected.");
-
-        var prgSize = rom[4];
-        var chrSize = rom[5];
-        Console.WriteLine($"PRG Size: {prgSize} * 16 * 1024 = {prgSize * 16 * 1024}");
-        Console.WriteLine($"CHR Size: {chrSize} * 8 * 1024 = {chrSize * 8 * 1024}");
-
-        // Flag 6
-        var flag6 = rom[6];
-        var mirroring = (flag6 & 0x01) != 0 ? "Vertical" : "Horizontal";
-        var batteryBacked = (flag6 & 0x02) != 0 ? "Yes" : "No";
-        var trainer = (flag6 & 0x04) != 0 ? "Yes" : "No";
-        var fourScreen = (flag6 & 0x08) != 0 ? "Yes" : "No";
-        var mapperLow = (flag6 & 0xF0) >> 4;
-
-        Console.WriteLine($"Mirroring: {mirroring}");
-        Console.WriteLine($"Battery Backed: {batteryBacked}");
-        Console.WriteLine($"Trainer: {trainer}");
-        Console.WriteLine($"Four Screen: {fourScreen}");
-        Console.WriteLine($"Mapper (Low): {mapperLow}");
-
-        var prgRom = rom.Skip(16).Take(prgSize * 16 * 1024).ToArray();
-        var chrRom = rom.Skip(16 + prgRom.Length).Take(chrSize * 8 * 1024).ToArray();
-
-        var nmi = prgRom[^6] + (prgRom[^5] << 8);
-        var reset = prgRom[^4] + (prgRom[^3] << 8);
-        var irq = prgRom[^2] + (prgRom[^1] << 8);
-
-        Console.WriteLine($"NMI: ${nmi:X4}");
-        Console.WriteLine($"Reset: ${reset:X4}");
-        Console.WriteLine($"IRQ: ${irq:X4}");
-
-        var subroutines = Parser.ParsePrgRom(prgRom, reset, nmi, dynamicDispatchAddresses);
+        var subroutines = Parser.ParsePrgRom(cart, dynamicDispatchAddresses);
 
         OutputSubroutines(outputPath, subroutines);
         OutputInstructions(outputPath, subroutines);
@@ -67,9 +30,9 @@ internal class Program
         Console.WriteLine($"Total size: {subroutines.Sum(f => f.Size)}");
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
-        MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, prgSize * 16 * 1024);
+        MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, cart.PrgSize);
 
-        new Runner().Run(subroutines, reset, nmi);
+        new Runner().Run(subroutines, cart);
     }
 
     private static void LoadCustomLabels(string outputPath)
