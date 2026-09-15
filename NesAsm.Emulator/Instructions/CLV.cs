@@ -9,5 +9,5 @@ public record CLV : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetO(false);
 }

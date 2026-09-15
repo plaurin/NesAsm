@@ -9,7 +9,7 @@ public record STX : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
         AddressMode.SetValue(Cpu.X);
         //_cycles += cycles + addressing.ExtraCycle;

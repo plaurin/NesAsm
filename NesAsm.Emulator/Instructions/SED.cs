@@ -9,6 +9,5 @@ public record SED : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetD(true);
 }
-

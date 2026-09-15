@@ -5,9 +5,9 @@ namespace NesAsm.Emulator.Instructions;
 public record BRK : Instruction
 {
     public BRK(CPU cpu)
-        : base(cpu, 0x00, "BRK", new Implied(), 7)
+        : base(cpu, 0x00, "BRK", new Implied(), 7, bytesOverride: 0)
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }

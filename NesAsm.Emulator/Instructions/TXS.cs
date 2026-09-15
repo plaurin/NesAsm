@@ -9,5 +9,5 @@ public record TXS : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetSP(Cpu.X);
 }

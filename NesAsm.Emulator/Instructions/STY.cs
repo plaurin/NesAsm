@@ -9,7 +9,7 @@ public record STY : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
         AddressMode.SetValue(Cpu.Y);
         //_cycles += cycles + addressing.ExtraCycle;

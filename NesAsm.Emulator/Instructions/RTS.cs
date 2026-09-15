@@ -5,9 +5,9 @@ namespace NesAsm.Emulator.Instructions;
 public record RTS : Instruction
 {
     public RTS(CPU cpu)
-        : base(cpu, 0x60, "RTS", new Implied(), 6)
+        : base(cpu, 0x60, "RTS", new Implied(), 6, bytesOverride: 0)
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }

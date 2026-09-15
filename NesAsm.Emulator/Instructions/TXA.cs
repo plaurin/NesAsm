@@ -9,8 +9,5 @@ public record TXA : Instruction
     {
     }
 
-    protected override void Execute()
-    {
-        Cpu.SetA_NZ(Cpu.X);
-    }
+    public override void Execute() => Cpu.SetA_NZ(Cpu.X);
 }

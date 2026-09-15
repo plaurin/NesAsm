@@ -9,6 +9,5 @@ public record CLI : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetI(false);
 }
-

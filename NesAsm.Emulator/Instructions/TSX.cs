@@ -9,5 +9,5 @@ public record TSX : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }

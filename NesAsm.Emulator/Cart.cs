@@ -1,4 +1,6 @@
-﻿namespace NesAsm.Emulator;
+﻿using System.Net;
+
+namespace NesAsm.Emulator;
 
 public class Cart
 {
@@ -62,5 +64,20 @@ public class Cart
         Console.WriteLine($"IRQ: ${IrqAddress:X4}");
 
         IsValid = true;
+    }
+
+    public byte ReadMemory(ushort address)
+    {
+        return PrgRom[address - 0x8000];
+    }
+
+    public byte ReadByteArgument(ushort baseAddress)
+    {
+        return PrgRom[baseAddress + 1 - 0x8000];
+    }
+
+    public ushort ReadWordArgument(ushort baseAddress)
+    {
+        return (ushort)(PrgRom[baseAddress + 1 - 0x8000] | (PrgRom[baseAddress + 2 - 0x8000] << 8));
     }
 }

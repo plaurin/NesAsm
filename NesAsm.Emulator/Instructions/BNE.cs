@@ -9,9 +9,5 @@ public record BNE : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }
-
-
-
-

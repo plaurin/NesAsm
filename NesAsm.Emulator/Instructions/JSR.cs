@@ -5,9 +5,9 @@ namespace NesAsm.Emulator.Instructions;
 public record JSR : Instruction
 {
     public JSR(CPU cpu, byte opcode, AddressMode addressMode, int cycles)
-        : base(cpu, opcode, "JSR", addressMode, cycles)
+        : base(cpu, opcode, "JSR", addressMode, cycles, bytesOverride: 0)
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }

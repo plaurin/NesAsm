@@ -9,6 +9,5 @@ public record CLC : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetC(false);
 }
-

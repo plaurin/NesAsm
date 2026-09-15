@@ -32,7 +32,7 @@ internal class Program
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
         MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, cart.PrgSize);
 
-        new Runner().Run(subroutines, cart);
+        new Runner(cart).Run(subroutines);
     }
 
     private static void LoadCustomLabels(string outputPath)

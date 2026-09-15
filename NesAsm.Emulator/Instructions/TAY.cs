@@ -9,8 +9,5 @@ public record TAY : Instruction
     {
     }
 
-    protected override void Execute()
-    {
-        Cpu.SetY_NZ(Cpu.A);
-    }
+    public override void Execute() => Cpu.SetY_NZ(Cpu.A);
 }

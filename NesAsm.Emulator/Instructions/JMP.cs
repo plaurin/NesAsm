@@ -5,9 +5,9 @@ namespace NesAsm.Emulator.Instructions;
 public record JMP : Instruction
 {
     public JMP(CPU cpu, byte opcode, AddressMode addressMode, int cycles)
-        : base(cpu, opcode, "JMP", addressMode, cycles)
+        : base(cpu, opcode, "JMP", addressMode, cycles, bytesOverride: 0)
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => throw new NotImplementedException();
 }

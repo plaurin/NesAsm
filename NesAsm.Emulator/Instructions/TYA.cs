@@ -9,8 +9,5 @@ public record TYA : Instruction
     {
     }
 
-    protected override void Execute()
-    {
-        Cpu.SetA_NZ(Cpu.Y);
-    }
+    public override void Execute() => Cpu.SetA_NZ(Cpu.Y);
 }

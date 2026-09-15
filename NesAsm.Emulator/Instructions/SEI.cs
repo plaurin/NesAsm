@@ -9,6 +9,5 @@ public record SEI : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetI(true);
 }
-

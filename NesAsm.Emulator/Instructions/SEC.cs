@@ -9,6 +9,5 @@ public record SEC : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetC(true);
 }
-

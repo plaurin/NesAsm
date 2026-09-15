@@ -9,7 +9,7 @@ public record LDY : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
         var res = AddressMode.GetValue();
         Cpu.SetY_NZ(res);

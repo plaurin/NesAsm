@@ -21,7 +21,14 @@ public class CPU
     private bool _overflow;
     private bool _decimal;
 
+    public CPU(NesMemory memory)
+    {
+        _memory = memory;
+        InitInstructions();
+    }
+
     public NesMemory Memory => _memory;
+    public Cart Cart => _memory.Cart;
 
     public byte A => _a;
     public byte X => _x;
@@ -36,12 +43,6 @@ public class CPU
     public bool Overflow => _overflow;
     public bool Decimal => _decimal;
 
-    public CPU(NesMemory memory)
-    {
-        _memory = memory;
-        InitInstructions();
-    }
-
     public void Init()
     {
         _cycles = 0;
@@ -49,30 +50,55 @@ public class CPU
         _a = 0;
         _x = 0;
         _y = 0;
+
+        _pc = Cart.ResetAddress;
         _sp = 0xFD;
 
-        // Todo Flags
-        //_pc =  (ushort)((_memory.Read(0xFFFD)))
+        _carry = false;
+        _zero = false;
+        _negative = false;
+        _interrupt = false;
+        _overflow = false;
+        _decimal = false;
     }
 
-    // --------------
+    public override string ToString() => $"""
+        PC:{_pc:X4} A:{_a:X2} X:{_x:X2} Y:{_y:X2} 
+        {(_carry ? "C" : "c")}{(_zero ? "Z" : "z")}{(_negative ? "N" : "n")}{(_interrupt ? "I" : "i")} 
+        S:{_sp:X2} Todo Stack
+        """;
+        
+
+    // ----- Set -----
+
     public void SetA_NZ(byte value)
     {
         _a = value;
         FlagNZ(_a);
     }
+
     public void SetX_NZ(byte value)
     {
         _x = value;
         FlagNZ(_x);
     }
+
     public void SetY_NZ(byte value)
     {
         _y = value;
         FlagNZ(_y);
     }
 
-    // --------------
+    public void SetSP(byte value) => _sp = value;
+    public void SetPC(ushort address) => _pc = address;
+
+    public void SetC(bool value) => _carry = value;
+    public void SetI(bool value) => _interrupt = value;
+    public void SetO(bool value) => _overflow = value;
+    public void SetD(bool value) => _decimal = value;
+
+    // ----- Instructions init -----
+
     private readonly Instruction[] _instructionSet = new Instruction[256];
     private void InitInstructions()
     {
@@ -133,10 +159,10 @@ public class CPU
         Init(new STY(this, 0x8C, absolute, 4));
 
         // Transfert
-        Init(new TAX(this));
-        Init(new TXA(this));
-        Init(new TAY(this));
-        Init(new TYA(this));
+        Init(new TAX(this)); // Implied
+        Init(new TXA(this)); // Implied
+        Init(new TAY(this)); // Implied
+        Init(new TYA(this)); // Implied
 
         // Arithmetic
         Init(new ADC(this, 0x69, immediate, 2));
@@ -285,17 +311,22 @@ public class CPU
         Init(new NOP(this)); // Implied
     }
 
+    // ----- Execution -----
+
     public void RunNextInstruction()
     {
-        var opcode = NextByte();
+        var opcode = _memory.Read(_pc);
 
         var instruction = _instructionSet[opcode];
 
-        instruction.Run();
+        instruction.Execute();
+
+        _pc = (ushort)(_pc + instruction.Bytes);
+        _cycles += instruction.Cycles;
     }
 
-    public byte NextByte() => _memory.Read(_pc++);
-    public ushort NextWord() => (ushort)(_memory.Read(_pc++) | (_memory.Read(_pc++) << 8));
+    public byte PeekByteArgument() => _memory.ReadByteArgument(_pc);
+    public ushort PeekWordArgument() => _memory.ReadWordArgument(_pc);
 
     private void FlagNZ(byte value)
     {
@@ -309,5 +340,4 @@ public class CPU
         _negative = (value >> 7) == 1;
         _carry = value > 0xFF;
     }
-
 }

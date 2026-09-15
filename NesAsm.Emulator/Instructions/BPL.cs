@@ -9,9 +9,8 @@ public record BPL : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        Cpu.SetPC(AddressMode.GetAddress());
+    }
 }
-
-
-
-

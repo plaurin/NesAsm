@@ -9,9 +9,8 @@ public record STA : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
         AddressMode.SetValue(Cpu.A);
-        //_cycles += cycles + addressing.ExtraCycle;
     }
 }

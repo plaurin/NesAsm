@@ -9,7 +9,7 @@ public record LDX : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
         var res = AddressMode.GetValue();
         Cpu.SetX_NZ(res);

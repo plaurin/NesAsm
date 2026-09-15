@@ -2,14 +2,10 @@
 
 public class Relative(CPU cpu) : AddressMode
 {
-    public override byte GetValue()
-    {
-        var offset = (sbyte)cpu.NextByte();
-        var address = (ushort)(cpu.PC + offset);
-
-        return cpu.Memory.Read(address);
-    }
+    public override int Bytes => 1;
+    public override byte GetValue() => cpu.Memory.Read(GetAddress());
     // TODO Extra cycle
 
     public override void SetValue(byte value) => throw new NotImplementedException();
+    public override ushort GetAddress() => (ushort)(cpu.PC + (sbyte)cpu.PeekByteArgument());
 }

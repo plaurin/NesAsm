@@ -9,6 +9,6 @@ public record NOP : Instruction
     {
     }
 
-    protected override void Execute() { } // No Op
+    public override void Execute() { } // No Op
 }
 

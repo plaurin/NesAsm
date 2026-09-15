@@ -9,6 +9,5 @@ public record CLD : Instruction
     {
     }
 
-    protected override void Execute() => throw new NotImplementedException();
+    public override void Execute() => Cpu.SetD(false);
 }
-

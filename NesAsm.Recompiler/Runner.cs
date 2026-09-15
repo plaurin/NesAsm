@@ -6,16 +6,16 @@ public class Runner
 {
     private readonly CPU _cpu;
 
-    public Runner()
+    public Runner(Cart cart)
     {
-        var memory = new NesMemory();
+        var memory = new NesMemory(cart);
         _cpu = new CPU(memory);
     }
 
-    public void Run(IReadOnlyCollection<Subroutine> subroutines, Cart cart)
+    public void Run(IReadOnlyCollection<Subroutine> subroutines)
     {
-        var resetSub = subroutines.FirstOrDefault(s => s.Address == cart.ResetAddress);
-        var nmiSub = subroutines.FirstOrDefault(s => s.Address == cart.NmiAddress);
+        var resetSub = subroutines.FirstOrDefault(s => s.Address == _cpu.Cart.ResetAddress);
+        var nmiSub = subroutines.FirstOrDefault(s => s.Address == _cpu.Cart.NmiAddress);
 
         if (resetSub != null)
         {
@@ -25,6 +25,13 @@ public class Runner
         if (nmiSub != null)
         {
             RunSub(nmiSub);
+        }
+
+        _cpu.Init();
+
+        while(true)
+        {
+            _cpu.RunNextInstruction();
         }
     }
 

@@ -9,10 +9,10 @@ public record LDA : Instruction
     {
     }
 
-    protected override void Execute()
+    public override void Execute()
     {
-        var res = AddressMode.GetValue();
-        Cpu.SetA_NZ(res);
+        var value = AddressMode.GetValue();
+        Cpu.SetA_NZ(value);
         //_cycles += cycles + addressing.ExtraCycle;
     }
 }
