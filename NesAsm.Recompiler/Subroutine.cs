@@ -22,10 +22,12 @@ public record Subroutine(ICollection<Instruction> Instructions)
 
     public bool EndsWithJSR => Instruction.IsJumpToSubroutine(Instructions.Last().Mnemonic);
 
+    public string Label => Labels.GetLabel(Address);
+    public string LabelOrAddress => string.IsNullOrEmpty(Label) ? $"{Address:X4}" : Label;
+
     public override string ToString()
     {
-        var label = Labels.GetLabel(Address);
-        label = !string.IsNullOrWhiteSpace(label) ? $"{label} at " : string.Empty;
+        var label = !string.IsNullOrWhiteSpace(Label) ? $"{Label} at " : string.Empty;
         return $"Sub {label}${Address:X4} to ${LastInstructionAddress:X4} (Instructions: {Instructions.Count}, Size: {Size})";
     }
 }

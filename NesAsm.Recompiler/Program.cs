@@ -24,6 +24,7 @@ internal class Program
         OutputSubroutines(outputPath, subroutines);
         OutputInstructions(outputPath, subroutines);
         OutputSubroutinesWithUnknown(outputPath, subroutines);
+        OutputRAMAccess(outputPath, subroutines);
 
         Console.WriteLine($"Total subroutines: {subroutines.Count}");
         Console.WriteLine($"Total instructions: {subroutines.SelectMany(f => f.Instructions).Count()}");
@@ -124,6 +125,76 @@ internal class Program
             }
         }
         File.WriteAllText(Path.Combine(outputPath, "unknown.txt"), sb.ToString());
+    }
+
+    private static void OutputRAMAccess(string outputPath, IReadOnlyCollection<Subroutine> subroutines)
+    {
+        var sb = new StringBuilder();
+
+        var directMode = new[] { AddressingMode.ZeroPage, AddressingMode.Absolute };
+        var indirectMode = new[] { AddressingMode.ZeroPageX, AddressingMode.AbsoluteX, AddressingMode.AbsoluteY, AddressingMode.Indirect, AddressingMode.IndirectIndexed };
+
+        var access = new Dictionary<ushort, HashSet<Subroutine>>();
+        var indirectAccess = new Dictionary<ushort, HashSet<Subroutine>>();
+
+        static void RecordAccess(Subroutine sub, Instruction ins, Dictionary<ushort, HashSet<Subroutine>> dictionary)
+        {
+            if (!dictionary.TryGetValue(ins.UShortArgument, out var list))
+            {
+                list = [];
+                dictionary[ins.UShortArgument] = list;
+            }
+
+            list.Add(sub);
+        }
+
+        foreach (var sub in subroutines)
+        {
+            foreach (var ins in sub.Instructions)
+            {
+                if (directMode.Any(m => m == ins.Mode))
+                {
+                    if (ins.UShortArgument >= 0x8000)
+                    {
+                        if (ins.Mnemonic == "JSR" || ins.Mnemonic == "JMP")
+                            continue;
+                    }
+
+                    RecordAccess(sub, ins, access);
+                }
+
+                if (indirectMode.Any(m => m == ins.Mode))
+                {
+                    if (ins.UShortArgument >= 0x8000)
+                    {
+                        if (ins.Mnemonic == "JSR" || ins.Mnemonic == "JMP")
+                            continue;
+                    }
+
+                    RecordAccess(sub, ins, indirectAccess);
+                }
+            }
+        }
+
+        sb.AppendLine("Direct Access");
+        foreach (var item in access.OrderBy(a => a.Key))
+        {
+            sb.AppendLine($"{item.Key:X4} : {string.Join(" ", item.Value.OrderBy(x => x.Address).Select(x => x.LabelOrAddress)) }");
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("------------------------------------------------");
+        sb.AppendLine();
+
+        sb.AppendLine("Indirect Access");
+        foreach (var item in indirectAccess.OrderBy(a => a.Key))
+        {
+            sb.AppendLine($"{item.Key:X4} : {string.Join(" ", item.Value.OrderBy(x => x.Address).Select(x => x.LabelOrAddress))}");
+        }
+
+        // TODO Split by Zone
+
+        File.WriteAllText(Path.Combine(outputPath, "ramaccess.txt"), sb.ToString());
     }
 
     private static (string gameName, string romPath, string outputPath) ParseArguments(string[] args)
