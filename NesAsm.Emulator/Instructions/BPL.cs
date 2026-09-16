@@ -11,6 +11,9 @@ public record BPL : Instruction
 
     public override void Execute()
     {
-        Cpu.SetPC(AddressMode.GetAddress());
+        if (!Cpu.Negative)
+        {
+            Cpu.SetPC(AddressMode.GetAddress());
+        }
     }
 }

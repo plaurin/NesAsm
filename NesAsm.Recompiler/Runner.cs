@@ -5,10 +5,12 @@ namespace NesAsm.Recompiler;
 public class Runner
 {
     private readonly CPU _cpu;
+    private readonly PPUInstance _ppu;
 
     public Runner(Cart cart)
     {
-        var memory = new NesMemory(cart);
+        _ppu = new PPUInstance();
+        var memory = new NesMemory(cart, _ppu);
         _cpu = new CPU(memory);
     }
 
@@ -32,6 +34,7 @@ public class Runner
         while(true)
         {
             _cpu.RunNextInstruction();
+            _ppu.RunToCycle(_cpu.Cycles);
         }
     }
 

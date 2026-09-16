@@ -9,5 +9,10 @@ public record CMP : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.SetC(Cpu.A >= value);
+        Cpu.FlagNZ((byte)(Cpu.A - value));
+    }
 }

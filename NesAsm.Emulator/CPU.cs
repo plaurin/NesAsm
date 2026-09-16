@@ -93,6 +93,8 @@ public class CPU
     public void SetPC(ushort address) => _pc = address;
 
     public void SetC(bool value) => _carry = value;
+    public void SetZ(bool value) => _zero = value;
+    public void SetN(bool value) => _negative = value;
     public void SetI(bool value) => _interrupt = value;
     public void SetO(bool value) => _overflow = value;
     public void SetD(bool value) => _decimal = value;
@@ -328,7 +330,7 @@ public class CPU
     public byte PeekByteArgument() => _memory.ReadByteArgument(_pc);
     public ushort PeekWordArgument() => _memory.ReadWordArgument(_pc);
 
-    private void FlagNZ(byte value)
+    public void FlagNZ(byte value)
     {
         _zero = value == 0;
         _negative = (value >> 7) == 1;
