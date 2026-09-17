@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record Instruction(int Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, int? Argument = null)
+public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, ushort? Argument = null)
 {
     public byte ByteArgument => (byte)Argument!;
     public ushort UShortArgument => (ushort)Argument!;
@@ -17,6 +17,18 @@ public record Instruction(int Address, byte Opcode, string Mnemonic, int Bytes, 
     public static bool IsJump(string mnemonic) => mnemonic == "JMP";
 
     public static bool IsJumpToSubroutine(string mnemonic) => mnemonic == "JSR";
+
+    public static bool IsDirectMemoryAccess(AddressingMode mode) => mode == AddressingMode.ZeroPage || mode == AddressingMode.Absolute;
+    public static bool IsIndirectMemoryAccess(AddressingMode mode) => mode == AddressingMode.ZeroPageX || mode == AddressingMode.AbsoluteX
+        || mode == AddressingMode.AbsoluteY || mode == AddressingMode.IndirectIndexed;
+
+    public static bool IsMemoryRead(string mnemonic) => mnemonic == "LDA" || mnemonic == "LDX" || mnemonic == "LDY" || mnemonic == "ADC" || mnemonic == "AND"
+        || mnemonic == "ASL" || mnemonic == "BIT" || mnemonic == "CMP" || mnemonic == "CPX" || mnemonic == "CPY" || mnemonic == "DEC" || mnemonic == "DEX"
+        || mnemonic == "DEY" || mnemonic == "EOR" || mnemonic == "INC" || mnemonic == "INX" || mnemonic == "INY" || mnemonic == "LSR" || mnemonic == "ORA"
+        || mnemonic == "ROL" || mnemonic == "ROR" || mnemonic == "SBC";
+
+    public static bool IsMemoryWrite(string mnemonic) => mnemonic == "STA" || mnemonic == "STX" || mnemonic == "STY" || mnemonic == "DEC" || mnemonic == "INC"
+        || mnemonic == "LSR" || mnemonic == "ASL" || mnemonic == "ROL" || mnemonic == "ROR";
 
     public override string ToString()
     {
@@ -37,5 +49,25 @@ public record Instruction(int Address, byte Opcode, string Mnemonic, int Bytes, 
         };
 
         return $"${Address:X4} [{Opcode:X2}] {Mnemonic} {argument}".Trim();
+    }
+
+    public MemoryAccessRecord? GetMemoryAccess(Subroutine subroutine)
+    {
+        bool? isDirectAccess = null;
+
+        if (IsDirectMemoryAccess(Mode) && (UShortArgument < 0x8000 || (Mnemonic != "JSR" && Mnemonic != "JMP")))
+            isDirectAccess = true;
+        else if (IsIndirectMemoryAccess(Mode))
+            isDirectAccess = false;
+        else if (IsDynamicDispatch(Opcode))
+            isDirectAccess = true;
+
+        if (isDirectAccess.HasValue)
+        {
+            return new MemoryAccessRecord(subroutine, this, RomAddress: Address, TargetAddress: UShortArgument,
+                IsRead: IsMemoryRead(Mnemonic), IsWrite: IsMemoryWrite(Mnemonic), IsDirectAccess: isDirectAccess.Value);
+        }
+
+        return null;
     }
 }

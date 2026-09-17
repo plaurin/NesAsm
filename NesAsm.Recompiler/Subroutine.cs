@@ -2,7 +2,7 @@
 
 public record Subroutine(ICollection<Instruction> Instructions)
 {
-    public int Address => Instructions.First().Address;
+    public ushort Address => Instructions.First().Address;
     public int LastInstructionAddress => Instructions.Last().Address;
     public int Size => LastInstructionAddress - Address + Instructions.Last().Bytes;
 
@@ -30,4 +30,13 @@ public record Subroutine(ICollection<Instruction> Instructions)
         var label = !string.IsNullOrWhiteSpace(Label) ? $"{Label} at " : string.Empty;
         return $"Sub {label}${Address:X4} to ${LastInstructionAddress:X4} (Instructions: {Instructions.Count}, Size: {Size})";
     }
+
+    public IEnumerable<MemoryAccessRecord> GetDirectAccess() => GetMemoryAccess().Where(m => m.IsDirectAccess);
+
+    public IEnumerable<MemoryAccessRecord> GetIndirectAccess() => GetMemoryAccess().Where(m => !m.IsDirectAccess);
+
+    public IEnumerable<MemoryAccessRecord> GetDynamicDispatch() => Instructions.Where(i => Instruction.IsDynamicDispatch(i.Opcode)).Select(i => i.GetMemoryAccess(this)!);
+
+    public IEnumerable<MemoryAccessRecord> GetMemoryAccess() => Instructions.Select(i => i.GetMemoryAccess(this)).Where(m => m != null).Select(m => m!);
+
 }

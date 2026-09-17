@@ -4,9 +4,9 @@ namespace NesAsm.Recompiler;
 
 public class Parser
 {
-    public static IReadOnlyCollection<Subroutine> ParsePrgRom(Cart cart, IEnumerable<int> dynamicDispatchAddresses)
+    public static IReadOnlyCollection<Subroutine> ParsePrgRom(Cart cart, IEnumerable<ushort> dynamicDispatchAddresses)
     {
-        var addressesToParse = new Queue<int>();
+        var addressesToParse = new Queue<ushort>();
         
         addressesToParse.Enqueue(cart.ResetAddress);
         addressesToParse.Enqueue(cart.NmiAddress);
@@ -121,11 +121,11 @@ public class Parser
     {
         Console.WriteLine($"Continuing parsing sub after JSR ${sub.LastInstructionAddress:X4}");
 
-        var address = sub.LastInstructionAddress + sub.Instructions.Last().Bytes;
+        var address = (ushort)(sub.LastInstructionAddress + sub.Instructions.Last().Bytes);
         ParseSub(prgRom, sub, address);
     }
 
-    private static Subroutine ParseNewSub(ReadOnlySpan<byte> prgRom, int address)
+    private static Subroutine ParseNewSub(ReadOnlySpan<byte> prgRom, ushort address)
     {
         Console.WriteLine($"Parsing sub at ${address:X4}");
 
@@ -138,9 +138,9 @@ public class Parser
         return sub;
     }
 
-    private static void ParseSub(ReadOnlySpan<byte> prgRom, Subroutine sub, int address)
+    private static void ParseSub(ReadOnlySpan<byte> prgRom, Subroutine sub, ushort address)
     {
-        var branchesToParse = new Queue<int>();
+        var branchesToParse = new Queue<ushort>();
         branchesToParse.Enqueue(address);
 
         var instructions = sub.Instructions;
@@ -153,7 +153,7 @@ public class Parser
 
                 var ins = GetInstruction(prgRom, address);
                 instructions.Add(ins);
-                address += ins.Bytes;
+                address = (ushort)(address + ins.Bytes);
 
                 //Console.WriteLine(ins.ToString());
 
@@ -178,12 +178,12 @@ public class Parser
         }
     }
 
-    public static Instruction GetInstruction(ReadOnlySpan<byte> prgRom, int address)
+    public static Instruction GetInstruction(ReadOnlySpan<byte> prgRom, ushort address)
     {
         var romIndex = address - 0x8000;
         var opcode = prgRom[romIndex];
 
-        Instruction Ins(string mnemonic, int bytes, (AddressingMode mode, int? argument) args) => new(address, opcode, mnemonic, bytes, args.mode, args.argument);
+        Instruction Ins(string mnemonic, int bytes, (AddressingMode mode, int? argument) args) => new(address, opcode, mnemonic, bytes, args.mode, (ushort?)args.argument);
 
         var firstByte = prgRom[romIndex + 1];
         var secondByte = prgRom[romIndex + 2];
@@ -313,8 +313,8 @@ public class Parser
     }
 }
 
-public record Jump(int Address, int TargetAddress);
+public record Jump(int Address, ushort TargetAddress);
 
-public record Branch(int Address, int TargetAddress);
+public record Branch(int Address, ushort TargetAddress);
 
-public record ReturnAfterJSR(Subroutine Sub, int TargetAddress);
+public record ReturnAfterJSR(Subroutine Sub, ushort TargetAddress);

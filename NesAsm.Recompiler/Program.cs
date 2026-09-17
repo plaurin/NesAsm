@@ -58,9 +58,9 @@ internal class Program
         }
     }
 
-    private static IEnumerable<int> LoadDynamicDispatchs(string outputPath)
+    private static IEnumerable<ushort> LoadDynamicDispatchs(string outputPath)
     {
-        var dispatchs = new List<int>();
+        var dispatchs = new List<ushort>();
 
         var labelsFilePath = Path.Combine(outputPath, "dispatchs.txt");
         if (File.Exists(labelsFilePath))
@@ -72,7 +72,7 @@ internal class Program
                 var targetAddress = line[5..].Trim();
                 if (int.TryParse(targetAddress, System.Globalization.NumberStyles.HexNumber, null, out var addr))
                 {
-                    dispatchs.Add(addr);
+                    dispatchs.Add((ushort)addr);
                 }
             }
         }
@@ -131,66 +131,52 @@ internal class Program
     {
         var sb = new StringBuilder();
 
-        var directMode = new[] { AddressingMode.ZeroPage, AddressingMode.Absolute };
-        var indirectMode = new[] { AddressingMode.ZeroPageX, AddressingMode.AbsoluteX, AddressingMode.AbsoluteY, AddressingMode.Indirect, AddressingMode.IndirectIndexed };
-
-        var access = new Dictionary<ushort, HashSet<Subroutine>>();
-        var indirectAccess = new Dictionary<ushort, HashSet<Subroutine>>();
-
-        static void RecordAccess(Subroutine sub, Instruction ins, Dictionary<ushort, HashSet<Subroutine>> dictionary)
+        void PrintMemoryAccess(IEnumerable<MemoryAccessRecord> memoryAccesRecords)
         {
-            if (!dictionary.TryGetValue(ins.UShortArgument, out var list))
+            foreach (var item in memoryAccesRecords.GroupBy(m => m.TargetAddress).OrderBy(a => a.Key))
             {
-                list = [];
-                dictionary[ins.UShortArgument] = list;
+                var target = Labels.GetLabelAndMemoryAddress(item.Key);
+                var sourceSub = item
+                    .GroupBy(m => m.Subroutine)
+                    .OrderBy(g => g.Key.Address)
+                    .Select(g => $"{(g.Any(r => r.IsRead) ? "R": " ")}{(g.Any(r => r.IsWrite) ? "W" : " ")} {Labels.GetLabelAndMemoryAddress(g.Key.Address)}");
+                sb.AppendLine($"{target,-15} : {string.Join("  ", sourceSub)}");
             }
 
-            list.Add(sub);
+            // TODO split
+            /*
+             * ZP <FF
+             * Stack 100-1FF (?100-19F pour nametable?)
+             * OAM 200-2FF
+             * Reste RAM 300-7FF
+             * PPU 2000-2007
+             * Mirror PPU 2008-3FFF
+             * - Background Palette 3F00-3F0F
+             * - Sprite Patelle 3F01-3F1F
+             * Work Ram 6000-7FFF
+             * Read ROM 8000-FFFF
+             * */
         }
 
-        foreach (var sub in subroutines)
+        void PrintSeparator()
         {
-            foreach (var ins in sub.Instructions)
-            {
-                if (directMode.Any(m => m == ins.Mode))
-                {
-                    if (ins.UShortArgument >= 0x8000)
-                    {
-                        if (ins.Mnemonic == "JSR" || ins.Mnemonic == "JMP")
-                            continue;
-                    }
-
-                    RecordAccess(sub, ins, access);
-                }
-
-                if (indirectMode.Any(m => m == ins.Mode))
-                {
-                    if (ins.UShortArgument >= 0x8000)
-                    {
-                        if (ins.Mnemonic == "JSR" || ins.Mnemonic == "JMP")
-                            continue;
-                    }
-
-                    RecordAccess(sub, ins, indirectAccess);
-                }
-            }
+            sb.AppendLine();
+            sb.AppendLine("------------------------------------------------");
+            sb.AppendLine();
         }
 
         sb.AppendLine("Direct Access");
-        foreach (var item in access.OrderBy(a => a.Key))
-        {
-            sb.AppendLine($"{item.Key:X4} : {string.Join(" ", item.Value.OrderBy(x => x.Address).Select(x => x.LabelOrAddress)) }");
-        }
+        PrintMemoryAccess(subroutines.SelectMany(s => s.GetDirectAccess()));
 
-        sb.AppendLine();
-        sb.AppendLine("------------------------------------------------");
-        sb.AppendLine();
+        PrintSeparator();
 
         sb.AppendLine("Indirect Access");
-        foreach (var item in indirectAccess.OrderBy(a => a.Key))
-        {
-            sb.AppendLine($"{item.Key:X4} : {string.Join(" ", item.Value.OrderBy(x => x.Address).Select(x => x.LabelOrAddress))}");
-        }
+        PrintMemoryAccess(subroutines.SelectMany(s => s.GetIndirectAccess()));
+
+        PrintSeparator();
+
+        sb.AppendLine("Dynamic Dispatch");
+        PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
 
         // TODO Split by Zone
 
