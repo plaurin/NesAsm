@@ -28,7 +28,8 @@ public record Subroutine(ICollection<Instruction> Instructions)
     public override string ToString()
     {
         var label = !string.IsNullOrWhiteSpace(Label) ? $"{Label} at " : string.Empty;
-        return $"Sub {label}${Address:X4} to ${LastInstructionAddress:X4} (Instructions: {Instructions.Count}, Size: {Size})";
+        var flags = GetFlags();
+        return $"Sub {label}${Address:X4} to ${LastInstructionAddress:X4} (Instructions: {Instructions.Count}, Size: {Size})  {flags}";
     }
 
     public IEnumerable<MemoryAccessRecord> GetDirectAccess() => GetMemoryAccess().Where(m => m.IsDirectAccess);
@@ -39,4 +40,22 @@ public record Subroutine(ICollection<Instruction> Instructions)
 
     public IEnumerable<MemoryAccessRecord> GetMemoryAccess() => Instructions.Select(i => i.GetMemoryAccess(this)).Where(m => m != null).Select(m => m!);
 
+    private string GetFlags()
+    {
+        var flags = new List<string>();
+        var memoryAccess = GetMemoryAccess();
+
+        if (memoryAccess.Any(m => m.IsDynamicDispatch)) flags.Add("[DynamicDispatch]");
+        if (memoryAccess.Any(m => m.IsZeroPageAccess)) flags.Add("[ZeroPage]");
+        if (memoryAccess.Any(m => m.IsStackPageAccess)) flags.Add("[StackPage]");
+        if (memoryAccess.Any(m => m.IsOAMPageAccess)) flags.Add("[OAMPage]");
+        if (memoryAccess.Any(m => m.IsOtherRAMPageAccess)) flags.Add("[OtherRAMPage]");
+        if (memoryAccess.Any(m => m.IsPPURegisterAccess)) flags.Add("[PPU]");
+        if (memoryAccess.Any(m => m.IsAPURegisterAccess)) flags.Add("[APU]");
+        if (memoryAccess.Any(m => m.IsOAMDataAccess)) flags.Add("[OAMData]");
+        if (memoryAccess.Any(m => m.IsJoypadAccess)) flags.Add("[Joypad]");
+        if (memoryAccess.Any(m => m.IsWorkRAMAccess)) flags.Add("[WorkRAM]");
+        
+        return string.Join(" ", flags);
+    }
 }

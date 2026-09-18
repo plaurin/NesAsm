@@ -50,7 +50,7 @@ public class Labels
             0x4014 => "SpriteDma_4014",
             0x4015 => "ApuStatus_4015",
             0x4016 => "Controller1_4016",
-            0x4017 => "Ctrl2FrameCounter_4017",
+            0x4017 => "Ctrl2FrameCnt_4017",
             _ => address <= 0xFF ? $"${address:X2}" : $"${address:X4}",
         };
     }

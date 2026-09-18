@@ -92,7 +92,8 @@ internal class Program
             sb.AppendLine(sub.ToString());
             foreach (var instruction in sub.Instructions)
             {
-                sb.AppendLine(instruction.ToString());
+                var memoryAccess = instruction.GetMemoryAccess(sub);
+                sb.AppendLine($"{instruction.ToString(),-40}{memoryAccess}");
             }
             sb.AppendLine();
         }
@@ -133,8 +134,16 @@ internal class Program
 
         void PrintMemoryAccess(IEnumerable<MemoryAccessRecord> memoryAccesRecords)
         {
+            MemoryRegion? currentRegion = null;
             foreach (var item in memoryAccesRecords.GroupBy(m => m.TargetAddress).OrderBy(a => a.Key))
             {
+                var region = item.First().MemoryRegion;
+                if (item.First().MemoryRegion != currentRegion)
+                {
+                    currentRegion = region;
+                    sb.AppendLine();
+                    sb.AppendLine($"-- {region} --");
+                }
                 var target = Labels.GetLabelAndMemoryAddress(item.Key);
                 var sourceSub = item
                     .GroupBy(m => m.Subroutine)
@@ -150,9 +159,7 @@ internal class Program
              * OAM 200-2FF
              * Reste RAM 300-7FF
              * PPU 2000-2007
-             * Mirror PPU 2008-3FFF
-             * - Background Palette 3F00-3F0F
-             * - Sprite Patelle 3F01-3F1F
+             * ? Mirror PPU 2008-3FFF
              * Work Ram 6000-7FFF
              * Read ROM 8000-FFFF
              * */
@@ -165,17 +172,17 @@ internal class Program
             sb.AppendLine();
         }
 
-        sb.AppendLine("Direct Access");
+        sb.AppendLine("===== Direct Access =====");
         PrintMemoryAccess(subroutines.SelectMany(s => s.GetDirectAccess()));
 
         PrintSeparator();
 
-        sb.AppendLine("Indirect Access");
+        sb.AppendLine("===== Indirect Access =====");
         PrintMemoryAccess(subroutines.SelectMany(s => s.GetIndirectAccess()));
 
         PrintSeparator();
 
-        sb.AppendLine("Dynamic Dispatch");
+        sb.AppendLine("===== Dynamic Dispatch =====");
         PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
 
         // TODO Split by Zone
