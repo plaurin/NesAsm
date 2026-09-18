@@ -55,7 +55,7 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
     {
         bool? isDirectAccess = null;
 
-        if (IsDirectMemoryAccess(Mode) && (UShortArgument < 0x8000 || (Mnemonic != "JSR" && Mnemonic != "JMP")))
+        if (IsDirectMemoryAccess(Mode))
             isDirectAccess = true;
         else if (IsIndirectMemoryAccess(Mode))
             isDirectAccess = false;
@@ -65,7 +65,7 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
         if (isDirectAccess.HasValue)
         {
             return new MemoryAccessRecord(subroutine, this, RomAddress: Address, TargetAddress: UShortArgument,
-                IsRead: IsMemoryRead(Mnemonic), IsWrite: IsMemoryWrite(Mnemonic), IsDirectAccess: isDirectAccess.Value);
+                IsRead: IsMemoryRead(Mnemonic), IsWrite: IsMemoryWrite(Mnemonic), IsJump: IsJump(Mnemonic) || IsJumpToSubroutine(Mnemonic), IsDirectAccess: isDirectAccess.Value);
         }
 
         return null;

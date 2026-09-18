@@ -57,7 +57,7 @@ public class Labels
 
     public static void AddMemoryLabel(int address, string label)
     {
-        _romLabels.Add(address, label);
+        _romLabels[address] = label;
     }
 
     public static string GetLabel(int address)

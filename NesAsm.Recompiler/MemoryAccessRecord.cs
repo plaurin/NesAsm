@@ -1,10 +1,14 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record MemoryAccessRecord(Subroutine Subroutine, Instruction Instruction, ushort RomAddress, ushort TargetAddress, bool IsRead, bool IsWrite, bool IsDirectAccess)
+public record MemoryAccessRecord(Subroutine Subroutine, Instruction Instruction, ushort RomAddress, ushort TargetAddress, bool IsRead, bool IsWrite, bool IsJump, bool IsDirectAccess)
 {
     public override string ToString()
     {
-        return $"{(IsDirectAccess ? "D" : "I")}{(IsRead ? "R" : " ")}{(IsWrite ? "W" : " ")} {Labels.GetLabelAndMemoryAddress(TargetAddress)}";
+        var direct = IsDirectAccess ? "D" : "I";
+        string read = IsRead ? "R" : " ";
+        string write = IsWrite ? "W" : " ";
+        string jump = IsJump ? "J" : "";
+        return $"{direct}{read}{write}{jump} {Labels.GetLabelAndMemoryAddress(TargetAddress)}";
     }
 
     public MemoryRegion MemoryRegion

@@ -15,6 +15,7 @@ internal class Program
         Directory.CreateDirectory(outputPath);
 
         LoadCustomLabels(outputPath);
+        LoadSymbols(outputPath);
         var dynamicDispatchAddresses = LoadDynamicDispatchs(outputPath);
 
         var cart = new Cart(romPath);
@@ -84,6 +85,34 @@ internal class Program
         return dispatchs;
     }
 
+    private static void LoadSymbols(string outputPath)
+    {
+        var labelsFilePath = Path.Combine(outputPath, "symbols.sym");
+        if (File.Exists(labelsFilePath))
+        {
+            var lines = File.ReadAllLines(labelsFilePath);
+            foreach (var line in lines)
+            {
+                if (line.Trim().StartsWith('#') || string.IsNullOrWhiteSpace(line))
+                {
+                    // Skip
+                }
+                else
+                {
+                    var parts = line.Split(' ');
+                    var address = parts[0]!;
+                    var label = parts[1];
+                    var type = parts[2];
+
+                    if (type == "func" || type == "ram")
+                        if (int.TryParse(address, System.Globalization.NumberStyles.HexNumber, null, out var addr))
+                            if (string.IsNullOrWhiteSpace(Labels.GetLabel(addr)))
+                                Labels.AddMemoryLabel(addr, label);
+                }
+            }
+        }
+    }
+
     private static void OutputInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
@@ -135,6 +164,7 @@ internal class Program
         void PrintMemoryAccess(IEnumerable<MemoryAccessRecord> memoryAccesRecords)
         {
             MemoryRegion? currentRegion = null;
+            int index = 0;
             foreach (var item in memoryAccesRecords.GroupBy(m => m.TargetAddress).OrderBy(a => a.Key))
             {
                 var region = item.First().MemoryRegion;
@@ -145,11 +175,16 @@ internal class Program
                     sb.AppendLine($"-- {region} --");
                 }
                 var target = Labels.GetLabelAndMemoryAddress(item.Key);
+                if (++index == 4)
+                {
+                    index = 0;
+                    target = $"{target} ".PadRight(25, '.')[..25];
+                }
                 var sourceSub = item
                     .GroupBy(m => m.Subroutine)
                     .OrderBy(g => g.Key.Address)
                     .Select(g => $"{(g.Any(r => r.IsRead) ? "R": " ")}{(g.Any(r => r.IsWrite) ? "W" : " ")} {Labels.GetLabelAndMemoryAddress(g.Key.Address)}");
-                sb.AppendLine($"{target,-15} : {string.Join("  ", sourceSub)}");
+                sb.AppendLine($"{target,-25} : {string.Join("  ", sourceSub)}");
             }
 
             // TODO split
