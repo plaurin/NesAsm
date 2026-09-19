@@ -40,6 +40,12 @@ public class Parser
                     continue;
                 }
 
+                if (subroutines.Any(s => address >= s.Address && address <= s.LastInstructionAddress))
+                {
+                    Console.WriteLine($"Endless loop inside current subroutine at ${address:X4}, skipping");
+                    continue;
+                }
+
                 var sub = ParseNewSub(cart.PrgRom, address);
                 subroutines.Add(sub);
                 parsedAddresses.Add(address);

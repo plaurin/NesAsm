@@ -121,8 +121,11 @@ internal class Program
             sb.AppendLine(sub.ToString());
             foreach (var instruction in sub.Instructions)
             {
+                var branch = sub.Branches.FirstOrDefault(b => b.TargetAddress == instruction.Address);
+                var label = branch != null ? $"{Labels.GetLabelOrMemoryAddress(branch.TargetAddress)}:" : string.Empty;
+
                 var memoryAccess = instruction.GetMemoryAccess(sub);
-                sb.AppendLine($"{instruction.ToString(),-40}{memoryAccess}");
+                sb.AppendLine($"{label,-15}{instruction.ToString(),-40}{memoryAccess}");
             }
             sb.AppendLine();
         }
@@ -183,21 +186,9 @@ internal class Program
                 var sourceSub = item
                     .GroupBy(m => m.Subroutine)
                     .OrderBy(g => g.Key.Address)
-                    .Select(g => $"{(g.Any(r => r.IsRead) ? "R": " ")}{(g.Any(r => r.IsWrite) ? "W" : " ")} {Labels.GetLabelAndMemoryAddress(g.Key.Address)}");
+                    .Select(g => $"{(g.Any(r => r.IsRead) ? "R": " ")}{(g.Any(r => r.IsWrite) ? "W" : " ")}{(g.Any(r => r.IsJump) ? "J" : "")} {Labels.GetLabelAndMemoryAddress(g.Key.Address)}");
                 sb.AppendLine($"{target,-25} : {string.Join("  ", sourceSub)}");
             }
-
-            // TODO split
-            /*
-             * ZP <FF
-             * Stack 100-1FF (?100-19F pour nametable?)
-             * OAM 200-2FF
-             * Reste RAM 300-7FF
-             * PPU 2000-2007
-             * ? Mirror PPU 2008-3FFF
-             * Work Ram 6000-7FFF
-             * Read ROM 8000-FFFF
-             * */
         }
 
         void PrintSeparator()
@@ -219,8 +210,6 @@ internal class Program
 
         sb.AppendLine("===== Dynamic Dispatch =====");
         PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
-
-        // TODO Split by Zone
 
         File.WriteAllText(Path.Combine(outputPath, "ramaccess.txt"), sb.ToString());
     }
