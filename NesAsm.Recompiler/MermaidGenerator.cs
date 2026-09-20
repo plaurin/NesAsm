@@ -21,14 +21,20 @@ public class MermaidGenerator
         File.WriteAllText(Path.Combine(outputPath, "Subroutines.md"), sb.ToString());
     }
 
-    public static void GenerateRomTreeMap(string outputPath, IEnumerable<Subroutine> subroutines, int prgSize)
+    public static void GenerateRomTreeMap(string outputPath, IEnumerable<Subroutine> subroutines, IEnumerable<Subroutine> potentialSubroutines, int prgSize)
     {
         var sb = new StringBuilder();
         sb.AppendLine("```mermaid");
         sb.AppendLine("treemap-beta");
-        sb.AppendLine("\"Code\"");
 
+        sb.AppendLine("\"Code\"");
         foreach (var sub in subroutines)
+        {
+            sb.AppendLine($"    \"{sub.Address:X4}\" : {sub.Size}");
+        }
+
+        sb.AppendLine("\"Potential Code\"");
+        foreach (var sub in potentialSubroutines)
         {
             sb.AppendLine($"    \"{sub.Address:X4}\" : {sub.Size}");
         }
@@ -36,7 +42,7 @@ public class MermaidGenerator
         sb.AppendLine("\"Data\"");
 
         sb.AppendLine("\"Unknown\"");
-        var codeSize = subroutines.Sum(f => f.Size);
+        var codeSize = subroutines.Sum(f => f.Size) + potentialSubroutines.Sum(s => s.Size);
         sb.AppendLine($"    \"Unmapped\" : {prgSize - codeSize}");
 
         sb.AppendLine("```");

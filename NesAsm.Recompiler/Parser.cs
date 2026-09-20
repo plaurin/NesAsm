@@ -98,6 +98,131 @@ public class Parser
         return subroutines.OrderBy(f => f.Address).ToList();
     }
 
+    public static IReadOnlyCollection<Subroutine> TryParseEmptyPrgRomRange(Cart cart, IReadOnlyCollection<Subroutine> subroutines)
+    {
+        var potentialSubs = new List<Subroutine>();
+
+        int address = 0x8000;
+        while (address < 0xFFFF)
+        {
+            var existingSub = subroutines.SingleOrDefault(s => s.Address == address);
+            if (existingSub != null)
+            {
+                address = existingSub.LastInstructionAddress + existingSub.Instructions.Last().Bytes;
+            }
+            else
+            {
+                var sub = TryParseMemory(cart, subroutines, (ushort)address);
+
+                if (sub != null)
+                {
+                    potentialSubs.Add(sub);
+                    address = sub.LastInstructionAddress + sub.Instructions.Last().Bytes;
+                }
+                else
+                {
+                    var nextSub = subroutines.SkipWhile(s => s.Address <= address).FirstOrDefault();
+                    if (nextSub != null)
+                        address = nextSub.LastInstructionAddress + nextSub.Instructions.Last().Bytes;
+                    else
+                        address = 0xFFFF;
+                }
+            }
+        }
+
+        return potentialSubs.OrderBy(s => s.Address).ToList();
+    }
+
+    public static Subroutine? TryParseMemory(Cart cart, IReadOnlyCollection<Subroutine> subroutines, ushort address)
+    {
+        var nextOffset = address;
+
+        while (true)
+        {
+            if (subroutines.Any(s => s.Address == nextOffset)) return null;
+
+            Console.WriteLine($"Trying to parse address: {nextOffset:X4}");
+
+            var offset0Sub = ParseNewSub(cart.PrgRom, nextOffset);
+            var offset1Sub = ParseNewSub(cart.PrgRom, (ushort)(nextOffset + 1));
+            var offset2Sub = ParseNewSub(cart.PrgRom, (ushort)(nextOffset + 2));
+
+            var offsetSubs = new List<Subroutine>() { offset0Sub, offset1Sub, offset2Sub };
+
+            void TrimEndSub(Subroutine sub)
+            {
+                if (sub.Instructions.Count == 0) return;
+                foreach (var existingSub in subroutines)
+                {
+                    if (sub.LastInstructionAddress >= existingSub.Address && sub.LastInstructionAddress <= existingSub.LastInstructionAddress)
+                    {
+                        foreach (var existingIns in existingSub.Instructions.SkipWhile(i => i.Address < sub.Address))
+                        {
+                            var toRemove = sub.Instructions.SingleOrDefault(i => i.Address == existingIns.Address);
+                            if (toRemove != null)
+                                sub.Instructions.Remove(toRemove);
+                        }
+
+                        if (sub.Instructions.Count == 0) break;
+                    }
+                }
+            }
+
+            void TrimStartSub(Subroutine sub)
+            {
+                var invalidInstructions = sub.Instructions.Where(i => i.Mnemonic.StartsWith("Unknown"));
+                if (invalidInstructions.Any())
+                {
+                    var lastInvalidAddress = invalidInstructions.Max(i => i.Address);
+                    var instructionToRemove = sub.Instructions.TakeWhile(i => i.Address <= lastInvalidAddress).ToList();
+                    foreach (var toRemove in instructionToRemove)
+                    {
+                        sub.Instructions.Remove(toRemove);
+                    }
+                }
+            }
+
+            bool IsValidInstructionRegion(IEnumerable<Instruction> instructions)
+            {
+                int curValidIns = 0;
+                foreach (var ins in instructions)
+                {
+                    if (!ins.Mnemonic.StartsWith("Unknown"))
+                        curValidIns++;
+                    else
+                    {
+                        curValidIns = 0;
+                    }
+                }
+
+                return curValidIns > 3;
+            }
+
+            foreach (var sub in offsetSubs)
+                TrimEndSub(sub);
+
+            var validSubs = offsetSubs.Where(s => IsValidInstructionRegion(s.Instructions));
+            if (validSubs.Any())
+            {
+                foreach (var sub in validSubs)
+                    TrimStartSub(sub);
+
+                var foundSub = validSubs.OrderBy(s => s.Size).Last();
+
+                Console.WriteLine("Found something!");
+                return foundSub;
+            }
+            else
+            {
+                offsetSubs = offsetSubs.Where(s => s.Instructions.Count > 0).ToList();
+                if (offsetSubs.All(s => s.Instructions.Count == 0)) return null;
+
+                nextOffset = (ushort)(offsetSubs.Max(s => s.LastInstructionAddress + s.Instructions.Last().Bytes));
+                Console.WriteLine($"Found nothing before {nextOffset:X4}");
+            }
+        }
+    }
+
     private static Subroutine? FindSubroutineAtAddress(IReadOnlyCollection<Subroutine> subroutines, int address) 
         => subroutines.FirstOrDefault(f => address >= f.Address && address <= f.LastInstructionAddress);
 
@@ -156,6 +281,7 @@ public class Parser
             for (int i = 0; i < 500; i++) // Limit to avoid infinite loops in case of bad parsing
             {
                 if (instructions.Any(f => f.Address == address)) break; // Already parsed this instruction, exit
+                if (address >= 0xFFFD) break; // End of ROM
 
                 var ins = GetInstruction(prgRom, address);
                 instructions.Add(ins);

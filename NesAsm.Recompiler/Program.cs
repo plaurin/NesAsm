@@ -21,18 +21,22 @@ internal class Program
         var cart = new Cart(romPath);
 
         var subroutines = Parser.ParsePrgRom(cart, dynamicDispatchAddresses);
+        var potentialSubroutines = Parser.TryParseEmptyPrgRomRange(cart, subroutines);
 
         OutputSubroutines(outputPath, subroutines);
-        OutputInstructions(outputPath, subroutines);
         OutputSubroutinesWithUnknown(outputPath, subroutines);
-        OutputRAMAccess(outputPath, subroutines);
+        OutputPotentialSubroutines(outputPath, potentialSubroutines);
+        OutputRom(outputPath, subroutines);
+        OutputRomMap(outputPath, subroutines, potentialSubroutines);
+        OutputPotentialSubInstructions(outputPath, potentialSubroutines);
+        OutputMemoryAccess(outputPath, subroutines);
 
         Console.WriteLine($"Total subroutines: {subroutines.Count}");
         Console.WriteLine($"Total instructions: {subroutines.SelectMany(f => f.Instructions).Count()}");
         Console.WriteLine($"Total size: {subroutines.Sum(f => f.Size)}");
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
-        MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, cart.PrgSize);
+        MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, potentialSubroutines, cart.PrgSize);
 
         new Runner(cart).Run(subroutines);
     }
@@ -113,7 +117,7 @@ internal class Program
         }
     }
 
-    private static void OutputInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
+    private static void OutputRom(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
         foreach (var sub in subroutines)
@@ -129,7 +133,73 @@ internal class Program
             }
             sb.AppendLine();
         }
-        File.WriteAllText(Path.Combine(outputPath, "instructions.txt"), sb.ToString());
+        File.WriteAllText(Path.Combine(outputPath, "rom.txt"), sb.ToString());
+    }
+
+    private static void OutputRomMap(string outputPath, IReadOnlyCollection<Subroutine> subroutines, IReadOnlyCollection<Subroutine> potentialSubroutines)
+    {
+        var sb = new StringBuilder();
+
+        var memAccessAddress = subroutines.SelectMany(s => s.GetMemoryAccess())
+            .Where(m => m.IsRead || m.IsWrite).Select(m => m.TargetAddress)
+            .Distinct().Where(a => a >= 0x8000).ToList();
+
+        var potentialMemAccessAddress = potentialSubroutines.SelectMany(s => s.GetMemoryAccess())
+            .Where(m => m.IsRead || m.IsWrite).Select(m => m.TargetAddress)
+            .Distinct().Where(a => a >= 0x8000).Except(memAccessAddress);
+
+        var regions = subroutines.Select(s => new { Type = "sub", IsOfficial = " ", s.Address, s.Size, s.Label })
+            .Concat(potentialSubroutines.Select(s => new { Type = "sub", IsOfficial = "?", s.Address, s.Size, s.Label }))
+            .Concat(memAccessAddress.Select(a => new { Type = "dat", IsOfficial = " ", Address = a, Size = 1, Label = Labels.GetLabel(a) }))
+            .Concat(potentialMemAccessAddress.Select(a => new { Type = "dat", IsOfficial = "?", Address = a, Size = 1, Label = Labels.GetLabel(a) }))
+            .OrderBy(x => x.Address);
+
+        var overlapping = new List<(ushort Address1, int LastAddress1, ushort Address2, int LastAddress2)>();
+        (ushort Address, int LastAddress) lastRegion = (0, 0);
+        foreach (var r in regions)
+        {
+            sb.AppendLine($"${r.Address:X4}-${r.Address + r.Size - 1:X4} l:{r.Size,4} {r.IsOfficial} {r.Type} {r.Label}");
+
+            var region = (r.Address, r.Address + r.Size - 1);
+            if (region.Address <= lastRegion.LastAddress)
+            {
+                overlapping.Add((lastRegion.Address, lastRegion.LastAddress, region.Address, region.Item2));
+            }
+
+            lastRegion = region;
+        }
+
+        sb.AppendLine();
+        sb.AppendLine("----------------");
+        sb.AppendLine();
+        sb.AppendLine("Overlapping memory regions:");
+        sb.AppendLine();
+
+        foreach (var o in overlapping)
+        {
+            sb.AppendLine($"${o.Address1:X4}-${o.LastAddress1:X4} and ${o.Address2:X4}-${o.LastAddress2:X4}");
+        }
+
+        File.WriteAllText(Path.Combine(outputPath, "rommap.txt"), sb.ToString());
+    }
+
+    private static void OutputPotentialSubInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
+    {
+        var sb = new StringBuilder();
+        foreach (var sub in subroutines)
+        {
+            sb.AppendLine(sub.ToString());
+            foreach (var instruction in sub.Instructions)
+            {
+                var branch = sub.Branches.FirstOrDefault(b => b.TargetAddress == instruction.Address);
+                var label = branch != null ? $"{Labels.GetLabelOrMemoryAddress(branch.TargetAddress)}:" : string.Empty;
+
+                var memoryAccess = instruction.GetMemoryAccess(sub);
+                sb.AppendLine($"{label,-15}{instruction.ToString(),-40}{memoryAccess}");
+            }
+            sb.AppendLine();
+        }
+        File.WriteAllText(Path.Combine(outputPath, "potentialsubins.txt"), sb.ToString());
     }
 
     private static void OutputSubroutines(string outputPath, IEnumerable<Subroutine> subroutines)
@@ -140,6 +210,16 @@ internal class Program
             sb.AppendLine($"- {sub.ToString()}");
         }
         File.WriteAllText(Path.Combine(outputPath, "subroutines.txt"), sb.ToString());
+    }
+
+    private static void OutputPotentialSubroutines(string outputPath, IReadOnlyCollection<Subroutine> potentialSubroutines)
+    {
+        var sb = new StringBuilder();
+        foreach (var sub in potentialSubroutines)
+        {
+            sb.AppendLine($"- {sub.ToString()}");
+        }
+        File.WriteAllText(Path.Combine(outputPath, "potentialsubs.txt"), sb.ToString());
     }
 
     private static void OutputSubroutinesWithUnknown(string outputPath, IEnumerable<Subroutine> subroutines)
@@ -160,7 +240,7 @@ internal class Program
         File.WriteAllText(Path.Combine(outputPath, "unknown.txt"), sb.ToString());
     }
 
-    private static void OutputRAMAccess(string outputPath, IReadOnlyCollection<Subroutine> subroutines)
+    private static void OutputMemoryAccess(string outputPath, IReadOnlyCollection<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
 
@@ -211,7 +291,7 @@ internal class Program
         sb.AppendLine("===== Dynamic Dispatch =====");
         PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
 
-        File.WriteAllText(Path.Combine(outputPath, "ramaccess.txt"), sb.ToString());
+        File.WriteAllText(Path.Combine(outputPath, "memoryaccess.txt"), sb.ToString());
     }
 
     private static (string gameName, string romPath, string outputPath) ParseArguments(string[] args)
