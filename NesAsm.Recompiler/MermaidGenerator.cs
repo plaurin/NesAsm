@@ -8,10 +8,10 @@ public class MermaidGenerator
     {
         var sb = new StringBuilder();
         sb.AppendLine("```mermaid");
-        sb.AppendLine("flowchart TD");
+        sb.AppendLine("flowchart LR");
         foreach (var sub in subroutines)
         {
-            sb.AppendLine($"    F{sub.Address:X4}[\"${sub.Address:X4}\"]");
+            sb.AppendLine($"    F{sub.Address:X4}[\"${Labels.GetLabelAndMemoryAddress(sub.Address)}\"]");
             foreach (var jump in sub.Jumps)
             {
                 sb.AppendLine($"    F{sub.Address:X4} --> F{jump.TargetAddress:X4}");
