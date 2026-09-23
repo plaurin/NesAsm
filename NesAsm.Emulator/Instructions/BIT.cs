@@ -9,5 +9,11 @@ public record BIT : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.SetZ((Cpu.A & value) == 0);
+        Cpu.SetO((value & 0b_0100_0000) == 0b_0100_0000);
+        Cpu.SetN((value & 0b_1000_0000) == 0b_1000_0000);
+    }
 }

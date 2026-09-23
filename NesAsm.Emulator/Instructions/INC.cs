@@ -9,5 +9,9 @@ public record INC : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        AddressMode.SetValue((byte)(value + 1));
+    }
 }

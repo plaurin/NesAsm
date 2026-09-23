@@ -9,5 +9,9 @@ public record AND : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.FlagNZ((byte)(Cpu.A & value));
+    }
 }

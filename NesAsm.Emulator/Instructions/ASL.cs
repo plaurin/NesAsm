@@ -9,5 +9,11 @@ public record ASL : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.SetC((value & 0b_1000_0000) == 0b_1000_0000);
+        value <<= 1;
+        AddressMode.SetValue(value);
+    }
 }

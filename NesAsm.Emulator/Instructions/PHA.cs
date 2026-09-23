@@ -9,5 +9,8 @@ public record PHA : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        Cpu.PushStack(Cpu.A);
+    }
 }

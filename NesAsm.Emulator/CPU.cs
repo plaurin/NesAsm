@@ -65,9 +65,10 @@ public class CPU
     public override string ToString() => $"""
         PC:{_pc:X4} A:{_a:X2} X:{_x:X2} Y:{_y:X2} 
         {(_carry ? "C" : "c")}{(_zero ? "Z" : "z")}{(_negative ? "N" : "n")}{(_interrupt ? "I" : "i")} 
-        S:{_sp:X2} Todo Stack
+        S:{_sp:X2} [{string.Join(" ", Stack.Select(b => b.ToString("X2")))}]
         """;
-        
+
+    private byte[] Stack => Enumerable.Range(_sp + 1, 0xFF - _sp).Select(x => (byte)x).Select(b => _memory.Read((ushort)(0x100 + b))).ToArray();
 
     // ----- Set -----
 
@@ -98,6 +99,24 @@ public class CPU
     public void SetI(bool value) => _interrupt = value;
     public void SetO(bool value) => _overflow = value;
     public void SetD(bool value) => _decimal = value;
+
+    public void PushStack(ushort address)
+    {
+        PushStack((byte)(address / 256));
+        PushStack((byte)(address % 256));
+    }
+
+    public void PushStack(byte value)
+    {
+        _memory.Write((ushort)(0x100 + _sp), value);
+        _sp -= 1;
+    }
+
+    public byte PopStack()
+    {
+        _sp += 1;
+        return _memory.Read((ushort)(0x100 + _sp));
+    }
 
     // ----- Instructions init -----
 
@@ -287,6 +306,8 @@ public class CPU
         // Jump
         Init(new JMP(this, 0x4C, absolute, 3));
         Init(new JMP(this, 0x6C, indirect, 5));
+        
+        Init(new JSR(this, 0x20, absolute, 6));
 
         Init(new RTS(this)); // Implied
         Init(new BRK(this)); // Implied

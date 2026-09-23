@@ -9,5 +9,8 @@ public record PLA : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        Cpu.SetA_NZ(Cpu.PopStack());
+    }
 }

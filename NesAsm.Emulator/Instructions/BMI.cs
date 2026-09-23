@@ -9,5 +9,11 @@ public record BMI : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        if (Cpu.Negative)
+        {
+            Cpu.SetPC(AddressMode.GetAddress());
+        }
+    }
 }

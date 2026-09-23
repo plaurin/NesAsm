@@ -9,5 +9,10 @@ public record CPY : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.SetC(Cpu.Y >= value);
+        Cpu.FlagNZ((byte)(Cpu.Y - value));
+    }
 }

@@ -9,5 +9,11 @@ public record BNE : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        if (!Cpu.Zero)
+        {
+            Cpu.SetPC(AddressMode.GetAddress());
+        }
+    }
 }

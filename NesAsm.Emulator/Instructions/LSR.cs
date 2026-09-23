@@ -9,5 +9,11 @@ public record LSR : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        Cpu.SetC((value & 0b_0000_0001) == 0b_0000_0001);
+        value >>= 1;
+        AddressMode.SetValue(value);
+    }
 }

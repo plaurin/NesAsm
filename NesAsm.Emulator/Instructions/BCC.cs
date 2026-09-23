@@ -9,5 +9,11 @@ public record BCC : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        if (!Cpu.Carry)
+        {
+            Cpu.SetPC(AddressMode.GetAddress());
+        }
+    }
 }

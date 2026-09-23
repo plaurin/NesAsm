@@ -9,5 +9,12 @@ public record RTS : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var hi = Cpu.PopStack();
+        var lo = Cpu.PopStack();
+        var address = (ushort)(hi * 256 + lo);
+
+        Cpu.SetPC((ushort)(address + 1));
+    }
 }

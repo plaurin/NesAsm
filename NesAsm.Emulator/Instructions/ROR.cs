@@ -9,5 +9,16 @@ public record ROR : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var value = AddressMode.GetValue();
+        var carry = (byte)(Cpu.Carry ? 0x80 : 0);
+
+        Cpu.SetC((value & 0b_0000_0001) == 0b_0000_0001);
+        value >>= 1;
+        value += carry;
+
+        AddressMode.SetValue(value);
+        Cpu.FlagNZ(value);
+    }
 }

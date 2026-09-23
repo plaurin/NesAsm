@@ -9,5 +9,8 @@ public record DEX : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        Cpu.SetX_NZ((byte)(Cpu.X - 1));
+    }
 }

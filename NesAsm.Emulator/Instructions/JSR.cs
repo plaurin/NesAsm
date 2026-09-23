@@ -9,5 +9,11 @@ public record JSR : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var targetPC = AddressMode.GetAddress();
+        Cpu.PushStack((ushort)(Cpu.PC + 2));
+
+        Cpu.SetPC(targetPC);
+    }
 }

@@ -9,5 +9,9 @@ public record JMP : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        var targetPC = AddressMode.GetAddress();
+        Cpu.SetPC(targetPC);
+    }
 }

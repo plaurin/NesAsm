@@ -9,5 +9,8 @@ public record INY : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        Cpu.SetY_NZ((byte)(Cpu.Y + 1));
+    }
 }

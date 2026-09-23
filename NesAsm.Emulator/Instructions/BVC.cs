@@ -9,5 +9,11 @@ public record BVC : Instruction
     {
     }
 
-    public override void Execute() => throw new NotImplementedException();
+    public override void Execute()
+    {
+        if (!Cpu.Overflow)
+        {
+            Cpu.SetPC(AddressMode.GetAddress());
+        }
+    }
 }
