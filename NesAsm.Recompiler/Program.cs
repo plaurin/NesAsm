@@ -56,11 +56,15 @@ internal class Program
         Console.WriteLine($"Total size: {subroutines.Sum(f => f.Size)}");
 
         // Find candidate subs
+        Console.WriteLine();
+        Console.WriteLine("Trying to parse empty space");
+        Console.WriteLine();
+
         var candidateSubroutines = Parser.TryParseEmptyPrgRomRange(cart, subroutines);
 
-        Output.CandidateSubroutines(outputPath, candidateSubroutines);
+        var promotedSubs = Output.CandidateSubroutines(outputPath, subroutines, candidateSubroutines);
+        Output.CandidateSubInstructions(outputPath, candidateSubroutines, promotedSubs);
         Output.RomMap(outputPath, subroutines, candidateSubroutines);
-        Output.CandidateSubInstructions(outputPath, candidateSubroutines);
 
         MermaidGenerator.GenerateRomTreeMap(outputPath, subroutines, candidateSubroutines, cart.PrgSize);
 

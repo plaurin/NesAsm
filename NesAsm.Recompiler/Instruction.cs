@@ -47,8 +47,9 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
             AddressingMode.Indirect => $"({Labels.GetLabelOrMemoryAddress(Argument)})",
             _ => Labels.GetLabelOrMemoryAddress(Argument)
         };
+        var invalid = IsInvalid ? "*Invalid*" : "";
 
-        return $"${Address:X4} [{Opcode:X2}] {Mnemonic} {argument}".Trim();
+        return $"${Address:X4} [{Opcode:X2}] {Mnemonic} {argument} {invalid}".Trim();
     }
 
     public MemoryAccessRecord? GetMemoryAccess(Subroutine subroutine)
@@ -64,10 +65,28 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
 
         if (isDirectAccess.HasValue)
         {
-            return new MemoryAccessRecord(subroutine, this, RomAddress: Address, TargetAddress: UShortArgument,
-                IsRead: IsMemoryRead(Mnemonic), IsWrite: IsMemoryWrite(Mnemonic), IsJump: IsJump(Mnemonic) || IsJumpToSubroutine(Mnemonic), IsDirectAccess: isDirectAccess.Value);
+            return new MemoryAccessRecord(subroutine, this,
+                RomAddress: Address,
+                TargetAddress: UShortArgument,
+                IsRead: IsMemoryRead(Mnemonic),
+                IsWrite: IsMemoryWrite(Mnemonic),
+                IsJump: IsJump(Mnemonic) || IsJumpToSubroutine(Mnemonic),
+                IsBranch: IsBranch(Mnemonic),
+                IsDirectAccess: isDirectAccess.Value);
         }
 
         return null;
+    }
+
+    public bool IsInvalid
+    {
+        get
+        {
+            if (Mnemonic.StartsWith("Unknown")) return true;
+            if (Mnemonic.StartsWith("ST") && UShortArgument >= 0x8000) return true;
+            if (Mnemonic == "JSR" && UShortArgument <= 0x6000) return true;
+
+            return false;
+        }
     }
 }

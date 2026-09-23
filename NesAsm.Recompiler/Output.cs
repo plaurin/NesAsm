@@ -23,13 +23,15 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "Rom.txt"), sb.ToString());
     }
 
-    public static void RomMap(string outputPath, IReadOnlyCollection<Subroutine> subroutines, IReadOnlyCollection<Subroutine> potentialSubroutines)
+    public static void RomMap(string outputPath, IReadOnlyCollection<Subroutine> subroutines, IEnumerable<Subroutine> potentialSubroutines)
     {
         var sb = new StringBuilder();
 
         var memAccessAddress = subroutines.SelectMany(s => s.GetMemoryAccess())
             .Where(m => m.IsRead || m.IsWrite).Select(m => m.TargetAddress)
             .Distinct().Where(a => a >= 0x8000).ToList();
+
+        potentialSubroutines = potentialSubroutines.Where(s => !s.InvalidInstructions.Any());
 
         var potentialMemAccessAddress = potentialSubroutines.SelectMany(s => s.GetMemoryAccess())
             .Where(m => m.IsRead || m.IsWrite).Select(m => m.TargetAddress)
@@ -70,12 +72,13 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "RomMap.txt"), sb.ToString());
     }
 
-    public static void CandidateSubInstructions(string outputPath, IEnumerable<Subroutine> subroutines)
+    public static void CandidateSubInstructions(string outputPath, IEnumerable<Subroutine> candidateSubroutines, IReadOnlyCollection<Subroutine> promotedSubs)
     {
         var sb = new StringBuilder();
-        foreach (var sub in subroutines)
+        foreach (var sub in candidateSubroutines)
         {
-            sb.AppendLine(sub.ToString());
+            var isPromoted = promotedSubs.Contains(sub);
+            sb.AppendLine($"{sub.ToString()} {(isPromoted ? "** Promoted **" : "")}");
             foreach (var instruction in sub.Instructions)
             {
                 var branch = sub.Branches.FirstOrDefault(b => b.TargetAddress == instruction.Address);
@@ -99,14 +102,92 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "Subroutines.txt"), sb.ToString());
     }
 
-    public static void CandidateSubroutines(string outputPath, IReadOnlyCollection<Subroutine> potentialSubroutines)
+    public static IReadOnlyCollection<Subroutine> CandidateSubroutines(string outputPath, IReadOnlyCollection<Subroutine> existingSubroutines, IReadOnlyCollection<Subroutine> candidateSubroutines)
     {
+        static string ListSub(IEnumerable<MemoryAccessRecord> memoryAccess, IReadOnlyCollection<Subroutine> subs)
+        {
+            return string.Join(" ", memoryAccess.Select(m => subs.FirstOrDefault(s => s.IsInSub(m.TargetAddress))?.LabelOrAddress ?? $"${m.LabelAndAddress}"));
+        }
+
+        static string ListExistingAndCandidate(IEnumerable<MemoryAccessRecord> existingMemoryAcces, IReadOnlyCollection<Subroutine> existingSubs,
+            IEnumerable<MemoryAccessRecord> candidateMemoryAcces, IReadOnlyCollection<Subroutine> candidateSubs)
+        {
+            if (!(existingMemoryAcces.Any() || candidateMemoryAcces.Any())) return "0";
+
+            return (existingMemoryAcces.Any() ? ListSub(existingMemoryAcces, existingSubs) : "") +
+                (candidateMemoryAcces.Any() ? $" - Candidate {ListSub(candidateMemoryAcces, candidateSubs)}" : "");
+        }
+
+        static string ListOrZero(IEnumerable<string> items)
+        {
+            if (items.Any())
+                return string.Join(" ", items);
+
+            return "0";
+        }
+
+        var existingJumps = existingSubroutines.SelectMany(s => s.GetMemoryAccess()).Where(m => m.IsJump).ToList();
+        var candidateJumps = candidateSubroutines.SelectMany(s => s.GetMemoryAccess()).Where(m => m.IsJump).ToList();
+
+        var result = new List<Subroutine>();
         var sb = new StringBuilder();
-        foreach (var sub in potentialSubroutines)
+        foreach (var sub in candidateSubroutines)
         {
             sb.AppendLine($"- {sub.ToString()}");
+
+            var existingJumpsToThisSub = existingJumps.Where(m => sub.IsInSub(m.TargetAddress));
+            var candidateJumpsToThisSub = candidateJumps.Where(m => sub.IsInSub(m.TargetAddress));
+
+            sb.AppendLine($"   Jump to this sub:    {ListExistingAndCandidate(existingJumpsToThisSub, existingSubroutines, candidateJumpsToThisSub, candidateSubroutines)}");
+
+            var memoryAccess = sub.GetMemoryAccess().ToList();
+
+            var jumps = memoryAccess.Where(m => m.IsJump).ToList();
+            var jumpsInExistingSub = jumps.Where(j => existingSubroutines.Any(s => s.IsInSub(j.TargetAddress))).ToList();
+            var jumpsInCandidateSub = jumps.Except(jumpsInExistingSub).Where(j => candidateSubroutines.Any(s => s.IsInSub(j.TargetAddress))).ToList();
+            var orphanJumps = jumps.Except(jumpsInExistingSub).Except(jumpsInCandidateSub).Select(m => m.LabelAndAddress);
+
+            sb.AppendLine($"   Jumps to other sub:  {ListExistingAndCandidate(jumpsInExistingSub, existingSubroutines, jumpsInCandidateSub, candidateSubroutines)}");
+            sb.AppendLine($"   ! Orphan Jumps:      {ListOrZero(orphanJumps)}");
+
+            var ramAccess = memoryAccess.Where(m => m.TargetAddress <= 0x7FF).Select(m => m.LabelAndAddress);
+            var romAccess = memoryAccess.Where(m => m.TargetAddress >= 0x6000).Select(m => m.LabelAndAddress);
+            var unknownAccess = memoryAccess.Where(m => m.MemoryRegion == MemoryRegion.Unknown).Select(m => m.LabelAndAddress);
+
+            sb.AppendLine($"   Memory Access (RAM): {ListOrZero(ramAccess)}");
+            sb.AppendLine($"   Memory Access (ROM): {ListOrZero(romAccess)}");
+            sb.AppendLine($"   ! Memory Access:     {ListOrZero(unknownAccess)}");
+
+            var facts = new List<(string Reason, int Score)>();
+            if (sub.InvalidInstructions.Any()) facts.Add(("Invalid instructions!", -100));
+            if (existingJumpsToThisSub.Any()) facts.Add(("Existing jumps to this sub", 40));
+            if (candidateJumpsToThisSub.Any()) facts.Add(("Existing jumps to this sub", 5));
+            if (jumpsInExistingSub.Any()) facts.Add(("Existing jumps to this sub", 15));
+            if (jumpsInCandidateSub.Any()) facts.Add(("Existing jumps to this sub", 5));
+            if (orphanJumps.Any()) facts.Add(("Orphan jumps", -10));
+            if (ramAccess.Any()) facts.Add(("RAM Access", 10));
+            if (romAccess.Any()) facts.Add(("ROM Access", 10));
+
+            var total = facts.Sum(f => f.Score);
+            var pass = total > 30;
+            if (pass) result.Add(sub);
+
+            sb.AppendLine($"   => Final decision: {(pass ? "Pass!" : "Fail")} [{total}] {string.Join("; ", facts.Select(f => f.Reason))}");
+            sb.AppendLine();
         }
+
         File.WriteAllText(Path.Combine(outputPath, "CandiateSubs.txt"), sb.ToString());
+
+        var promotedSubs = result
+            .SelectMany(r => r.Jumps.Select(j => j.TargetAddress))
+            .Distinct()
+            .Where(a => !existingSubroutines.Any(s => s.IsInSub(a)))
+            .OrderBy(a => a)
+            .Select(a => a.ToString("X4"));
+
+        File.WriteAllLines(Path.Combine(outputPath, "PromotedSubs.txt"), promotedSubs);
+
+        return result;
     }
 
     public static void SubroutinesWithUnknown(string outputPath, IEnumerable<Subroutine> subroutines)

@@ -20,10 +20,15 @@ public record Subroutine(ICollection<Instruction> Instructions)
     public IEnumerable<Instruction> DynamicDispathes => Instructions
         .Where(i => Instruction.IsDynamicDispatch(i.Opcode));
 
+    public IEnumerable<Instruction> InvalidInstructions => Instructions
+        .Where(i => i.IsInvalid);
+
     public bool EndsWithJSR => Instruction.IsJumpToSubroutine(Instructions.Last().Mnemonic);
 
     public string Label => Labels.GetLabel(Address);
-    public string LabelOrAddress => string.IsNullOrEmpty(Label) ? $"{Address:X4}" : Label;
+    public string LabelOrAddress => string.IsNullOrEmpty(Label) ? $"${Address:X4}" : Label;
+
+    public bool IsInSub(ushort address) => address >= Address && address <= LastInstructionAddress;
 
     public override string ToString()
     {
@@ -55,6 +60,7 @@ public record Subroutine(ICollection<Instruction> Instructions)
         if (memoryAccess.Any(m => m.IsOAMDataAccess)) flags.Add("[OAMData]");
         if (memoryAccess.Any(m => m.IsJoypadAccess)) flags.Add("[Joypad]");
         if (memoryAccess.Any(m => m.IsWorkRAMAccess)) flags.Add("[WorkRAM]");
+        if (Instructions.Any(i => i.IsInvalid)) flags.Add("[InvalidInstruction]");
         
         return string.Join(" ", flags);
     }
