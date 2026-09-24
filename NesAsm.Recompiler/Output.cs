@@ -261,4 +261,10 @@ public static class Output
 
         File.WriteAllText(Path.Combine(outputPath, "MemoryAccess.txt"), sb.ToString());
     }
+
+    public static void Run(string outputPath, Runner runner)
+    {
+        Subroutines(outputPath, runner.Subroutines);
+        Rom(outputPath, runner.Subroutines);
+    }
 }

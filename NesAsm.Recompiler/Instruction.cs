@@ -1,4 +1,6 @@
-﻿namespace NesAsm.Recompiler;
+﻿using NesAsm.Emulator.AddressModes;
+
+namespace NesAsm.Recompiler;
 
 public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, ushort? Argument = null)
 {
@@ -20,7 +22,7 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
 
     public static bool IsDirectMemoryAccess(AddressingMode mode) => mode == AddressingMode.ZeroPage || mode == AddressingMode.Absolute;
     public static bool IsIndirectMemoryAccess(AddressingMode mode) => mode == AddressingMode.ZeroPageX || mode == AddressingMode.AbsoluteX
-        || mode == AddressingMode.AbsoluteY || mode == AddressingMode.IndirectIndexed;
+        || mode == AddressingMode.AbsoluteY || mode == AddressingMode.IndirectX || mode == AddressingMode.IndirectY;
 
     public static bool IsMemoryRead(string mnemonic) => mnemonic == "LDA" || mnemonic == "LDX" || mnemonic == "LDY" || mnemonic == "ADC" || mnemonic == "AND"
         || mnemonic == "ASL" || mnemonic == "BIT" || mnemonic == "CMP" || mnemonic == "CPX" || mnemonic == "CPY" || mnemonic == "DEC" || mnemonic == "DEX"
@@ -43,7 +45,8 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
             AddressingMode.AbsoluteX => $"{Labels.GetLabelOrMemoryAddress(Argument)}, X",
             AddressingMode.AbsoluteY => $"{Labels.GetLabelOrMemoryAddress(Argument)}, Y",
             AddressingMode.Relative => Labels.GetLabelOrMemoryAddress(Argument),
-            AddressingMode.IndirectIndexed => $"(${Argument:X2}), Y",
+            AddressingMode.IndirectX => $"(${Argument:X2}), X",
+            AddressingMode.IndirectY => $"(${Argument:X2}), Y",
             AddressingMode.Indirect => $"({Labels.GetLabelOrMemoryAddress(Argument)})",
             _ => Labels.GetLabelOrMemoryAddress(Argument)
         };

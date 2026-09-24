@@ -30,6 +30,8 @@ public class PPUInstance
     private int _scanlineCycle;
     private int _frame;
 
+    public int Frame => _frame;
+
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
 
     public byte ReadRegister(ushort address)

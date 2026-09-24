@@ -1,5 +1,4 @@
 ﻿using NesAsm.Emulator;
-using System.Text;
 
 namespace NesAsm.Recompiler;
 
@@ -29,7 +28,19 @@ internal class Program
             subroutines = ProcessIteration(cart, dynamicDispatchAddresses, iteration, iterationPath);
         }
 
-        new Runner(cart).Run(subroutines!);
+        var runner = new Runner(cart);
+        try
+        {
+            runner.Run();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        var runPath = Path.Combine(outputPath, $"Run1");
+        Directory.CreateDirectory(runPath);
+        Output.Run(runPath, runner);
     }
 
     private static IReadOnlyCollection<Subroutine> ProcessIteration(Cart cart, IEnumerable<ushort> extraAddressToParse, int iteration, string outputPath)

@@ -330,7 +330,8 @@ public class Parser
         (AddressingMode, int?) AbsoluteY() => (AddressingMode.AbsoluteY, secondByte * 256 + firstByte);
         (AddressingMode, int?) Relative() => (AddressingMode.Relative, address + 2 + (sbyte)firstByte);
         (AddressingMode, int?) Indirect() => (AddressingMode.Indirect, firstByte);
-        (AddressingMode, int?) IndirectIndexed() => (AddressingMode.IndirectIndexed, firstByte);
+        (AddressingMode, int?) IndirectX() => (AddressingMode.IndirectX, firstByte);
+        (AddressingMode, int?) IndirectY() => (AddressingMode.IndirectY, firstByte);
 
         return opcode switch
         {
@@ -388,7 +389,7 @@ public class Parser
             0x8E => Ins("STX", 3, Absolute()),
 
             0x90 => Ins("BCC", 2, Relative()),
-            0x91 => Ins("STA", 2, IndirectIndexed()),
+            0x91 => Ins("STA", 2, IndirectY()),
             0x95 => Ins("STA", 2, ZeroPageX()),
             0x98 => Ins("TYA", 1, Implicit()),
             0x99 => Ins("STA", 3, AbsoluteY()),
@@ -408,7 +409,7 @@ public class Parser
             0xAE => Ins("LDX", 3, Absolute()),
 
             0xB0 => Ins("BCS", 2, Relative()),
-            0xB1 => Ins("LDA", 2, IndirectIndexed()),
+            0xB1 => Ins("LDA", 2, IndirectY()),
             0xB5 => Ins("LDA", 2, ZeroPageX()),
             0xB9 => Ins("LDA", 3, AbsoluteY()),
             0xBD => Ins("LDA", 3, AbsoluteX()),

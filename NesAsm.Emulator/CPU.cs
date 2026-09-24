@@ -336,16 +336,24 @@ public class CPU
 
     // ----- Execution -----
 
-    public void RunNextInstruction()
+    public Instruction RunNextInstruction()
     {
         var opcode = _memory.Read(_pc);
 
         var instruction = _instructionSet[opcode];
-
         instruction.Execute();
 
-        _pc = (ushort)(_pc + instruction.Bytes);
         _cycles += instruction.Cycles;
+        _pc = (ushort)(_pc + instruction.Bytes);
+
+        return instruction;
+    }
+
+    public Instruction GetInstructionAt(ushort address)
+    {
+        var opcode = _memory.Read(address);
+        var instruction = _instructionSet[opcode];
+        return instruction;
     }
 
     public byte PeekByteArgument() => _memory.ReadByteArgument(_pc);
