@@ -264,7 +264,25 @@ public static class Output
 
     public static void Run(string outputPath, Runner runner)
     {
-        Subroutines(outputPath, runner.Subroutines);
-        Rom(outputPath, runner.Subroutines);
+        var subroutines = runner.Subroutines;
+
+        Subroutines(outputPath, subroutines);
+        Rom(outputPath, subroutines);
+
+        MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
+
+        // Callstack
+        Callstacks(outputPath, runner.Callstacks);
     }
+
+    public static void Callstacks(string outputPath, IEnumerable<string> callstacks)
+    {
+        var sb = new StringBuilder();
+        foreach (var line in callstacks)
+        {
+            sb.AppendLine(line);
+        }
+        File.WriteAllText(Path.Combine(outputPath, "Callstacks.txt"), sb.ToString());
+    }
+
 }
