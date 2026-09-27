@@ -45,7 +45,10 @@ public class NesMemory
 
     public void Write(ushort address, byte value)
     {
-        if (address < 0x800) _ram[address] = value;
+        if (address < 0x800)
+            _ram[address] = value;
+        else if (address >= 0x2000 && address <= 0x3FFF)
+            Ppu.WriteRegister(address, value);
         // TODO PPU and others
     }
 }

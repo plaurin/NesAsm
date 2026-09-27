@@ -12,6 +12,6 @@ public record AND : Instruction
     public override void Execute()
     {
         var value = AddressMode.GetValue();
-        Cpu.FlagNZ((byte)(Cpu.A & value));
+        Cpu.SetA_NZ((byte)(Cpu.A & value));
     }
 }

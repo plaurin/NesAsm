@@ -118,6 +118,33 @@ public class CPU
         return _memory.Read((ushort)(0x100 + _sp));
     }
 
+    public void PushFlagsOnStack()
+    {
+        var value =
+            (_negative ? 0x80 : 0) +
+            (_overflow ? 0x40 : 0) +
+            0x20 +
+            0x10 +
+            (_decimal ? 0x08 : 0) +
+            (_interrupt ? 0x04 : 0) +
+            (_zero ? 0x02 : 0) +
+            (_carry ? 0x01 : 0);
+
+        PushStack((byte)value);
+    }
+
+    public void PullFlagsFromStack()
+    {
+        var value = PopStack();
+
+        _negative = (value & 0x80) == 0x80;
+        _overflow = (value & 0x40) == 0x40;
+        _decimal = (value & 0x08) == 0x08;
+        _interrupt = (value & 0x04) == 0x04;
+        _zero = (value & 0x02) == 0x02;
+        _carry = (value & 0x01) == 0x01;
+    }
+
     // ----- Instructions init -----
 
     private readonly Instruction[] _instructionSet = new Instruction[256];
@@ -347,6 +374,18 @@ public class CPU
         _pc = (ushort)(_pc + instruction.Bytes);
 
         return instruction;
+    }
+
+    public void RunNmi()
+    {
+        // SetFlag(FLAG_B, false);
+        // SetFlag(FLAG_UNUSED, true);
+        PushStack(_pc);
+        PushFlagsOnStack();
+        _interrupt = true;
+
+        SetPC(Cart.NmiAddress);
+        _cycles += 7;
     }
 
     public Instruction GetInstructionAt(ushort address)

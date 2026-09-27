@@ -34,6 +34,8 @@ public class PPUInstance
 
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
 
+    public bool NmiRequested { get; set; }
+
     public byte ReadRegister(ushort address)
     {
         switch (address)
@@ -43,8 +45,23 @@ public class PPUInstance
                 _ppuStatus &= 0x3F;
                 _addrLatch = false;
                 return result;
+            case PPUCTRL:
+                return _ppuCtrl;
         }
         return 0;
+    }
+
+    public void WriteRegister(ushort address, byte value)
+    {
+        switch (address)
+        {
+            case PPUCTRL:
+                _ppuCtrl = value;
+                // t?
+                break;
+            case PPUSTATUS:
+                break;
+        }
     }
 
     public void RunToCycle(long cpuCycles)
@@ -75,9 +92,9 @@ public class PPUInstance
                 if (_scanline == 241 && _scanlineCycle == 0)
                 {
                     _ppuStatus |= 0x80;
-                    //if ((PPUCTRL & 0x80) != 0)
+                    if ((_ppuCtrl & 0x80) != 0)
                     {
-                        // Request NMI
+                        NmiRequested = true;
                     }
                 }
             }

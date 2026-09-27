@@ -20,7 +20,7 @@ public class Runner
     public CPU Cpu { get; init; }
 
     public IEnumerable<Subroutine> Subroutines => _subs
-        .Select(s => new Subroutine(s.Value.Addresses.Select(a => Parser.GetInstruction(Cpu.Cart.PrgRom, a)).ToList()))
+        .Select(s => new Subroutine(s.Value.Addresses.OrderBy(a => a).Select(a => Parser.GetInstruction(Cpu.Cart.PrgRom, a)).ToList()))
         .OrderBy(s => s.Address);
 
     public IEnumerable<string> Callstacks => _callstack;
@@ -50,14 +50,22 @@ public class Runner
         }
 
         void WriteCallstack(int indentation, ushort endSegmentAddress, string mnemonic, ushort targetAddress) =>
-            _callstack.Add($"{"".PadLeft(indentation)}run ${startSegmentAddress:X4}-${endSegmentAddress:X4} => {mnemonic} to ${targetAddress:X4}");
+            _callstack.Add($"{"".PadLeft(indentation)}run ${startSegmentAddress:X4}-${endSegmentAddress:X4} => {mnemonic} to {Labels.GetLabelAndMemoryAddress(targetAddress)}");
+
+        (HashSet<ushort> addresses, Sub sub) Jump(ushort address, Emulator.Instructions.Instruction ins)
+        {
+            WriteCallstack(255 - Cpu.SP + 2, address, ins.Mnemonic, Cpu.PC);
+            startSegmentAddress = Cpu.PC;
+
+            return TryGetSub(Cpu.PC);
+        }
 
         (var addresses, var sub) = TryGetSub(Cpu.PC);
 
-        while (_ppu.Frame <= 5)
+        while (_ppu.Frame <= 15)
         {
             var address = Cpu.PC;
-            if (address == 0x8E28) { }
+            if (address == 0x8052) { }
             addresses.Add(address);
 
             var ins = Cpu.RunNextInstruction();
@@ -66,6 +74,7 @@ public class Runner
             {
                 case 0x20: // JSR
                 case 0x4C: // JMP Absolute
+                case 0x6C: // JMP Indirect
                     if (address != Cpu.PC)
                     {
                         _jumpTable.TryAdd(address, Cpu.PC);
@@ -77,18 +86,36 @@ public class Runner
                         startSegmentAddress = Cpu.PC;
                     }
                     break;
-                case 0x6C: // JMP Indirect
-                    break;
                 case 0x60: // "RTS"
+                    (addresses, sub) = TryGetSub(Cpu.PC);
+
+                    WriteCallstack(255 - Cpu.SP + 2, address, ins.Mnemonic, Cpu.PC);
+                    startSegmentAddress = Cpu.PC;
+                    //Jump(address, ins);
+                    break;
                 case 0x40: // "RTI"
                     (addresses, sub) = TryGetSub(Cpu.PC);
 
                     WriteCallstack(255 - Cpu.SP + 2, address, ins.Mnemonic, Cpu.PC);
                     startSegmentAddress = Cpu.PC;
+                    //Jump(address, ins);
                     break;
             }
 
             _ppu.RunToCycle(Cpu.Cycles);
+
+            if (_ppu.NmiRequested)
+            {
+                _ppu.NmiRequested = false;
+                Cpu.RunNmi();
+
+                (addresses, sub) = TryGetSub(Cpu.PC);
+                startSegmentAddress = Cpu.PC;
+
+                _callstack.Add("");
+                _callstack.Add($"--- Nmi Frame {_ppu.Frame} ---");
+                _callstack.Add("");
+            }
         }
     }
 }
