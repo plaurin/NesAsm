@@ -23,6 +23,26 @@ public class Runner
         .Select(s => new Subroutine(s.Value.Addresses.OrderBy(a => a).Select(a => Parser.GetInstruction(Cpu.Cart.PrgRom, a)).ToList()))
         .OrderBy(s => s.Address);
 
+    public IEnumerable<MemoryAccessRecord> IndirectJumpTableMemoryAccess()
+    {
+        foreach (var jumpAddress in _jumpITable)
+        {
+            var sub = Subroutines.Single(s => s.IsInSub(jumpAddress.Key));
+            var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, jumpAddress.Key);
+            foreach (var targetAddress in jumpAddress.Value.OrderBy(a => a))
+            {
+                yield return new MemoryAccessRecord(sub, ins,
+                    RomAddress: jumpAddress.Key,
+                    TargetAddress: targetAddress,
+                    IsRead: false,
+                    IsWrite: false,
+                    IsJump: true,
+                    IsBranch: false,
+                    IsDirectAccess: false);
+            }
+        }
+    }
+
     public IEnumerable<string> Callstacks => _callstack;
 
     public void Run()
@@ -34,9 +54,9 @@ public class Runner
 
         var returnToSubs = new Dictionary<ushort, Sub>();
 
-        (HashSet<ushort> addresses, Sub sub) TryGetSub(ushort address)
+        (HashSet<ushort> addresses, Sub sub) TryGetSub(ushort address, bool useReturnsToo = false)
         {
-            if (returnToSubs.TryGetValue(address, out var s))
+            if (useReturnsToo && returnToSubs.TryGetValue(address, out var s))
                 return (s.Addresses, s);
 
             if (_subs.TryGetValue(address, out s))
@@ -85,9 +105,18 @@ public class Runner
                         WriteCallstack(255 - Cpu.SP - 2 + (ins.Mnemonic == "JMP" ? 2 : 0), address, ins.Mnemonic, Cpu.PC);
                         startSegmentAddress = Cpu.PC;
                     }
+                    if (ins.Opcode == 0x6C)
+                    {
+                        if (!_jumpITable.TryGetValue(address, out var hashset))
+                        {
+                            hashset = [];
+                            _jumpITable.TryAdd(address, hashset);
+                        }
+                        hashset.Add(Cpu.PC);
+                    }
                     break;
                 case 0x60: // "RTS"
-                    (addresses, sub) = TryGetSub(Cpu.PC);
+                    (addresses, sub) = TryGetSub(Cpu.PC, useReturnsToo: true);
 
                     WriteCallstack(255 - Cpu.SP + 2, address, ins.Mnemonic, Cpu.PC);
                     startSegmentAddress = Cpu.PC;

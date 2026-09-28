@@ -10,13 +10,18 @@ public static class Output
         foreach (var sub in subroutines)
         {
             sb.AppendLine(sub.ToString());
+            int nextInstruction = sub.Address;
             foreach (var instruction in sub.Instructions)
             {
+                if (instruction.Address != nextInstruction)
+                    sb.AppendLine($"                 [${nextInstruction:X4}..${instruction.Address - 1:X4}] ?");
+
                 var branch = sub.Branches.FirstOrDefault(b => b.TargetAddress == instruction.Address);
                 var label = branch != null ? $"{Labels.GetLabelOrMemoryAddress(branch.TargetAddress)}:" : string.Empty;
 
                 var memoryAccess = instruction.GetMemoryAccess(sub);
                 sb.AppendLine($"{label,-15}{instruction.ToString(),-40}{memoryAccess}");
+                nextInstruction = instruction.Address + instruction.Bytes;
             }
             sb.AppendLine();
         }
@@ -208,7 +213,7 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "Unknown.txt"), sb.ToString());
     }
 
-    public static void MemoryAccess(string outputPath, IReadOnlyCollection<Subroutine> subroutines)
+    public static void MemoryAccess(string outputPath, IEnumerable<Subroutine> subroutines, IEnumerable<MemoryAccessRecord>? dynamicDispatchOverride = null)
     {
         var sb = new StringBuilder();
 
@@ -257,7 +262,10 @@ public static class Output
         PrintSeparator();
 
         sb.AppendLine("===== Dynamic Dispatch =====");
-        PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
+        if (dynamicDispatchOverride != null)
+            PrintMemoryAccess(dynamicDispatchOverride);
+        else
+            PrintMemoryAccess(subroutines.SelectMany(s => s.GetDynamicDispatch()));
 
         File.WriteAllText(Path.Combine(outputPath, "MemoryAccess.txt"), sb.ToString());
     }
@@ -268,11 +276,13 @@ public static class Output
 
         Subroutines(outputPath, subroutines);
         Rom(outputPath, subroutines);
+        MemoryAccess(outputPath, subroutines, runner.IndirectJumpTableMemoryAccess());
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
 
-        // Callstack
         Callstacks(outputPath, runner.Callstacks);
+
+        BranchesPathNotTaken(outputPath, subroutines);
     }
 
     public static void Callstacks(string outputPath, IEnumerable<string> callstacks)
@@ -285,4 +295,31 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "Callstacks.txt"), sb.ToString());
     }
 
+    private static void BranchesPathNotTaken(string outputPath, IEnumerable<Subroutine> subroutines)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var subroutine in subroutines)
+        {
+            var hasPrintSub = false;
+            foreach (var branch in subroutine.Branches)
+            {
+                var hasTakenBranch = subroutine.Instructions.Any(i => i.Address == branch.TargetAddress);
+                var hasBranchSkiped = subroutine.Instructions.Any(i => i.Address == branch.Address + 2);
+                
+                if (!hasTakenBranch || !hasBranchSkiped)
+                {
+                    if (!hasPrintSub)
+                    {
+                        sb.AppendLine(subroutine.ToString());
+                        hasPrintSub = true;
+                    }
+                    sb.AppendLine($"  ${branch.Address:X4} {(!hasBranchSkiped ? "not skipped branch ": "")}{(!hasTakenBranch ? $"not taken branch {Labels.GetLabelAndMemoryAddress(branch.TargetAddress)}" : "")}");
+                }
+            }
+            if (hasPrintSub) sb.AppendLine();
+        }
+
+        File.WriteAllText(Path.Combine(outputPath, "Branches.txt"), sb.ToString());
+    }
 }
