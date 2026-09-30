@@ -20,7 +20,28 @@ public class Runner
     public CPU Cpu { get; init; }
 
     public IEnumerable<Subroutine> Subroutines => _subs
-        .Select(s => new Subroutine(s.Value.Addresses.OrderBy(a => a).Select(a => Parser.GetInstruction(Cpu.Cart.PrgRom, a)).ToList()))
+        .Select(s =>
+        {
+            var instructions = new List<Instruction>();
+            int nextAddress = s.Key;
+            foreach (var addr in s.Value.Addresses.OrderBy(a => a))
+            {
+                while (nextAddress < addr)
+                {
+                    // fill gap
+                    var parsedIns = Parser.GetInstruction(Cpu.Cart.PrgRom, (ushort)nextAddress, false);
+                    instructions.Add(parsedIns);
+                    nextAddress = parsedIns.Address + parsedIns.Bytes;
+                }
+
+                var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, addr, true);
+                instructions.Add(ins);
+                nextAddress = ins.Address + ins.Bytes;
+            } 
+
+            return new Subroutine(instructions);
+        })
+        .Where(s => s.Instructions.Count > 0)
         .OrderBy(s => s.Address);
 
     public IEnumerable<MemoryAccessRecord> IndirectJumpTableMemoryAccess()
@@ -82,11 +103,12 @@ public class Runner
 
         (var addresses, var sub) = TryGetSub(Cpu.PC);
 
-        while (_ppu.Frame <= 15)
+        while (_ppu.Frame <= 250)
         {
             var address = Cpu.PC;
             if (address == 0x8052) { }
-            addresses.Add(address);
+            if (address >= 0x6000 && address <= 0xFFFF)
+                addresses.Add(address);
 
             var ins = Cpu.RunNextInstruction();
 
@@ -142,6 +164,7 @@ public class Runner
                 startSegmentAddress = Cpu.PC;
 
                 _callstack.Add("");
+                _callstack.Add($"  * Total [F:{_ppu.Frame - 1,3}]: {_subs.Count,3} Subs, {_jumpTable.Count,3} jumps, {_jumpITable.Sum(j => j.Value.Count),3} indirect jumps *");
                 _callstack.Add($"--- Nmi Frame {_ppu.Frame} ---");
                 _callstack.Add("");
             }

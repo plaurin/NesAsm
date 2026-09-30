@@ -37,10 +37,12 @@ internal class Program
         {
             Console.WriteLine(ex);
         }
-
-        var runPath = Path.Combine(outputPath, $"Run1");
-        Directory.CreateDirectory(runPath);
-        Output.Run(runPath, runner);
+        finally
+        {
+            var runPath = Path.Combine(outputPath, $"Run1");
+            Directory.CreateDirectory(runPath);
+            Output.Run(runPath, runner);
+        }
     }
 
     private static IReadOnlyCollection<Subroutine> ProcessIteration(Cart cart, IEnumerable<ushort> extraAddressToParse, int iteration, string outputPath)

@@ -310,12 +310,12 @@ public class Parser
         }
     }
 
-    public static Instruction GetInstruction(ReadOnlySpan<byte> prgRom, ushort address)
+    public static Instruction GetInstruction(ReadOnlySpan<byte> prgRom, ushort address, bool executed = false)
     {
         var romIndex = address - 0x8000;
         var opcode = prgRom[romIndex];
 
-        Instruction Ins(string mnemonic, int bytes, (AddressingMode mode, int? argument) args) => new(address, opcode, mnemonic, bytes, args.mode, (ushort?)args.argument);
+        Instruction Ins(string mnemonic, int bytes, (AddressingMode mode, int? argument) args) => new(address, opcode, mnemonic, bytes, args.mode, (ushort?)args.argument, executed);
 
         var firstByte = prgRom[romIndex + 1];
         var secondByte = prgRom[romIndex + 2];

@@ -7,8 +7,16 @@ public static class Output
     public static void Rom(string outputPath, IEnumerable<Subroutine> subroutines)
     {
         var sb = new StringBuilder();
+        var addr = 0x8000;
+
         foreach (var sub in subroutines)
         {
+            if (addr < sub.Address)
+            {
+                sb.AppendLine($"Unknown at ${addr:X4} to ${sub.Address - 1:X4} (Size: {sub.Address - addr + 1})");
+                sb.AppendLine();
+            }
+
             sb.AppendLine(sub.ToString());
             int nextInstruction = sub.Address;
             foreach (var instruction in sub.Instructions)
@@ -24,7 +32,15 @@ public static class Output
                 nextInstruction = instruction.Address + instruction.Bytes;
             }
             sb.AppendLine();
+
+            addr = sub.Address + sub.Size;
         }
+
+        if (addr < 0xFFFA)
+        {
+            sb.AppendLine($"Unknown at ${addr:X4} to $FFF9 (Size: {0xFFFA - addr + 1})");
+        }
+
         File.WriteAllText(Path.Combine(outputPath, "Rom.txt"), sb.ToString());
     }
 
@@ -292,6 +308,18 @@ public static class Output
         {
             sb.AppendLine(line);
         }
+
+        sb.AppendLine();
+        sb.AppendLine("--------------------------------");
+        sb.AppendLine();
+        sb.AppendLine("=== Per Frames ===");
+        sb.AppendLine();
+
+        foreach (var line in callstacks.Where(l => l.StartsWith("  * Total")))
+        {
+            sb.AppendLine(line);
+        }
+
         File.WriteAllText(Path.Combine(outputPath, "Callstacks.txt"), sb.ToString());
     }
 

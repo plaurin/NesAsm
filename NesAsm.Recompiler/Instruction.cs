@@ -2,7 +2,7 @@
 
 namespace NesAsm.Recompiler;
 
-public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, ushort? Argument = null)
+public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, ushort? Argument = null, bool Executed = false)
 {
     public byte ByteArgument => (byte)Argument!;
     public ushort UShortArgument => (ushort)Argument!;
@@ -51,8 +51,9 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
             _ => Labels.GetLabelOrMemoryAddress(Argument)
         };
         var invalid = IsInvalid ? "*Invalid*" : "";
+        var parsed = Executed ? "" : ".";
 
-        return $"${Address:X4} [{Opcode:X2}] {Mnemonic} {argument} {invalid}".Trim();
+        return $"{parsed}${Address:X4} [{Opcode:X2}] {Mnemonic} {argument} {invalid}".Trim();
     }
 
     public MemoryAccessRecord? GetMemoryAccess(Subroutine subroutine)
