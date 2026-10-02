@@ -281,7 +281,7 @@ public class Parser
             for (int i = 0; i < 500; i++) // Limit to avoid infinite loops in case of bad parsing
             {
                 if (instructions.Any(f => f.Address == address)) break; // Already parsed this instruction, exit
-                if (address >= 0xFFFD) break; // End of ROM
+                if (address >= 0xFFFA) break; // End of ROM
 
                 var ins = GetInstruction(prgRom, address);
                 instructions.Add(ins);
@@ -325,6 +325,7 @@ public class Parser
         (AddressingMode, int?) Immediate() => (AddressingMode.Immediate, firstByte);
         (AddressingMode, int?) ZeroPage() => (AddressingMode.ZeroPage, firstByte);
         (AddressingMode, int?) ZeroPageX() => (AddressingMode.ZeroPageX, firstByte);
+        (AddressingMode, int?) ZeroPageY() => (AddressingMode.ZeroPageY, firstByte);
         (AddressingMode, int?) Absolute() => (AddressingMode.Absolute, secondByte * 256 + firstByte);
         (AddressingMode, int?) AbsoluteX() => (AddressingMode.AbsoluteX, secondByte * 256 + firstByte);
         (AddressingMode, int?) AbsoluteY() => (AddressingMode.AbsoluteY, secondByte * 256 + firstByte);
@@ -335,18 +336,30 @@ public class Parser
 
         return opcode switch
         {
-            0x00 => Ins("BRK", 1, Implicit()),
+            0x00 => Ins("BRK", 2, Implicit()),
+            0x01 => Ins("ORA", 2, IndirectX()),
             0x05 => Ins("ORA", 2, ZeroPage()),
+            0x06 => Ins("ASL", 2, ZeroPage()),
             0x08 => Ins("PHP", 1, Implicit()),
             0x09 => Ins("ORA", 2, Immediate()),
             0x0A => Ins("ASL", 1, Accumulator()),
+            0x0D => Ins("ORA", 3, Absolute()),
             0x0E => Ins("ASL", 3, Absolute()),
 
             0x10 => Ins("BPL", 2, Relative()),
-            0x18 => Ins("CLC", 1, Implicit()),
+            0x11 => Ins("ORA", 2, IndirectY()),
+            0x15 => Ins("ORA", 2, ZeroPageX()),
+            0x16 => Ins("ASL", 1, ZeroPageX()),
+            0x18 => Ins("CLC", 2, Implicit()),
+            0x19 => Ins("ORA", 3, AbsoluteY()),
+            0x1D => Ins("ORA", 3, AbsoluteX()),
+            0x1E => Ins("ASL", 3, AbsoluteX()),
 
             0x20 => Ins("JSR", 3, Absolute()),
+            0x21 => Ins("AND", 3, IndirectX()),
+            0x24 => Ins("BIT", 2, ZeroPage()),
             0x25 => Ins("AND", 2, ZeroPage()),
+            0x26 => Ins("ROL", 2, ZeroPage()),
             0x29 => Ins("AND", 2, Immediate()),
             0x2A => Ins("ROL", 1, Accumulator()),
             0x2C => Ins("BIT", 3, Absolute()),
@@ -354,31 +367,52 @@ public class Parser
             0x2E => Ins("ROL", 3, Absolute()),
 
             0x30 => Ins("BMI", 2, Relative()),
+            0x31 => Ins("AND", 3, IndirectY()),
+            0x35 => Ins("AND", 2, ZeroPageX()),
+            0x36 => Ins("ROL", 2, ZeroPageX()),
             0x38 => Ins("SEC", 1, Implicit()),
+            0x39 => Ins("AND", 3, AbsoluteY()),
             0x3D => Ins("AND", 3, AbsoluteX()),
+            0x3E => Ins("ROL", 3, AbsoluteX()),
 
             0x40 => Ins("RTI", 1, Implicit()),
+            0x41 => Ins("EOR", 2, IndirectX()),
             0x45 => Ins("EOR", 2, ZeroPage()),
             0x46 => Ins("LSR", 2, ZeroPage()),
             0x48 => Ins("PHA", 1, Implicit()),
             0x49 => Ins("EOR", 2, Immediate()),
             0x4A => Ins("LSR", 1, Accumulator()),
             0x4C => Ins("JMP", 3, Absolute()),
+            0x4D => Ins("EOR", 3, Absolute()),
+            0x4E => Ins("LSR", 3, Absolute()),
+
+            0x51 => Ins("EOR", 2, IndirectY()),
+            0x55 => Ins("EOR", 2, ZeroPageX()),
+            0x56 => Ins("LSR", 2, ZeroPageX()),
+            0x59 => Ins("EOR", 3, AbsoluteY()),
+            0x5D => Ins("EOR", 3, AbsoluteX()),
+            0x5E => Ins("LSR", 3, AbsoluteX()),
 
             0x60 => Ins("RTS", 1, Implicit()),
+            0x61 => Ins("ADC", 2, IndirectX()),
             0x65 => Ins("ADC", 2, ZeroPage()),
+            0x66 => Ins("ROR", 2, ZeroPage()),
             0x68 => Ins("PLA", 1, Implicit()),
             0x69 => Ins("ADC", 2, Immediate()),
             0x6A => Ins("ROR", 1, Accumulator()),
             0x6C => Ins("JMP", 3, Indirect()), // Based on memory!! we need to emulate the memory to get the correct address
             0x6D => Ins("ADC", 3, Absolute()),
+            0x6E => Ins("ROR", 3, Absolute()),
 
+            0x71 => Ins("ADC", 2, IndirectY()),
             0x75 => Ins("ADC", 2, ZeroPageX()),
+            0x76 => Ins("ROR", 2, ZeroPageX()),
             0x78 => Ins("SEI", 1, Implicit()),
             0x79 => Ins("ADC", 3, AbsoluteY()),
             0x7D => Ins("ADC", 3, AbsoluteX()),
             0x7E => Ins("ROR", 3, AbsoluteX()),
 
+            0x81 => Ins("STA", 2, IndirectX()),
             0x84 => Ins("STY", 2, ZeroPage()),
             0x85 => Ins("STA", 2, ZeroPage()),
             0x86 => Ins("STX", 2, ZeroPage()),
@@ -390,13 +424,16 @@ public class Parser
 
             0x90 => Ins("BCC", 2, Relative()),
             0x91 => Ins("STA", 2, IndirectY()),
+            0x94 => Ins("STY", 2, ZeroPageX()),
             0x95 => Ins("STA", 2, ZeroPageX()),
+            0x96 => Ins("STX", 2, ZeroPageY()),
             0x98 => Ins("TYA", 1, Implicit()),
             0x99 => Ins("STA", 3, AbsoluteY()),
             0x9A => Ins("TXS", 1, Implicit()),
             0x9D => Ins("STA", 3, AbsoluteX()),
 
             0xA0 => Ins("LDY", 2, Immediate()),
+            0xA1 => Ins("LDA", 2, IndirectX()),
             0xA2 => Ins("LDX", 2, Immediate()),
             0xA4 => Ins("LDY", 2, ZeroPage()),
             0xA5 => Ins("LDA", 2, ZeroPage()),
@@ -410,36 +447,54 @@ public class Parser
 
             0xB0 => Ins("BCS", 2, Relative()),
             0xB1 => Ins("LDA", 2, IndirectY()),
+            0xB4 => Ins("LDY", 2, ZeroPageX()),
             0xB5 => Ins("LDA", 2, ZeroPageX()),
+            0xB6 => Ins("LDX", 2, ZeroPageY()),
             0xB9 => Ins("LDA", 3, AbsoluteY()),
+            0xBC => Ins("LDY", 3, AbsoluteX()),
             0xBD => Ins("LDA", 3, AbsoluteX()),
             0xBE => Ins("LDX", 3, AbsoluteY()),
 
             0xC0 => Ins("CPY", 2, Immediate()),
+            0xC1 => Ins("CMP", 2, IndirectX()),
+            0xC4 => Ins("CPY", 2, ZeroPage()),
             0xC5 => Ins("CMP", 2, ZeroPage()),
             0xC6 => Ins("DEC", 2, ZeroPage()),
             0xC8 => Ins("INY", 1, Implicit()),
             0xC9 => Ins("CMP", 2, Immediate()),
             0xCA => Ins("DEX", 1, Implicit()),
+            0xCC => Ins("CPY", 3, Absolute()),
             0xCD => Ins("CMP", 3, Absolute()),
             0xCE => Ins("DEC", 3, Absolute()),
 
             0xD0 => Ins("BNE", 2, Relative()),
+            0xD1 => Ins("CMP", 2, IndirectY()),
+            0xD5 => Ins("CMP", 2, ZeroPageX()),
+            0xD6 => Ins("DEC", 2, ZeroPageX()),
             0xD8 => Ins("CLD", 1, Implicit()),
             0xD9 => Ins("CMP", 3, AbsoluteY()),
             0xDD => Ins("CMP", 3, AbsoluteX()),
             0xDE => Ins("DEC", 3, AbsoluteX()),
 
             0xE0 => Ins("CPX", 2, Immediate()),
+            0xE1 => Ins("SBC", 2, IndirectX()),
+            0xE4 => Ins("CPX", 2, ZeroPage()),
+            0xE5 => Ins("SBC", 2, ZeroPage()),
             0xE6 => Ins("INC", 2, ZeroPage()),
             0xE8 => Ins("INX", 1, Implicit()),
             0xE9 => Ins("SBC", 2, Immediate()),
+            0xEA => Ins("NOP", 1, Implicit()),
+            0xEC => Ins("CPX", 3, Absolute()),
             0xED => Ins("SBC", 3, Absolute()),
             0xEE => Ins("INC", 3, Absolute()),
 
             0xF0 => Ins("BEQ", 2, Relative()),
+            0xF1 => Ins("SBC", 2, IndirectY()),
             0xF5 => Ins("SBC", 2, ZeroPageX()),
+            0xF6 => Ins("INC", 3, Absolute()),
             0xF9 => Ins("SBC", 3, AbsoluteY()),
+            0xFD => Ins("SBC", 3, AbsoluteX()),
+            0xFE => Ins("INC", 3, AbsoluteX()),
 
             _ => Ins($"Unknown Opcode: {opcode:X2}", 1, (AddressingMode.Implicit, null))
         };
