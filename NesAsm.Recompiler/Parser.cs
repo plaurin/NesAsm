@@ -289,7 +289,7 @@ public class Parser
 
                 //Console.WriteLine(ins.ToString());
 
-                if (Instruction.IsBranch(ins.Mnemonic))
+                if (ins.IsBranch)
                 {
                     //Console.WriteLine($"Found {ins.Mnemonic} to ${ins.Argument!.Value:X4}");
                     branchesToParse.Enqueue(ins.Argument!.Value);
@@ -336,7 +336,7 @@ public class Parser
 
         return opcode switch
         {
-            0x00 => Ins("BRK", 2, Implicit()),
+            0x00 => Ins("BRK", 1, Implicit()),
             0x01 => Ins("ORA", 2, IndirectX()),
             0x05 => Ins("ORA", 2, ZeroPage()),
             0x06 => Ins("ASL", 2, ZeroPage()),
@@ -350,7 +350,7 @@ public class Parser
             0x11 => Ins("ORA", 2, IndirectY()),
             0x15 => Ins("ORA", 2, ZeroPageX()),
             0x16 => Ins("ASL", 1, ZeroPageX()),
-            0x18 => Ins("CLC", 2, Implicit()),
+            0x18 => Ins("CLC", 1, Implicit()),
             0x19 => Ins("ORA", 3, AbsoluteY()),
             0x1D => Ins("ORA", 3, AbsoluteX()),
             0x1E => Ins("ASL", 3, AbsoluteX()),

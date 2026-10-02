@@ -1,16 +1,7 @@
 ﻿namespace NesAsm.Recompiler;
 
-public enum MemoryRegion
+public abstract record MemoryRegion()
 {
-    Unknown,
-    ZeroPage,
-    StackPage,
-    OAMPage,
-    OtherRAMPage,
-    PPURegister,
-    APURegister,
-    OAMData,
-    Joypad,
-    WorkRAM,
-    ROM
+    public abstract ushort Address { get; }
+    public abstract int Size { get; }
 }

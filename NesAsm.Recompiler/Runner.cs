@@ -5,6 +5,8 @@ namespace NesAsm.Recompiler;
 public class Runner
 {
     private readonly PPUInstance _ppu;
+
+    private readonly HashSet<ushort> _instructionAddresses = [];
     private readonly Dictionary<ushort, Sub> _subs = [];
     private readonly Dictionary<ushort, ushort>  _jumpTable = [];
     private readonly Dictionary<ushort, HashSet<ushort>> _jumpITable = [];
@@ -43,6 +45,53 @@ public class Runner
         })
         .Where(s => s.Instructions.Count > 0)
         .OrderBy(s => s.Address);
+
+    public IEnumerable<MemoryRegion> MemoryRegions
+    {
+        get
+        {
+            var result = new List<MemoryRegion>();
+            var instructions = new List<Instruction>();
+
+            var nextAddress = 0x8000;
+            foreach (var address in _instructionAddresses.OrderBy(a => a))
+            {
+                if (address == 0x8657) { }
+                if (address != nextAddress)
+                {
+                    if (instructions.Any(i => i.IsBranch && i.Argument == address))
+                    {
+                        while (nextAddress < address)
+                        {
+                            // fill gap
+                            var parsedIns = Parser.GetInstruction(Cpu.Cart.PrgRom, (ushort)nextAddress, executed: false);
+                            instructions.Add(parsedIns);
+                            nextAddress = parsedIns.Address + parsedIns.Bytes;
+                        }
+                        // assert nextAddress == address
+                    }
+                    else
+                    {
+                        // new sub
+                        result.Add(new Subroutine(instructions));
+                        instructions = [];
+                    }
+                }
+
+                var instruction = Parser.GetInstruction(Cpu.Cart.PrgRom, address, executed: true);
+                nextAddress = instruction.Address + instruction.Bytes;
+                instructions.Add(instruction);
+
+                if (instruction.IsReturn || _jumpTable.Any(j => j.Value == nextAddress) || _jumpITable.Any(j => j.Value.Any(t => t == nextAddress)))
+                {
+                    result.Add(new Subroutine(instructions));
+                    instructions = [];
+                }
+            }
+
+            return result.Where(s => s.Size > 0);
+        }
+    }
 
     public IEnumerable<MemoryAccessRecord> IndirectJumpTableMemoryAccess()
     {
@@ -93,14 +142,6 @@ public class Runner
         void WriteCallstack(int indentation, ushort endSegmentAddress, string mnemonic, ushort targetAddress) =>
             _callstack.Add($"{"".PadLeft(indentation)}run ${startSegmentAddress:X4}-${endSegmentAddress:X4} => {mnemonic} to {Labels.GetLabelAndMemoryAddress(targetAddress)}");
 
-        (HashSet<ushort> addresses, Sub sub) Jump(ushort address, Emulator.Instructions.Instruction ins)
-        {
-            WriteCallstack(255 - Cpu.SP + 2, address, ins.Mnemonic, Cpu.PC);
-            startSegmentAddress = Cpu.PC;
-
-            return TryGetSub(Cpu.PC);
-        }
-
         (var addresses, var sub) = TryGetSub(Cpu.PC);
 
         while (_ppu.Frame <= 250)
@@ -111,6 +152,7 @@ public class Runner
                 addresses.Add(address);
 
             var ins = Cpu.RunNextInstruction();
+            _instructionAddresses.Add(address);
 
             switch (ins.Opcode)
             {

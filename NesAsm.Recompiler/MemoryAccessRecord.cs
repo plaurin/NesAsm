@@ -14,44 +14,44 @@ public record MemoryAccessRecord(Subroutine Subroutine, Instruction Instruction,
 
     public string LabelAndAddress => Labels.GetLabelAndMemoryAddress(TargetAddress);
 
-    public MemoryRegion MemoryRegion
+    public MemoryRegionKind MemoryRegion
     {
         get
         {
             if (TargetAddress <= 0xFF)
-                return MemoryRegion.ZeroPage;
+                return MemoryRegionKind.ZeroPage;
             else if (TargetAddress <= 0x1FF)
-                return MemoryRegion.StackPage;
+                return MemoryRegionKind.StackPage;
             else if (TargetAddress <= 0x2FF)
-                return MemoryRegion.OAMPage;
+                return MemoryRegionKind.OAMPage;
             if (TargetAddress <= 0x7FF)
-                return MemoryRegion.OtherRAMPage;
+                return MemoryRegionKind.OtherRAMPage;
             if (TargetAddress >= 0x2000 && TargetAddress <= 0x2007)
-                return MemoryRegion.PPURegister;
+                return MemoryRegionKind.PPURegister;
             if (TargetAddress >= 0x4000 && TargetAddress <= 0x4013 || TargetAddress == 0x4015)
-                return MemoryRegion.APURegister;
+                return MemoryRegionKind.APURegister;
             if (TargetAddress == 0x4014)
-                return MemoryRegion.OAMData;
+                return MemoryRegionKind.OAMData;
             if (TargetAddress == 0x4016 || TargetAddress == 0x4017)
-                return MemoryRegion.Joypad;
+                return MemoryRegionKind.Joypad;
             if (TargetAddress >= 0x6000 && TargetAddress < 0x7FFF)
-                return MemoryRegion.WorkRAM;
+                return MemoryRegionKind.WorkRAM;
             if (TargetAddress >= 0x8000 && TargetAddress < 0xFFFF)
-                return MemoryRegion.ROM;
+                return MemoryRegionKind.ROM;
             else
-                return MemoryRegion.Unknown;
+                return MemoryRegionKind.Unknown;
         }
     }
 
     public bool IsDynamicDispatch => Instruction.IsDynamicDispatch(Instruction.Opcode);
-    public bool IsZeroPageAccess => MemoryRegion == MemoryRegion.ZeroPage;
-    public bool IsStackPageAccess => MemoryRegion == MemoryRegion.StackPage;
-    public bool IsOAMPageAccess => MemoryRegion == MemoryRegion.OAMPage;
-    public bool IsOtherRAMPageAccess => MemoryRegion == MemoryRegion.OtherRAMPage;
-    public bool IsPPURegisterAccess => MemoryRegion == MemoryRegion.PPURegister;
-    public bool IsAPURegisterAccess => MemoryRegion == MemoryRegion.APURegister;
-    public bool IsOAMDataAccess => MemoryRegion == MemoryRegion.OAMData;
-    public bool IsJoypadAccess => MemoryRegion == MemoryRegion.Joypad;
-    public bool IsWorkRAMAccess => MemoryRegion == MemoryRegion.WorkRAM;
-    public bool IsROMAccess => MemoryRegion == MemoryRegion.ROM;
+    public bool IsZeroPageAccess => MemoryRegion == MemoryRegionKind.ZeroPage;
+    public bool IsStackPageAccess => MemoryRegion == MemoryRegionKind.StackPage;
+    public bool IsOAMPageAccess => MemoryRegion == MemoryRegionKind.OAMPage;
+    public bool IsOtherRAMPageAccess => MemoryRegion == MemoryRegionKind.OtherRAMPage;
+    public bool IsPPURegisterAccess => MemoryRegion == MemoryRegionKind.PPURegister;
+    public bool IsAPURegisterAccess => MemoryRegion == MemoryRegionKind.APURegister;
+    public bool IsOAMDataAccess => MemoryRegion == MemoryRegionKind.OAMData;
+    public bool IsJoypadAccess => MemoryRegion == MemoryRegionKind.Joypad;
+    public bool IsWorkRAMAccess => MemoryRegion == MemoryRegionKind.WorkRAM;
+    public bool IsROMAccess => MemoryRegion == MemoryRegionKind.ROM;
 }

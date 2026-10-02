@@ -44,6 +44,34 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "Rom.txt"), sb.ToString());
     }
 
+    public static void Rom2(string outputPath, IEnumerable<MemoryRegion> memoryRegions)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var region in memoryRegions)
+        {
+            if (region is Subroutine sub)
+            {
+                sb.AppendLine(sub.ToString());
+                foreach (var instruction in sub.Instructions)
+                {
+                    var branch = sub.Branches.FirstOrDefault(b => b.TargetAddress == instruction.Address);
+                    var label = branch != null ? $"{Labels.GetLabelOrMemoryAddress(instruction.Address)}:" : string.Empty;
+
+                    var memoryAccess = instruction.GetMemoryAccess(sub);
+                    sb.AppendLine($"{label,-15}{instruction.ToString(),-40}{memoryAccess}");
+                }
+                sb.AppendLine();
+            }
+            else
+            {
+                throw new NotSupportedException($"MemoryRegion of type {region.GetType().Name} is not supported in Rom2 output.");
+            }
+        }
+
+        File.WriteAllText(Path.Combine(outputPath, "Rom2.txt"), sb.ToString());
+    }
+
     public static void RomMap(string outputPath, IReadOnlyCollection<Subroutine> subroutines, IEnumerable<Subroutine> potentialSubroutines)
     {
         var sb = new StringBuilder();
@@ -173,7 +201,7 @@ public static class Output
 
             var ramAccess = memoryAccess.Where(m => m.TargetAddress <= 0x7FF).Select(m => m.LabelAndAddress);
             var romAccess = memoryAccess.Where(m => m.TargetAddress >= 0x6000).Select(m => m.LabelAndAddress);
-            var unknownAccess = memoryAccess.Where(m => m.MemoryRegion == MemoryRegion.Unknown).Select(m => m.LabelAndAddress);
+            var unknownAccess = memoryAccess.Where(m => m.MemoryRegion == MemoryRegionKind.Unknown).Select(m => m.LabelAndAddress);
 
             sb.AppendLine($"   Memory Access (RAM): {ListOrZero(ramAccess)}");
             sb.AppendLine($"   Memory Access (ROM): {ListOrZero(romAccess)}");
@@ -235,7 +263,7 @@ public static class Output
 
         void PrintMemoryAccess(IEnumerable<MemoryAccessRecord> memoryAccesRecords)
         {
-            MemoryRegion? currentRegion = null;
+            MemoryRegionKind? currentRegion = null;
             int index = 0;
             foreach (var item in memoryAccesRecords.GroupBy(m => m.TargetAddress).OrderBy(a => a.Key))
             {
@@ -292,6 +320,7 @@ public static class Output
 
         Subroutines(outputPath, subroutines);
         Rom(outputPath, subroutines);
+        Rom2(outputPath, runner.MemoryRegions);
         MemoryAccess(outputPath, subroutines, runner.IndirectJumpTableMemoryAccess());
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);

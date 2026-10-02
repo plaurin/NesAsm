@@ -1,17 +1,17 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record Subroutine(ICollection<Instruction> Instructions)
+public record Subroutine(ICollection<Instruction> Instructions) : MemoryRegion
 {
-    public ushort Address => Instructions.First().Address;
-    public int LastInstructionAddress => Instructions.Last().Address;
-    public int Size => LastInstructionAddress - Address + Instructions.Last().Bytes;
+    public override ushort Address => Instructions.FirstOrDefault()?.Address ?? 0;
+    public int LastInstructionAddress => Instructions.LastOrDefault()?.Address ?? 0;
+    public override int Size => LastInstructionAddress - Address + Instructions.LastOrDefault()?.Bytes ?? 0;
 
     public IEnumerable<Jump> Jumps => Instructions
         .Where(i => Instruction.IsJump(i.Mnemonic) || Instruction.IsJumpToSubroutine(i.Mnemonic))
         .Select(i => new Jump(i.Address, i.Argument!.Value));
 
     public IEnumerable<Branch> Branches => Instructions
-        .Where(i => Instruction.IsBranch(i.Mnemonic))
+        .Where(i => i.IsBranch)
         .Select(i => new Branch(i.Address, i.Argument!.Value));
 
     public bool Returns => Instructions

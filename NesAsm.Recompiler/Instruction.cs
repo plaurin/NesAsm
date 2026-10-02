@@ -1,6 +1,4 @@
-﻿using NesAsm.Emulator.AddressModes;
-
-namespace NesAsm.Recompiler;
+﻿namespace NesAsm.Recompiler;
 
 public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Bytes, AddressingMode Mode, ushort? Argument = null, bool Executed = false)
 {
@@ -9,7 +7,7 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
 
     public static bool IsEndOfSubroutine(string mnemonic) => mnemonic == "JMP" || mnemonic == "RTS" || mnemonic == "RTI" || mnemonic == "JSR";
 
-    public static bool IsBranch(string mnemonic) => mnemonic == "BPL" || mnemonic == "BMI" || mnemonic == "BVC" || mnemonic == "BVS"
+    public static bool IsBranchInstruction(string mnemonic) => mnemonic == "BPL" || mnemonic == "BMI" || mnemonic == "BVC" || mnemonic == "BVS"
         || mnemonic == "BCC" || mnemonic == "BCS" || mnemonic == "BEQ" || mnemonic == "BNE";
 
     public static bool IsReturnInstruction(string mnemonic) => mnemonic == "RTS" || mnemonic == "RTI";
@@ -31,6 +29,9 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
 
     public static bool IsMemoryWrite(string mnemonic) => mnemonic == "STA" || mnemonic == "STX" || mnemonic == "STY" || mnemonic == "DEC" || mnemonic == "INC"
         || mnemonic == "LSR" || mnemonic == "ASL" || mnemonic == "ROL" || mnemonic == "ROR";
+
+    public bool IsBranch => IsBranchInstruction(Mnemonic);
+    public bool IsReturn => IsReturnInstruction(Mnemonic);
 
     public override string ToString()
     {
@@ -75,7 +76,7 @@ public record Instruction(ushort Address, byte Opcode, string Mnemonic, int Byte
                 IsRead: IsMemoryRead(Mnemonic),
                 IsWrite: IsMemoryWrite(Mnemonic),
                 IsJump: IsJump(Mnemonic) || IsJumpToSubroutine(Mnemonic),
-                IsBranch: IsBranch(Mnemonic),
+                IsBranch: IsBranchInstruction(Mnemonic),
                 IsDirectAccess: isDirectAccess.Value);
         }
 
