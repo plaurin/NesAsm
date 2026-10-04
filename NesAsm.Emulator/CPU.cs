@@ -68,7 +68,7 @@ public class CPU
         S:{_sp:X2} [{string.Join(" ", Stack.Select(b => b.ToString("X2")))}]
         """;
 
-    private byte[] Stack => Enumerable.Range(_sp + 1, 0xFF - _sp).Select(x => (byte)x).Select(b => _memory.Read((ushort)(0x100 + b))).ToArray();
+    private byte[] Stack => Enumerable.Range(_sp + 1, 0xFF - _sp).Select(x => (byte)x).Select(b => _memory.Peek((ushort)(0x100 + b))).ToArray();
 
     // ----- Set -----
 
@@ -115,7 +115,7 @@ public class CPU
     public byte PopStack()
     {
         _sp += 1;
-        return _memory.Read((ushort)(0x100 + _sp));
+        return _memory.Peek((ushort)(0x100 + _sp));
     }
 
     public void PushFlagsOnStack()
@@ -365,7 +365,7 @@ public class CPU
 
     public Instruction RunNextInstruction()
     {
-        var opcode = _memory.Read(_pc);
+        var opcode = _memory.Peek(_pc);
 
         var instruction = _instructionSet[opcode];
         instruction.Execute();
@@ -390,13 +390,13 @@ public class CPU
 
     public Instruction GetInstructionAt(ushort address)
     {
-        var opcode = _memory.Read(address);
+        var opcode = _memory.Peek(address);
         var instruction = _instructionSet[opcode];
         return instruction;
     }
 
-    public byte PeekByteArgument() => _memory.ReadByteArgument(_pc);
-    public ushort PeekWordArgument() => _memory.ReadWordArgument(_pc);
+    public byte PeekByteArgument() => _memory.PeekByteArgument(_pc);
+    public ushort PeekWordArgument() => _memory.PeekWordArgument(_pc);
 
     public void FlagNZ(byte value)
     {

@@ -5,7 +5,7 @@ namespace NesAsm.Recompiler;
 public class Runner
 {
     private readonly PPUInstance _ppu;
-
+    private readonly NesMemory _memory;
     private readonly HashSet<ushort> _instructionAddresses = [];
     private readonly Dictionary<ushort, Sub> _subs = [];
     private readonly Dictionary<ushort, ushort>  _jumpTable = [];
@@ -15,8 +15,9 @@ public class Runner
     public Runner(Cart cart)
     {
         _ppu = new PPUInstance();
-        var memory = new NesMemory(cart, _ppu);
-        Cpu = new CPU(memory);
+        _memory = new NesMemory(cart, _ppu);
+        Cpu = new CPU(_memory);
+        _memory.SetCPU(Cpu);
     }
 
     public CPU Cpu { get; init; }
@@ -51,8 +52,11 @@ public class Runner
         get
         {
             var result = new List<MemoryRegion>();
+            var subs = new List<Subroutine>();
+
             var instructions = new List<Instruction>();
 
+            // Instructions
             var nextAddress = 0x8000;
             foreach (var address in _instructionAddresses.OrderBy(a => a))
             {
@@ -73,7 +77,7 @@ public class Runner
                     else
                     {
                         // new sub
-                        result.Add(new Subroutine(instructions));
+                        subs.Add(new Subroutine(instructions));
                         instructions = [];
                     }
                 }
@@ -84,12 +88,68 @@ public class Runner
 
                 if (instruction.IsReturn || _jumpTable.Any(j => j.Value == nextAddress) || _jumpITable.Any(j => j.Value.Any(t => t == nextAddress)))
                 {
-                    result.Add(new Subroutine(instructions));
+                    subs.Add(new Subroutine(instructions));
                     instructions = [];
                 }
             }
 
+            result.AddRange(subs);
             return result.Where(s => s.Size > 0);
+        }
+    }
+
+    public IEnumerable<MemoryAccessRecord> Reads() => GetMemoryAccess(_memory.Reads, isRead: true, isWrite: false);
+
+    public IEnumerable<MemoryAccessRecord> Writes() => GetMemoryAccess(_memory.Writes, isRead: false, isWrite: true);
+
+    private IEnumerable<MemoryAccessRecord> GetMemoryAccess(Dictionary<ushort, HashSet<ushort>> records, bool isRead, bool isWrite)
+    {
+        foreach (var record in records.OrderBy(r => r.Key))
+        {
+            var sourceAddress = record.Key;
+            var sub = Subroutines.First(s => s.IsInSub(sourceAddress));
+            var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, sourceAddress);
+
+            if (record.Value.Count == 1)
+                yield return new MemoryAccessRecord(sub, ins,
+                    RomAddress: sourceAddress,
+                    TargetAddress: record.Value.Single(),
+                    IsRead: isRead,
+                    IsWrite: isWrite,
+                    IsJump: false,
+                    IsBranch: false,
+                    IsDirectAccess: true);
+            else
+            {
+                var first = record.Value.OrderBy(a => a).First();
+                var last = record.Value.OrderBy(a => a).Last();
+                yield return new MemoryAccessRecord(sub, ins,
+                    RomAddress: sourceAddress,
+                    TargetAddress: first,
+                    IsRead: isRead,
+                    IsWrite: isWrite,
+                    IsJump: false,
+                    IsBranch: false,
+                    IsDirectAccess: false,
+                    Size: last - first - 1);
+            }
+        }
+    }
+
+    public IEnumerable<MemoryAccessRecord> DirectJumpTableMemoryAccess()
+    {
+        foreach (var jumpAddress in _jumpTable)
+        {
+            var sub = Subroutines.First(s => s.IsInSub(jumpAddress.Key));
+            var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, jumpAddress.Key);
+            yield return new MemoryAccessRecord(sub, ins,
+                RomAddress: jumpAddress.Key,
+                TargetAddress: jumpAddress.Value,
+                IsRead: false,
+                IsWrite: false,
+                IsJump: true,
+                IsBranch: false,
+                IsDirectAccess: true);
         }
     }
 

@@ -314,6 +314,70 @@ public static class Output
         File.WriteAllText(Path.Combine(outputPath, "MemoryAccess.txt"), sb.ToString());
     }
 
+    public static void MemoryAccess2(string outputPath, IEnumerable<MemoryAccessRecord> reads, IEnumerable<MemoryAccessRecord> writes, IEnumerable<MemoryAccessRecord> directJumps, IEnumerable<MemoryAccessRecord> indirectJumps)
+    {
+        var sb = new StringBuilder();
+
+        var allAccess = reads.Concat(writes).Concat(directJumps).Concat(indirectJumps).ToList();
+
+        void PrintMemoryAccess(IEnumerable<MemoryAccessRecord> memoryAccesRecords)
+        {
+            MemoryRegionKind? currentRegion = null;
+            int index = 0;
+            foreach (var memoryAccess in memoryAccesRecords.OrderBy(a => a.TargetAddress).ThenBy(a => a.RomAddress))
+            {
+                var region = memoryAccess.MemoryRegion;
+                if (memoryAccess.MemoryRegion != currentRegion)
+                {
+                    currentRegion = region;
+                    sb.AppendLine();
+                    sb.AppendLine($"-- {region} --");
+                }
+
+                var target = Labels.GetLabelAndMemoryAddress(memoryAccess.TargetAddress);
+
+                if (memoryAccess.Size > 1)
+                    target = $"{target}-{memoryAccess.TargetAddress + memoryAccess.Size - 1:X4} (s: {memoryAccess.Size})";
+
+                if (++index == 4)
+                {
+                    index = 0;
+                    target = $"{target} ".PadRight(35, '.')[..35];
+                }
+
+                var sourceSub = $"{(memoryAccess.IsRead ? "R" : " ")}{(memoryAccess.IsWrite ? "W" : " ")}{(memoryAccess.IsJump ? "J" : "")} ${memoryAccess.Instruction.Address:X4}-{Labels.GetLabelAndMemoryAddress(memoryAccess.Subroutine.Address)}";
+                sb.AppendLine($"{target,-35} : {string.Join("  ", sourceSub)}");
+            }
+        }
+
+        void PrintSeparator()
+        {
+            sb.AppendLine();
+            sb.AppendLine("------------------------------------------------");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine("===== Direct Access =====");
+        PrintMemoryAccess(allAccess.Where(a => a.IsDirectAccess && !a.IsJump));
+
+        PrintSeparator();
+
+        sb.AppendLine("===== Indirect Access =====");
+        PrintMemoryAccess(allAccess.Where(a => !a.IsDirectAccess && !a.IsJump));
+
+        PrintSeparator();
+
+        sb.AppendLine("===== Direct Jumps =====");
+        PrintMemoryAccess(allAccess.Where(a => a.IsDirectAccess && a.IsJump));
+
+        PrintSeparator();
+
+        sb.AppendLine("===== Indirect Jumps =====");
+        PrintMemoryAccess(allAccess.Where(a => !a.IsDirectAccess && a.IsJump));
+
+        File.WriteAllText(Path.Combine(outputPath, "MemoryAccess2.txt"), sb.ToString());
+    }
+
     public static void Run(string outputPath, Runner runner)
     {
         var subroutines = runner.Subroutines;
@@ -322,6 +386,7 @@ public static class Output
         Rom(outputPath, subroutines);
         Rom2(outputPath, runner.MemoryRegions);
         MemoryAccess(outputPath, subroutines, runner.IndirectJumpTableMemoryAccess());
+        MemoryAccess2(outputPath, runner.Reads(), runner.Writes(), runner.DirectJumpTableMemoryAccess(), runner.IndirectJumpTableMemoryAccess());
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
 

@@ -1,6 +1,6 @@
 ﻿namespace NesAsm.Recompiler;
 
-public record MemoryAccessRecord(Subroutine Subroutine, Instruction Instruction, ushort RomAddress, ushort TargetAddress, bool IsRead, bool IsWrite, bool IsJump, bool IsBranch, bool IsDirectAccess)
+public record MemoryAccessRecord(Subroutine Subroutine, Instruction Instruction, ushort RomAddress, ushort TargetAddress, bool IsRead, bool IsWrite, bool IsJump, bool IsBranch, bool IsDirectAccess, int? Size = 1)
 {
     public override string ToString()
     {
