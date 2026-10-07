@@ -48,4 +48,22 @@ public class MermaidGenerator
         sb.AppendLine("```");
         File.WriteAllText(Path.Combine(outputPath, "RomTreeMap.md"), sb.ToString());
     }
+
+    internal static void GenerateRomTreeMapLite(string outputPath, IEnumerable<MemoryRegion> romMemoryRegions)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("```mermaid");
+        sb.AppendLine("treemap-beta");
+
+        sb.AppendLine($"\"Code\" : {romMemoryRegions.OfType<Subroutine>().Sum(s => s.Size)}");
+
+        sb.AppendLine("\"Potential Code\"");
+
+        sb.AppendLine($"\"Data\" : {romMemoryRegions.OfType<DataRegion>().Sum(s => s.Size)}");
+
+        sb.AppendLine($"\"Unknown\" : {romMemoryRegions.OfType<UnknownRegion>().Sum(s => s.Size)}");
+
+        sb.AppendLine("```");
+        File.WriteAllText(Path.Combine(outputPath, "RomTreeMapLite.md"), sb.ToString());
+    }
 }

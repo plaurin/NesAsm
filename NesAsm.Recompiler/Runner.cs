@@ -22,32 +22,10 @@ public class Runner
 
     public CPU Cpu { get; init; }
 
-    public IEnumerable<Subroutine> Subroutines => _subs
-        .Select(s =>
-        {
-            var instructions = new List<Instruction>();
-            int nextAddress = s.Key;
-            foreach (var addr in s.Value.Addresses.OrderBy(a => a))
-            {
-                while (nextAddress < addr)
-                {
-                    // fill gap
-                    var parsedIns = Parser.GetInstruction(Cpu.Cart.PrgRom, (ushort)nextAddress, false);
-                    instructions.Add(parsedIns);
-                    nextAddress = parsedIns.Address + parsedIns.Bytes;
-                }
+    public IEnumerable<Subroutine> Subroutines => RomMemoryRegions.OfType<Subroutine>();
 
-                var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, addr, true);
-                instructions.Add(ins);
-                nextAddress = ins.Address + ins.Bytes;
-            } 
 
-            return new Subroutine(instructions);
-        })
-        .Where(s => s.Instructions.Count > 0)
-        .OrderBy(s => s.Address);
-
-    public IEnumerable<MemoryRegion> MemoryRegions
+    public IEnumerable<MemoryRegion> RomMemoryRegions
     {
         get
         {
@@ -93,8 +71,36 @@ public class Runner
                 }
             }
 
-            result.AddRange(subs);
-            return result.Where(s => s.Size > 0);
+            // Data
+            var dataRegions = new List<DataRegion>();
+            foreach (var readAccess in GetMemoryAccess(_memory.Reads, isRead: true, isWrite: false, subroutinesOverride: subs).Where(m => m.IsROMAccess))
+            {
+                dataRegions.Add(new DataRegion(readAccess.TargetAddress, readAccess.Size ?? 1));
+            }
+
+            result.AddRange(subs.OfType<MemoryRegion>().Where(s => s.Size > 0).Concat(dataRegions).OrderBy(a => a.Address));
+
+            // Unknown regions
+            var unknownRegions = new List<UnknownRegion>();
+            nextAddress = 0x8000;
+            foreach (var memoryRegion in result)
+            {
+                if (memoryRegion.Address != nextAddress)
+                {
+                    unknownRegions.Add(new UnknownRegion((ushort)nextAddress, memoryRegion.Address - nextAddress));
+                }
+
+                nextAddress = memoryRegion.Address + memoryRegion.Size;
+            }
+
+            if (nextAddress < 0xFFF9)
+            {
+                unknownRegions.Add(new UnknownRegion((ushort)nextAddress, 0xFFF9 - nextAddress + 1));
+            }
+
+            result.AddRange(unknownRegions);
+
+            return result.OrderBy(s => s.Address);
         }
     }
 
@@ -102,36 +108,84 @@ public class Runner
 
     public IEnumerable<MemoryAccessRecord> Writes() => GetMemoryAccess(_memory.Writes, isRead: false, isWrite: true);
 
-    private IEnumerable<MemoryAccessRecord> GetMemoryAccess(Dictionary<ushort, HashSet<ushort>> records, bool isRead, bool isWrite)
+    private IEnumerable<MemoryAccessRecord> GetMemoryAccess(Dictionary<ushort, HashSet<ushort>> records, bool isRead, bool isWrite, IReadOnlyCollection<Subroutine>? subroutinesOverride = null)
     {
         foreach (var record in records.OrderBy(r => r.Key))
         {
             var sourceAddress = record.Key;
-            var sub = Subroutines.First(s => s.IsInSub(sourceAddress));
+            var sub = (subroutinesOverride ?? Subroutines).First(s => s.IsInSub(sourceAddress));
             var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, sourceAddress);
+            if (ins.Address == 0x85C8) { }
 
-            if (record.Value.Count == 1)
-                yield return new MemoryAccessRecord(sub, ins,
-                    RomAddress: sourceAddress,
-                    TargetAddress: record.Value.Single(),
-                    IsRead: isRead,
-                    IsWrite: isWrite,
-                    IsJump: false,
-                    IsBranch: false,
-                    IsDirectAccess: true);
+            IEnumerable<ushort> direct = null!;
+            IEnumerable<ushort> indirect = null!;
+            int? size = null!;
+
+            if (ins.Mode == AddressingMode.IndirectY || ins.Mode == AddressingMode.IndirectX || ins.Mode == AddressingMode.Indirect)
+            {
+                direct = record.Value.Take(2);
+                indirect = record.Value.Skip(2);
+            }
+            else if (ins.Mode == AddressingMode.ZeroPageX || ins.Mode == AddressingMode.ZeroPageY || ins.Mode == AddressingMode.AbsoluteX || ins.Mode == AddressingMode.AbsoluteY)
+            {
+                indirect = record.Value;
+            }
             else
             {
-                var first = record.Value.OrderBy(a => a).First();
-                var last = record.Value.OrderBy(a => a).Last();
-                yield return new MemoryAccessRecord(sub, ins,
-                    RomAddress: sourceAddress,
-                    TargetAddress: first,
-                    IsRead: isRead,
-                    IsWrite: isWrite,
-                    IsJump: false,
-                    IsBranch: false,
-                    IsDirectAccess: false,
-                    Size: last - first - 1);
+                if (record.Value.Count == 1)
+                    direct = record.Value.Take(1);
+                else
+                {
+                    indirect = record.Value;
+                }
+            }
+
+            if (direct?.Any() == true)
+            {
+                foreach (var targetAddress in direct.OrderBy(a => a))
+                {
+                    yield return new MemoryAccessRecord(sub, ins,
+                        RomAddress: sourceAddress,
+                        TargetAddress: targetAddress,
+                        IsRead: isRead,
+                        IsWrite: isWrite,
+                        IsJump: false,
+                        IsBranch: false,
+                        IsDirectAccess: true);
+                }
+            }
+
+            if (indirect?.Any() == true)
+            {
+                size = indirect.OrderBy(a => a).Last() - indirect.OrderBy(a => a).First() + 1;
+                if (indirect.Count() * 10 < size) size = null;
+
+                if (size.HasValue)
+                {
+                    yield return new MemoryAccessRecord(sub, ins,
+                        RomAddress: sourceAddress,
+                        TargetAddress: indirect.OrderBy(a => a).First(),
+                        IsRead: isRead,
+                        IsWrite: isWrite,
+                        IsJump: false,
+                        IsBranch: false,
+                        IsDirectAccess: false,
+                        Size: size);
+                }
+                else
+                {
+                    foreach (var targetAddress in indirect.OrderBy(a => a))
+                    {
+                        yield return new MemoryAccessRecord(sub, ins,
+                            RomAddress: sourceAddress,
+                            TargetAddress: targetAddress,
+                            IsRead: isRead,
+                            IsWrite: isWrite,
+                            IsJump: false,
+                            IsBranch: false,
+                            IsDirectAccess: false);
+                    }
+                }
             }
         }
     }
@@ -142,6 +196,8 @@ public class Runner
         {
             var sub = Subroutines.First(s => s.IsInSub(jumpAddress.Key));
             var ins = Parser.GetInstruction(Cpu.Cart.PrgRom, jumpAddress.Key);
+            if (ins.Address == 0x85C8) { }
+
             yield return new MemoryAccessRecord(sub, ins,
                 RomAddress: jumpAddress.Key,
                 TargetAddress: jumpAddress.Value,

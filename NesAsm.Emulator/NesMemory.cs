@@ -60,7 +60,7 @@ public class NesMemory
         return 0; // should throw
     }
 
-    public void Write(ushort address, byte value)
+    public void Write(ushort address, byte value, bool? shouldRecord = true)
     {
         if (address < 0x800)
             _ram[address] = value;
@@ -68,7 +68,8 @@ public class NesMemory
             Ppu.WriteRegister(address, value);
         // TODO PPU and others
 
-        RecordAccess(address, _cpu.PC, Writes);
+        if (shouldRecord ?? true)
+            RecordAccess(address, _cpu.PC, Writes);
     }
 
     private static void RecordAccess(ushort address, ushort pc, Dictionary<ushort, HashSet<ushort>> dict)

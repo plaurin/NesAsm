@@ -63,6 +63,16 @@ public static class Output
                 }
                 sb.AppendLine();
             }
+            else if (region is DataRegion data)
+            {
+                sb.AppendLine(data.ToString());
+                sb.AppendLine();
+            }
+            else if (region is UnknownRegion unknown)
+            {
+                sb.AppendLine(unknown.ToString());
+                sb.AppendLine();
+            }
             else
             {
                 throw new NotSupportedException($"MemoryRegion of type {region.GetType().Name} is not supported in Rom2 output.");
@@ -326,6 +336,7 @@ public static class Output
             int index = 0;
             foreach (var memoryAccess in memoryAccesRecords.OrderBy(a => a.TargetAddress).ThenBy(a => a.RomAddress))
             {
+                if (memoryAccess.TargetAddress == 0x8B08) { }
                 var region = memoryAccess.MemoryRegion;
                 if (memoryAccess.MemoryRegion != currentRegion)
                 {
@@ -342,7 +353,7 @@ public static class Output
                 if (++index == 4)
                 {
                     index = 0;
-                    target = $"{target} ".PadRight(35, '.')[..35];
+                    target = $"{target} ".PadRight(35, '.').Substring(0, Math.Max(target.Length, 35));
                 }
 
                 var sourceSub = $"{(memoryAccess.IsRead ? "R" : " ")}{(memoryAccess.IsWrite ? "W" : " ")}{(memoryAccess.IsJump ? "J" : "")} ${memoryAccess.Instruction.Address:X4}-{Labels.GetLabelAndMemoryAddress(memoryAccess.Subroutine.Address)}";
@@ -384,11 +395,12 @@ public static class Output
 
         Subroutines(outputPath, subroutines);
         Rom(outputPath, subroutines);
-        Rom2(outputPath, runner.MemoryRegions);
+        Rom2(outputPath, runner.RomMemoryRegions);
         MemoryAccess(outputPath, subroutines, runner.IndirectJumpTableMemoryAccess());
         MemoryAccess2(outputPath, runner.Reads(), runner.Writes(), runner.DirectJumpTableMemoryAccess(), runner.IndirectJumpTableMemoryAccess());
 
         MermaidGenerator.GenerateSubRelations(outputPath, subroutines);
+        MermaidGenerator.GenerateRomTreeMapLite(outputPath, runner.RomMemoryRegions);
 
         Callstacks(outputPath, runner.Callstacks);
 

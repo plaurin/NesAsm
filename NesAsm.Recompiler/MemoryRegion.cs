@@ -1,4 +1,6 @@
-﻿namespace NesAsm.Recompiler;
+﻿using NesAsm.Emulator.Instructions;
+
+namespace NesAsm.Recompiler;
 
 public abstract record MemoryRegion()
 {

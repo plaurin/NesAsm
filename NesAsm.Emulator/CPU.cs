@@ -108,7 +108,7 @@ public class CPU
 
     public void PushStack(byte value)
     {
-        _memory.Write((ushort)(0x100 + _sp), value);
+        _memory.Write((ushort)(0x100 + _sp), value, shouldRecord: false);
         _sp -= 1;
     }
 
