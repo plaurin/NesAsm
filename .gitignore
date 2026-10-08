@@ -369,3 +369,4 @@ FodyWeavers.xsd
 *NOTES.md
 /NesAsm.Recompiler/args
 /NesAsm.Recompiler/output/
+/NesAsm.UI/args

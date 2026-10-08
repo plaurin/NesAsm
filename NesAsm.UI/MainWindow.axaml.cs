@@ -12,6 +12,7 @@ using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,9 +21,9 @@ namespace NesAsm.UI;
 public partial class MainWindow : Window
 {
     private readonly SKBitmap _bitmap;
-    private readonly byte[] _screen;
+    private byte[] _screen;
+    private WriteableBitmap writeableBitmap;
     private readonly DispatcherTimer _timer = new();
-    private readonly WriteableBitmap writeableBitmap;
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
 
     private int _frameNumber;
@@ -49,15 +50,16 @@ public partial class MainWindow : Window
         topLevel!.KeyUp += OnKeyUp;
 
         _bitmap = new SKBitmap(256, 240);
-        _screen = PPU.GetScreen();
+        InitRenderTarget(PPU.GetScreen());
+        //_screen = PPU.GetScreen();
 
-        writeableBitmap = new WriteableBitmap(
-            new PixelSize(_bitmap.Width, _bitmap.Height),
-            new Vector(96, 96),
-            PixelFormat.Bgra8888,
-            AlphaFormat.Opaque);
-        
-        Image.Source = writeableBitmap;
+        //writeableBitmap = new WriteableBitmap(
+        //    new PixelSize(_bitmap.Width, _bitmap.Height),
+        //    new Vector(96, 96),
+        //    PixelFormat.Bgra8888,
+        //    AlphaFormat.Opaque);
+
+        //Image.Source = writeableBitmap;
 
         _colorPalette = PPU.Colors.Select(c => new SKColor(c.r, c.g, c.b)).ToArray()!;
 
@@ -74,10 +76,24 @@ public partial class MainWindow : Window
 
         //RunGame("Vertical Scrolling");
         //RunGame("Boxing Game");
-        RunGame("FPS Game");
+        //RunGame("FPS Game");
+        RunGame("ROM Game");
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
+    }
+
+    private void InitRenderTarget(byte[] target)
+    {
+        _screen = target;
+
+        writeableBitmap = new WriteableBitmap(
+            new PixelSize(_bitmap.Width, _bitmap.Height),
+            new Vector(96, 96),
+            PixelFormat.Bgra8888,
+            AlphaFormat.Opaque);
+
+        Image.Source = writeableBitmap;
     }
 
     private void RunGame(string gameName)
@@ -99,6 +115,21 @@ public partial class MainWindow : Window
                 break;
             case "FPS Game":
                 Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: FPSGame.Reset, nmi: FPSGame.Nmi)).ConfigureAwait(false);
+                break;
+            case "ROM Game":
+                const string projectFolder = "NesAsm.UI";
+                var cur = Directory.GetCurrentDirectory();
+                var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
+                var argFilePath = Path.Combine(cur[..ind], "args");
+
+                if (!File.Exists(argFilePath))
+                    throw new FileNotFoundException($"Argument file not found: {argFilePath}");
+
+                var romPath = File.ReadAllText(argFilePath);
+                var runner = new NesRunner(new Cart(romPath));
+                InitRenderTarget(runner.GetScreen());
+
+                Task.Run(() => runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
                 break;
             default:
                 throw new InvalidOperationException($"Game {gameName} is not implemented yet.");

@@ -35,6 +35,7 @@ public class PPUInstance
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
 
     public bool NmiRequested { get; set; }
+    public byte BackgroundColorIndex { get; private set; } = 0;
 
     public byte ReadRegister(ushort address)
     {
