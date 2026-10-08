@@ -235,10 +235,12 @@ public class Runner
     {
         Cpu.Init();
 
-        // TODO dataTable and dataITable
         ushort startSegmentAddress = Cpu.PC;
 
         var returnToSubs = new Dictionary<ushort, Sub>();
+        
+        var frameCallstack = new List<string>();
+        FrameStat lastestStats = new(0, 0, 0);
 
         (HashSet<ushort> addresses, Sub sub) TryGetSub(ushort address, bool useReturnsToo = false)
         {
@@ -256,14 +258,14 @@ public class Runner
         }
 
         void WriteCallstack(int indentation, ushort endSegmentAddress, string mnemonic, ushort targetAddress) =>
-            _callstack.Add($"{"".PadLeft(indentation)}run ${startSegmentAddress:X4}-${endSegmentAddress:X4} => {mnemonic} to {Labels.GetLabelAndMemoryAddress(targetAddress)}");
+            frameCallstack.Add($"{"".PadLeft(indentation)}run ${startSegmentAddress:X4}-${endSegmentAddress:X4} => {mnemonic} to {Labels.GetLabelAndMemoryAddress(targetAddress)}");
 
         (var addresses, var sub) = TryGetSub(Cpu.PC);
 
         while (_ppu.Frame <= 250)
         {
             var address = Cpu.PC;
-            if (address == 0x8052) { }
+            if (address == 0x9662) { }
             if (address >= 0x6000 && address <= 0xFFFF)
                 addresses.Add(address);
 
@@ -321,10 +323,19 @@ public class Runner
                 (addresses, sub) = TryGetSub(Cpu.PC);
                 startSegmentAddress = Cpu.PC;
 
-                _callstack.Add("");
-                _callstack.Add($"  * Total [F:{_ppu.Frame - 1,3}]: {_subs.Count,3} Subs, {_jumpTable.Count,3} jumps, {_jumpITable.Sum(j => j.Value.Count),3} indirect jumps *");
-                _callstack.Add($"--- Nmi Frame {_ppu.Frame} ---");
-                _callstack.Add("");
+                var frameStat = new FrameStat(_subs.Count, _jumpTable.Count, _jumpITable.Sum(j => j.Value.Count));
+
+                if (lastestStats.Subs != frameStat.Subs || lastestStats.Jumps != frameStat.Jumps || lastestStats.IndirectJumps != frameStat.IndirectJumps)
+                {
+                    frameCallstack.Add("");
+                    frameCallstack.Add($"  * Total [F:{_ppu.Frame - 1,3}]: {frameStat.Subs,3} Subs, {frameStat.Jumps,3} jumps, {frameStat.IndirectJumps,3} indirect jumps *");
+                    frameCallstack.Add($"--- Nmi Frame {_ppu.Frame} ---");
+                    frameCallstack.Add("");
+
+                    lastestStats = frameStat;
+                    _callstack.AddRange(frameCallstack);
+                    frameCallstack.Clear();
+                }
             }
         }
     }
@@ -339,3 +350,5 @@ public record Sub(CPU Cpu, ushort Address, HashSet<ushort> Addresses)
         return $"${Address:X4} to ${Addresses.Max():X4} (Instructions: {Instructions.Count()})";
     }
 }
+
+public record FrameStat(int Subs, int Jumps, int IndirectJumps);

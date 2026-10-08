@@ -282,7 +282,7 @@ public static class Output
                 {
                     currentRegion = region;
                     sb.AppendLine();
-                    sb.AppendLine($"-- {region} --");
+                    sb.AppendLine($"  -- {region} --");
                 }
                 var target = Labels.GetLabelAndMemoryAddress(item.Key);
                 if (++index == 4)
@@ -294,7 +294,7 @@ public static class Output
                     .GroupBy(m => m.Subroutine)
                     .OrderBy(g => g.Key.Address)
                     .Select(g => $"{(g.Any(r => r.IsRead) ? "R" : " ")}{(g.Any(r => r.IsWrite) ? "W" : " ")}{(g.Any(r => r.IsJump) ? "J" : "")} {Labels.GetLabelAndMemoryAddress(g.Key.Address)}");
-                sb.AppendLine($"{target,-25} : {string.Join("  ", sourceSub)}");
+                sb.AppendLine($"    {target,-25} : {string.Join("  ", sourceSub)}");
             }
         }
 
@@ -342,7 +342,7 @@ public static class Output
                 {
                     currentRegion = region;
                     sb.AppendLine();
-                    sb.AppendLine($"-- {region} --");
+                    sb.AppendLine($"  -- {region} --");
                 }
 
                 var target = Labels.GetLabelAndMemoryAddress(memoryAccess.TargetAddress);
@@ -357,7 +357,7 @@ public static class Output
                 }
 
                 var sourceSub = $"{(memoryAccess.IsRead ? "R" : " ")}{(memoryAccess.IsWrite ? "W" : " ")}{(memoryAccess.IsJump ? "J" : "")} ${memoryAccess.Instruction.Address:X4}-{Labels.GetLabelAndMemoryAddress(memoryAccess.Subroutine.Address)}";
-                sb.AppendLine($"{target,-35} : {string.Join("  ", sourceSub)}");
+                sb.AppendLine($"    {target,-35} : {string.Join("  ", sourceSub)}");
             }
         }
 

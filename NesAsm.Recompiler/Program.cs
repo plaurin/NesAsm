@@ -19,14 +19,14 @@ internal class Program
 
         var cart = new Cart(romPath);
 
-        IReadOnlyCollection<Subroutine>? subroutines = null;
+        //IReadOnlyCollection<Subroutine>? subroutines = null;
 
-        for (int iteration = 1; iteration <= 1; iteration++)
-        {
-            var iterationPath = Path.Combine(outputPath, $"Iteration{iteration}");
-            Directory.CreateDirectory(iterationPath);
-            subroutines = ProcessIteration(cart, dynamicDispatchAddresses, iteration, iterationPath);
-        }
+        //for (int iteration = 1; iteration <= 1; iteration++)
+        //{
+        //    var iterationPath = Path.Combine(outputPath, $"Iteration{iteration}");
+        //    Directory.CreateDirectory(iterationPath);
+        //    subroutines = ProcessIteration(cart, dynamicDispatchAddresses, iteration, iterationPath);
+        //}
 
         var runner = new Runner(cart);
         try
@@ -42,6 +42,40 @@ internal class Program
             var runPath = Path.Combine(outputPath, $"Run1");
             Directory.CreateDirectory(runPath);
             Output.Run(runPath, runner);
+        }
+
+        var addresses = FindIndirectJumpAddresses(runner);
+        foreach (var item in addresses)
+        {
+            Console.WriteLine(Labels.GetLabelAndMemoryAddress(item));
+        }
+    }
+
+    private static IEnumerable<ushort> FindIndirectJumpAddresses(Runner runner)
+    {
+        var indirectJumpSubs = runner.Subroutines.Where(s => s.Instructions.Any(i => Instruction.IsDynamicDispatch(i.Opcode))).ToList();
+
+        var useIndirectJumpsSub = runner.DirectJumpTableMemoryAccess().Where(m => indirectJumpSubs.Any(s => s.Address == m.TargetAddress)).ToList();
+
+        foreach (var sub in useIndirectJumpsSub)
+        {
+            var nextAddress = sub.Instruction.Address + sub.Instruction.Bytes;
+            var nextSub = runner.Subroutines.FirstOrDefault(s => s.Address > nextAddress);
+
+            if (nextSub != null)
+            {
+                while(nextAddress < nextSub.Address)
+                {
+                    var potentialAddress = runner.Cpu.Memory.PeekWordArgument((ushort)(nextAddress - 1));
+                    if (potentialAddress < 0x8000 || potentialAddress > 0xFFF9) break;
+                    yield return potentialAddress;
+                    nextAddress += 2;
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Sub {sub.Subroutine.LabelOrAddress} at ${sub.Subroutine.Address:X4} uses indirect jump to ${sub.TargetAddress:X4}, no next sub found");
+            }
         }
     }
 
