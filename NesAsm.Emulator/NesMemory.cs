@@ -4,24 +4,21 @@ public class NesMemory
 {
     public byte[] _ram = new byte[0x800];
     private CPU _cpu = null!;
+    private PPUInstance _ppu = null!;
 
-    public NesMemory(Cart cart, PPUInstance ppu)
+    public NesMemory(Cart cart)
     {
         Cart = cart;
-        Ppu = ppu;
     }
 
     public Cart Cart { get; init; }
-    public PPUInstance Ppu { get; init; }
 
     public Dictionary<ushort, HashSet<ushort>> Reads { get; } = [];
 
     public Dictionary<ushort, HashSet<ushort>> Writes { get; } = [];
 
-    public void SetCPU(CPU cpu)
-    {
-        _cpu = cpu;
-    }
+    public void SetCPU(CPU cpu) => _cpu = cpu;
+    public void SetPPU(PPUInstance ppu) => _ppu = ppu;
 
     public byte Read(ushort address)
     {
@@ -39,7 +36,7 @@ public class NesMemory
         else if (address >= 0x6000 && address <= 0xFFFF)
             return Cart.ReadMemory(address);
         else if (address >= 0x2000 && address <= 0x3FFF)
-            return Ppu.ReadRegister(address);
+            return _ppu.ReadRegister(address);
 
         return 0;
     }
@@ -65,7 +62,18 @@ public class NesMemory
         if (address < 0x800)
             _ram[address] = value;
         else if (address >= 0x2000 && address <= 0x3FFF)
-            Ppu.WriteRegister(address, value);
+            _ppu.WriteRegister(address, value);
+        else if (address == 0x4014) // OAMDMA
+        {
+            _ppu.WriteOAMDMA(value);
+        }
+        else if (address >= 0x4000 && address <= 0x4013 || address == 0x4015 || address == 0x4017) { } //APU
+        else if (address == 0x4016) { } // Read input
+        else
+        {
+
+            throw new NotImplementedException();
+        }
         // TODO PPU and others
 
         if (shouldRecord ?? true)

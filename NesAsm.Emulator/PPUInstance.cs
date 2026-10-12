@@ -14,40 +14,80 @@ public class PPUInstance
     public const ushort PPUADDR = 0x2006;
     public const ushort PPUDATA = 0x2007;
 
+    private readonly NesMemory _memory;
+    private readonly byte[] _oam = new byte[256];
+    private readonly byte[] _vram = new byte[0x4000];
+
     private byte _ppuCtrl;
     private byte _ppuMask;
     private byte _ppuStatus;
     private byte _oamAddr;
     private byte _oamData;
-    private byte _ppuScroll;
-    private byte _ppuAddr;
+    private byte _ppuScrollX;
+    private byte _ppuScrollY;
+    private ushort _ppuAddr;
     private byte _ppuData;
 
     private bool _addrLatch;
+    private bool _scrollLatch;
 
     private long _lastCpuCycle;
     private int _scanline;
     private int _scanlineCycle;
     private int _frame;
 
+    public PPUInstance(NesMemory memory)
+    {
+        _memory = memory;
+
+        var a = 0x3F00;
+        _vram[a++] = 0x21;
+        _vram[a++] = 0x29;
+        _vram[a++] = 0x1A;
+        _vram[a++] = 0x0F;
+
+        _vram[a++] = 0x0F;
+        _vram[a++] = 0x36;
+        _vram[a++] = 0x17;
+        _vram[a++] = 0x0F;
+
+        _vram[a++] = 0x0F;
+        _vram[a++] = 0x30;
+        _vram[a++] = 0x21;
+        _vram[a++] = 0x0F;
+
+        _vram[a++] = 0x0F;
+        _vram[a++] = 0x27;
+        _vram[a++] = 0x17;
+        _vram[a++] = 0x0F;
+    }
+
     public int Frame => _frame;
 
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
 
     public bool NmiRequested { get; set; }
-    public byte BackgroundColorIndex { get; private set; } = 0;
+
+    public byte BackgroundColorIndex => _vram[0x3F00];
+    public byte[] Oam => _oam;
+    public byte PpuCtrl => _ppuCtrl;
+    public byte PpuMask => _ppuMask;
+    public byte ScrollX => _ppuScrollX;
+    public byte ScrollY => _ppuScrollY;
+
+    public ReadOnlySpan<byte> Palette => _vram[0x3F00..0x3F20];
 
     public byte ReadRegister(ushort address)
     {
         switch (address)
         {
+            case PPUCTRL:
+                return _ppuCtrl;
             case PPUSTATUS:
                 var result = _ppuStatus;
                 _ppuStatus &= 0x3F;
                 _addrLatch = false;
                 return result;
-            case PPUCTRL:
-                return _ppuCtrl;
         }
         return 0;
     }
@@ -58,11 +98,68 @@ public class PPUInstance
         {
             case PPUCTRL:
                 _ppuCtrl = value;
-                // t?
+                break;
+            case PPUMASK:
+                _ppuMask = value;
                 break;
             case PPUSTATUS:
+                _ppuStatus &= 0x7F;
                 break;
+            case OAMADDR:
+                _oamAddr = value;
+                break;
+            case OAMDATA:
+                _oamData = value;
+                _oam[_oamData++] = value;
+                break;
+            case PPUSCROLL:
+                if (!_scrollLatch) _ppuScrollX = value;
+                else _ppuScrollY = value;
+                _scrollLatch = !_scrollLatch;
+                break;
+            case PPUADDR:
+                _ppuAddr = _addrLatch ? (ushort)((_ppuAddr & 0xFF00) | value) : (ushort)((_ppuAddr & 0x00FF) | (ushort)(value << 8));
+                _addrLatch = !_addrLatch;
+                break;
+            case PPUDATA:
+                _ppuData = value;
+                WriteVRAM(_ppuAddr, _ppuData);
+                _ppuAddr += ((_ppuCtrl & 0x04) != 0) ? (ushort)32 : (ushort)1;
+                break;
+            default:
+                throw new NotImplementedException($"PPU Register write not implemented for address {address:X4}");
         }
+    }
+
+    public void WriteOAMDMA(byte value)
+    {
+        var basAddress = value << 8;
+        for (int i = 0; i < 256; i++)
+        {
+            var t = _memory.Read((ushort)(basAddress + i));
+            _oam[_oamData++] = t;
+        }
+    }
+
+    public byte GetVram(ushort address)
+    {
+        if (address >= 0x3F00 && address < 0x3F20) { }
+
+        if (address >= 0x0 && address <= 0x1FFF)
+            return _memory.Cart.ReadChrMemory(address);
+        else if (address >= 0x2000 && address <= 0x3FFF)
+            return _vram[address];
+        else
+            throw new InvalidOperationException($"{address:X4} out of range");
+    }
+
+    public void WriteVRAM(ushort address, byte value)
+    {
+        if (address >= 0x3F00 && address < 0x3F20) { }
+        if (address >= 0x2000 && address <= 0x3FFF)
+            _vram[address] = value;
+        else
+            throw new InvalidOperationException($"{address:X4} out of range");
     }
 
     public void RunToCycle(long cpuCycles)

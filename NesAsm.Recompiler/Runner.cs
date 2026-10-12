@@ -14,8 +14,9 @@ public class Runner
 
     public Runner(Cart cart)
     {
-        _ppu = new PPUInstance();
-        _memory = new NesMemory(cart, _ppu);
+        _memory = new NesMemory(cart);
+        _ppu = new PPUInstance(_memory);
+        _memory.SetPPU(_ppu);
         Cpu = new CPU(_memory);
         _memory.SetCPU(Cpu);
     }

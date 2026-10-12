@@ -9,8 +9,9 @@ public class NesRunner
     private readonly byte[] _screen = new byte[256 * 240];
     public NesRunner(Cart cart)
     {
-        _ppu = new PPUInstance();
-        _memory = new NesMemory(cart, _ppu);
+        _memory = new NesMemory(cart);
+        _ppu = new PPUInstance(_memory);
+        _memory.SetPPU(_ppu);
         _cpu = new CPU(_memory);
         _memory.SetCPU(_cpu);
     }
@@ -23,11 +24,11 @@ public class NesRunner
         {
             _cpu.Init();
 
-            while (_ppu.Frame <= 250)
+            while (_ppu.Frame <= 1250)
             {
-                if (_cpu.PC == 0x9662) { }
+                if (_cpu.PC == 0x8094) { }
 
-                _cpu.RunNextInstruction();
+                var ins = _cpu.RunNextInstruction();
 
                 _ppu.RunToCycle(_cpu.Cycles);
 
@@ -53,16 +54,20 @@ public class NesRunner
 
     private const byte SpriteYOffset = 1; // The PPU adds 1 to the sprite Y position, so we need to subtract it when setting the sprite Y position.
 
-    public void DrawScreen(bool drawSprites = true, bool setbackgroundcolor = true, byte startScanline = 0, byte endScanline = 239)
+    public void DrawScreen(byte startScanline = 0, byte endScanline = 239)
     {
+        bool setbackgroundcolor = true;
+        bool drawSprites = (_ppu.PpuMask & 0x10) != 0;
+        bool drawBackground = (_ppu.PpuMask & 0x08) != 0;
+
         if (setbackgroundcolor)
             for (int y = startScanline; y <= endScanline; y++)
                 for (int x = 0; x < 256; x++)
                     _screen[x + y * 256] = _ppu.BackgroundColorIndex;
 
-        byte GetSpriteY(int sprite) => 0;
-        byte GetSpriteX(int sprite) => 0;
-        bool IsSpriteBehindBackground(int sprite) => false;
+        byte GetSpriteY(int sprite) => _ppu.Oam[sprite * 4 + 0];
+        byte GetSpriteX(int sprite) => _ppu.Oam[sprite * 4 + 3];
+        bool IsSpriteBehindBackground(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x20) != 0;
 
         void drawSprite(int index)
         {
@@ -81,35 +86,36 @@ public class NesRunner
                 if (IsSpriteBehindBackground(i))
                     drawSprite(i);
 
-        for (int y = startScanline; y <= endScanline; y++)
-            for (int x = 0; x < 256; x++)
-            {
-                var screenIndex = x + y * 256;
-                _screen[screenIndex] = DrawBackgroundPixel(x, y, _screen[screenIndex]);
-            }
+        if (drawBackground)
+            for (int y = startScanline; y <= endScanline; y++)
+                for (int x = 0; x < 256; x++)
+                {
+                    var screenIndex = x + y * 256;
+                    _screen[screenIndex] = DrawBackgroundPixel(x, y, _screen[screenIndex]);
+                }
 
         if (drawSprites)
             for (int i = 0; i < 64; i++)
                 if (!IsSpriteBehindBackground(i) && GetSpriteY(i) < 240)
                     drawSprite(i);
-
     }
 
-    private byte BackgroundPatternTableIndex = 0;
-    private byte SpritePatternTableIndex = 1;
-    private byte ScrollNametable => 0;
-    private byte ScrollX => 0;
-    private byte ScrollY => 0;
+    private int BackgroundPatternTableIndex => ((_ppu.PpuCtrl & 0x10) != 0) ? 1 : 0;
+    private int SpritePatternTableIndex => ((_ppu.PpuCtrl & 0x08) != 0) ? 1 : 0;
+    private byte ScrollX => _ppu.ScrollX;
+    private byte ScrollY => _ppu.ScrollY;
     private bool VerticalMirroring = true; // Default mirroring mode, can be changed by the game.
 
     private byte DrawBackgroundPixel(int x, int y, byte colorIndexIfTransparent)
     {
         (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
         (int patternX, int patternY) GetPatternTablePosition(int screenX, int screenY) => (screenX % 8, screenY % 8);
-        (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 2, nametableY / 2);
-        byte GetPatternIndex(int nametableIndex, int nametableX, int nametableY) => 0;
+        (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 4, nametableY / 4);
+        byte GetPatternIndex(int nametableIndex, int nametableX, int nametableY) => _ppu.GetVram((ushort)(0x2000 + nametableIndex * 0x400 + nametableY * 32 + nametableX));
+        byte GetAttributeTable(int tableIndex, int x, int y) => _ppu.GetVram((ushort)(0x23C0 + tableIndex * 0x400 + y * 8 + x));
+        byte GetBackgroundPaletteColor(int paletteIndex, int colorIndex) => _ppu.GetVram((ushort)(0x3F00 + paletteIndex * 4 + colorIndex));
 
-        var nametableIndex = ScrollNametable;
+        var nametableIndex = _ppu.PpuCtrl & 0x03;
         var (nametableX, nametableY) = GetNametablePosition(x + ScrollX, y + ScrollY);
         if (nametableX > 31)
         {
@@ -125,8 +131,10 @@ public class NesRunner
 
         var patternIndex = GetPatternIndex(nametableIndex, nametableX, nametableY);
 
+        if (patternIndex != 0x24) { }
+
         var (patternX, patternY) = GetPatternTablePosition(x + ScrollX, y + ScrollY);
-        var colorIndex = GetPatternTable(BackgroundPatternTableIndex, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY);
+        var colorIndex = GetPatternTableColorIndex(BackgroundPatternTableIndex, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY);
 
         if (colorIndex == 0)
         {
@@ -134,32 +142,34 @@ public class NesRunner
         }
 
         var (attributeX, attributeY) = GetAttributeTablePosition(nametableX, nametableY);
-        var paletteIndex = GetAttributeTable(nametableIndex, attributeX, attributeY);
+        var attributeValue = GetAttributeTable(nametableIndex, attributeX, attributeY);
+        if (attributeValue != 0) { }
+        var bitIndex = (nametableX % 2) * 0x04 + (nametableY % 2) * 0x10 + 1;
+        var bitIndex2 = (0x03 << ((nametableX % 2) * 2 + (nametableY % 2) * 4));
+        var bitIndex3 = (nametableX % 2) * 2 + (nametableY % 2) * 4;
+        var bit0 = attributeValue & bitIndex;
+        var bit1 = attributeValue & (bitIndex << 1);
+        var r = attributeValue >> bitIndex3 & 0x03;
+        var paletteIndex = r;
 
         return GetBackgroundPaletteColor(paletteIndex, colorIndex);
     }
 
-    private byte GetAttributeTable(int tableIndex, int x, int y)
-    {
-        return 0;
-    }
-
-    private byte GetBackgroundPaletteColor(int paletteIndex, int colorIndex) => 0;
-
     private byte DrawSpritePixel(int spriteIndex, int x, int y, byte colorIndexIfTransparent)
     {
         // TODO Move up callstack
-        byte GetSpriteTileIndex(int sprite) => 0;
-        byte GetSpritePaletteIndex(int sprite) => 0;
-        bool IsSpriteFlippedHorizontally(int sprite) => false;
-        bool IsSpriteFlippedVertically(int sprite) => false;
+        byte GetSpriteTileIndex(int sprite) => _ppu.Oam[sprite * 4 + 1];
+        byte GetSpritePaletteIndex(int sprite) => (byte)(_ppu.Oam[sprite * 4 + 2] & 0x03);
+        bool IsSpriteFlippedHorizontally(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x40) != 0;
+        bool IsSpriteFlippedVertically(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x80) != 0;
+        byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => 0;
 
         var patternIndex = GetSpriteTileIndex(spriteIndex);
 
         var actualX = IsSpriteFlippedHorizontally(spriteIndex) ? 7 - x : x;
         var actualY = IsSpriteFlippedVertically(spriteIndex) ? 7 - y : y;
 
-        var colorIndex = GetPatternTable(1, (patternIndex % 16) * 8 + actualX, (patternIndex / 16) * 8 + actualY);
+        var colorIndex = GetPatternTableColorIndex(SpritePatternTableIndex, (patternIndex % 16) * 8 + actualX, (patternIndex / 16) * 8 + actualY);
         if (colorIndex == 0)
         {
             return colorIndexIfTransparent;
@@ -170,10 +180,14 @@ public class NesRunner
         return GetSpritePaletteColor(paletteIndex, colorIndex);
     }
 
-    private byte GetPatternTable(int tableIndex, int x, int y)
+    private byte GetPatternTableColorIndex(int tableIndex, int x, int y)
     {
-        return 0;
+        var tx = (x / 8) * 0x10;
+        var ty = (y / 8) * 0x100;
+        var plane0 = _ppu.GetVram((ushort)(tableIndex * 0x1000 + tx + ty + y % 8));
+        var plane1 = _ppu.GetVram((ushort)(tableIndex * 0x1000 + tx + ty + y % 8 + 8));
+        var bit0 = plane0 >> (7 - x % 8) & 1;
+        var bit1 = plane1 >> (7 - x % 8) & 1;
+        return (byte)(bit0 | bit1 << 1);
     }
-
-    private byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => 0;
 }

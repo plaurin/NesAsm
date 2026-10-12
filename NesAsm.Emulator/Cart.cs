@@ -80,4 +80,9 @@ public class Cart
     {
         return (ushort)(PrgRom[baseAddress + 1 - 0x8000] | (PrgRom[baseAddress + 2 - 0x8000] << 8));
     }
+
+    internal byte ReadChrMemory(ushort address)
+    {
+        return ChrRom[address];
+    }
 }
