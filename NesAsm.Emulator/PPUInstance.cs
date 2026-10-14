@@ -75,6 +75,9 @@ public class PPUInstance
     public byte ScrollX => _ppuScrollX;
     public byte ScrollY => _ppuScrollY;
 
+    public int Scanline => _scanline;
+    public int ScanlineCycle => _scanlineCycle;
+
     public ReadOnlySpan<byte> Palette => _vram[0x3F00..0x3F20];
 
     public byte ReadRegister(ushort address)

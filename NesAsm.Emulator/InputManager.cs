@@ -107,4 +107,26 @@ public static class InputManager
             WasPress[i] = IsPress[i];
         }
     }
+
+    private static byte _buffer;
+    public static void TransfertStateToBuffer()
+    {
+        _buffer = (byte)(
+            IsPress[4] ? 0x01 : 0 // B
+            | (IsPress[5] ? 0x02 : 0) // A
+            | (IsPress[6] ? 0x04 : 0) // Select
+            | (IsPress[7] ? 0x08 : 0) // Start
+            | (IsPress[2] ? 0x10 : 0) // Up
+            | (IsPress[3] ? 0x20 : 0) // Down
+            | (IsPress[0] ? 0x40 : 0) // Left
+            | (IsPress[1] ? 0x80 : 0) // Right
+            );
+    }
+
+    public static byte ReadBuffer()
+    {
+        var value = (byte)(_buffer & 0x01);
+        _buffer >>= 1;
+        return value;
+    }
 }

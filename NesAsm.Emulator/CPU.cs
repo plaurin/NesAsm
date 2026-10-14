@@ -20,6 +20,7 @@ public class CPU
     private bool _interrupt;
     private bool _overflow;
     private bool _decimal;
+    private bool _bFlags;
 
     public CPU(NesMemory memory)
     {
@@ -33,6 +34,16 @@ public class CPU
     public byte A => _a;
     public byte X => _x;
     public byte Y => _y;
+    public byte  P => (byte)(
+        (_negative ? 0x80 : 0) +
+        (_overflow ? 0x40 : 0) +
+        0x20 +
+        (_bFlags ? 0x10 : 0) +
+        (_decimal ? 0x08 : 0) +
+        (_interrupt ? 0x04 : 0) +
+        (_zero ? 0x02 : 0) +
+        (_carry ? 0x01 : 0));
+
     public byte SP => _sp;
     public ushort PC => _pc;
     public long Cycles => _cycles;
@@ -45,7 +56,7 @@ public class CPU
 
     public void Init()
     {
-        _cycles = 0;
+        _cycles = 7;
 
         _a = 0;
         _x = 0;
@@ -57,9 +68,10 @@ public class CPU
         _carry = false;
         _zero = false;
         _negative = false;
-        _interrupt = false;
+        _interrupt = true;
         _overflow = false;
         _decimal = false;
+        _bFlags = false;
     }
 
     public override string ToString() => $"""
@@ -120,17 +132,9 @@ public class CPU
 
     public void PushFlagsOnStack()
     {
-        var value =
-            (_negative ? 0x80 : 0) +
-            (_overflow ? 0x40 : 0) +
-            0x20 +
-            0x10 +
-            (_decimal ? 0x08 : 0) +
-            (_interrupt ? 0x04 : 0) +
-            (_zero ? 0x02 : 0) +
-            (_carry ? 0x01 : 0);
+        var value = P;
 
-        PushStack((byte)value);
+        PushStack(value);
     }
 
     public void PullFlagsFromStack()

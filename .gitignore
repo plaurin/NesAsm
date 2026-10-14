@@ -370,3 +370,4 @@ FodyWeavers.xsd
 /NesAsm.Recompiler/args
 /NesAsm.Recompiler/output/
 /NesAsm.UI/args
+/NesAsm.Emulator.Tests/rom

@@ -1,10 +1,10 @@
-﻿using System.Net;
-
+﻿
 namespace NesAsm.Emulator;
 
 public class Cart
 {
     private readonly byte[] _rom = [];
+    private ushort _prgRomOffset = 0x8000;
 
     public byte NbPrgBanks { get; init; }
     public byte NbChrBanks { get; init; }
@@ -38,6 +38,8 @@ public class Cart
         Console.WriteLine("NES ROM detected.");
 
         NbPrgBanks = _rom[4];
+        _prgRomOffset = (ushort)(NbPrgBanks == 1 ? 0xC000 : 0x8000);
+
         NbChrBanks = _rom[5];
 
         var flag6 = _rom[6];
@@ -68,17 +70,17 @@ public class Cart
 
     public byte ReadMemory(ushort address)
     {
-        return PrgRom[address - 0x8000];
+        return PrgRom[address - _prgRomOffset];
     }
 
     public byte ReadByteArgument(ushort baseAddress)
     {
-        return PrgRom[baseAddress + 1 - 0x8000];
+        return PrgRom[baseAddress + 1 - _prgRomOffset];
     }
 
     public ushort ReadWordArgument(ushort baseAddress)
     {
-        return (ushort)(PrgRom[baseAddress + 1 - 0x8000] | (PrgRom[baseAddress + 2 - 0x8000] << 8));
+        return (ushort)(PrgRom[baseAddress + 1 - _prgRomOffset] | (PrgRom[baseAddress + 2 - _prgRomOffset] << 8));
     }
 
     internal byte ReadChrMemory(ushort address)

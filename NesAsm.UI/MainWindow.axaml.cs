@@ -125,7 +125,7 @@ public partial class MainWindow : Window
                 if (!File.Exists(argFilePath))
                     throw new FileNotFoundException($"Argument file not found: {argFilePath}");
 
-                var romPath = File.ReadAllText(argFilePath);
+                var romPath = File.ReadAllLines(argFilePath).First();
                 var runner = new NesRunner(new Cart(romPath));
                 InitRenderTarget(runner.GetScreen());
 
