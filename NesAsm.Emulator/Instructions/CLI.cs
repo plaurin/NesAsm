@@ -9,5 +9,10 @@ public record CLI : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetI(false);
+    public override int Execute()
+    {
+        Cpu.SetI(false);
+
+        return Cycles;
+    }
 }

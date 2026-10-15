@@ -9,10 +9,12 @@ public record CMP : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetC(Cpu.A >= value);
         Cpu.FlagNZ((byte)(Cpu.A - value));
+
+        return Cycles + AddressMode.GetExtraCycle(Cpu.PC);
     }
 }

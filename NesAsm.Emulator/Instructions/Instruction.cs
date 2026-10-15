@@ -22,7 +22,7 @@ public abstract record Instruction
     public AddressMode AddressMode { get; }
     public int Cycles { get; }
 
-    public abstract void Execute();
+    public abstract int Execute();
 
     protected virtual bool PrintMembers(StringBuilder builder)
     {

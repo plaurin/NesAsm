@@ -9,8 +9,10 @@ public record PLA : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.SetA_NZ(Cpu.PopStack());
+
+        return Cycles;
     }
 }

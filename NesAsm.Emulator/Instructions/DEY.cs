@@ -9,9 +9,10 @@ public record DEY : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.SetY_NZ((byte)(Cpu.Y - 1));
-    }
 
+        return Cycles;
+    }
 }

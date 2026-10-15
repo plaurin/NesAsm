@@ -9,5 +9,10 @@ public record SEC : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetC(true);
+    public override int Execute()
+    {
+        Cpu.SetC(true);
+
+        return Cycles;
+    }
 }

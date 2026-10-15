@@ -9,10 +9,11 @@ public record LDA : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetA_NZ(value);
-        //_cycles += cycles + addressing.ExtraCycle;
+
+        return Cycles + AddressMode.GetExtraCycle(Cpu.PC);
     }
 }

@@ -9,8 +9,10 @@ public record PHA : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.PushStack(Cpu.A);
+
+        return Cycles;
     }
 }

@@ -9,9 +9,13 @@ public record INC : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
-        AddressMode.SetValue((byte)(value + 1));
+        var result = (byte)(value + 1);
+        AddressMode.SetValue(result);
+        Cpu.FlagNZ(result);
+
+        return Cycles;
     }
 }

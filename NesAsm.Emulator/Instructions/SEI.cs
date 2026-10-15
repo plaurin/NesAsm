@@ -9,5 +9,10 @@ public record SEI : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetI(true);
+    public override int Execute()
+    {
+        Cpu.SetI(true);
+
+        return Cycles;
+    }
 }

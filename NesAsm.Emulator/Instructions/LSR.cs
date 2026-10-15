@@ -9,11 +9,15 @@ public record LSR : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetC((value & 0b_0000_0001) == 0b_0000_0001);
         value >>= 1;
         AddressMode.SetValue(value);
+        Cpu.SetN(false);
+        Cpu.SetZ(value == 0);
+
+        return Cycles;
     }
 }

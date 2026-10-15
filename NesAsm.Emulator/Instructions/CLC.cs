@@ -9,5 +9,10 @@ public record CLC : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetC(false);
+    public override int Execute()
+    {
+        Cpu.SetC(false);
+
+        return Cycles;
+    }
 }

@@ -9,8 +9,10 @@ public record INX : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.SetX_NZ((byte)(Cpu.X + 1));
+
+        return Cycles;
     }
 }

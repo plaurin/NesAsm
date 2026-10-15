@@ -9,5 +9,10 @@ public record CLV : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetO(false);
+    public override int Execute()
+    {
+        Cpu.SetO(false);
+
+        return Cycles;
+    }
 }

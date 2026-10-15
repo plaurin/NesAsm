@@ -9,10 +9,11 @@ public record LDX : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var res = AddressMode.GetValue();
         Cpu.SetX_NZ(res);
-        //_cycles += cycles + addressing.ExtraCycle;
+
+        return Cycles + AddressMode.GetExtraCycle(Cpu.PC);
     }
 }

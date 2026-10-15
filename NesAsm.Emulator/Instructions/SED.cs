@@ -9,5 +9,10 @@ public record SED : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetD(true);
+    public override int Execute()
+    {
+        Cpu.SetD(true);
+
+        return Cycles;
+    }
 }

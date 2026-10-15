@@ -9,9 +9,11 @@ public record JMP : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var targetPC = AddressMode.GetAddress();
         Cpu.SetPC(targetPC);
+
+        return Cycles;
     }
 }

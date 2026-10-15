@@ -9,11 +9,13 @@ public record BIT : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetZ((Cpu.A & value) == 0);
         Cpu.SetO((value & 0b_0100_0000) == 0b_0100_0000);
         Cpu.SetN((value & 0b_1000_0000) == 0b_1000_0000);
+
+        return Cycles;
     }
 }

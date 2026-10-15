@@ -9,8 +9,10 @@ public record PHP : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.PushFlagsOnStack();
+
+        return Cycles;
     }
 }

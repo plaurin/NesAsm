@@ -9,9 +9,11 @@ public record EOR : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetA_NZ((byte)(Cpu.A ^ value));
+
+        return Cycles + AddressMode.GetExtraCycle(Cpu.PC);
     }
 }

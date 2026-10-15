@@ -9,7 +9,7 @@ public record ROR : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         var carry = (byte)(Cpu.Carry ? 0x80 : 0);
@@ -20,5 +20,7 @@ public record ROR : Instruction
 
         AddressMode.SetValue(value);
         Cpu.FlagNZ(value);
+
+        return Cycles;
     }
 }

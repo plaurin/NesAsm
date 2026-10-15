@@ -9,11 +9,13 @@ public record JSR : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var targetPC = AddressMode.GetAddress();
         Cpu.PushStack((ushort)(Cpu.PC + 2));
 
         Cpu.SetPC(targetPC);
+
+        return Cycles;
     }
 }

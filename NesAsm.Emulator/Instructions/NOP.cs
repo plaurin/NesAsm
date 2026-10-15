@@ -9,6 +9,9 @@ public record NOP : Instruction
     {
     }
 
-    public override void Execute() { } // No Op
+    public override int Execute()
+    {
+        return Cycles;
+    }
 }
 

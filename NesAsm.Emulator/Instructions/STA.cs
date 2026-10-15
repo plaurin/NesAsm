@@ -9,8 +9,10 @@ public record STA : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         AddressMode.SetValue(Cpu.A);
+
+        return Cycles;
     }
 }

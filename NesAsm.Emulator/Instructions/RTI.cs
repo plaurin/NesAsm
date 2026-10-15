@@ -9,7 +9,7 @@ public record RTI : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         Cpu.PullFlagsFromStack();
 
@@ -18,5 +18,7 @@ public record RTI : Instruction
         var address = (ushort)(hi * 256 + lo);
 
         Cpu.SetPC(address);
+
+        return Cycles;
     }
 }

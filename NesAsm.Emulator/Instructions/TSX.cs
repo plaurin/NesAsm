@@ -9,8 +9,10 @@ public record TSX : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
-        Cpu.SetA_NZ(Cpu.SP);
+        Cpu.SetX_NZ(Cpu.SP);
+
+        return Cycles;
     }
 }

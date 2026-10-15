@@ -3,8 +3,8 @@
 public class Indirect(CPU cpu) : AddressMode
 {
     public override int Bytes => 2;
+    public override int GetExtraCycle(ushort cpuAddress) => 0;
     public override byte GetValue() => throw new NotImplementedException();
-    // TODO Extra cycle
     public override void SetValue(byte value) => throw new NotImplementedException();
     public override ushort GetAddress()
     {

@@ -9,5 +9,10 @@ public record TXS : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetSP(Cpu.X);
+    public override int Execute()
+    {
+        Cpu.SetSP(Cpu.X);
+
+        return Cycles;
+    }
 }

@@ -32,21 +32,30 @@ public class NesEmulatorRomTests
     [Fact]
     public void Test()
     {
-        int logIndex = 0;
         _cpu.SetPC(0xC000);
         _ppu.RunToCycle(_cpu.Cycles);
 
+        int logIndex = 0;
+        var previousLog = GetCurrentLog();
+
         while (_ppu.Frame <= 11250)
         {
-            var addr = _cpu.PC;
-            var states = $"A:{_cpu.A:X2} X:{_cpu.X:X2} Y:{_cpu.Y:X2} P:{_cpu.P:X2} SP:{_cpu.SP:X2} PPU:{_ppu.Scanline,3},{_ppu.ScanlineCycle,3} CYC:{_cpu.Cycles}";
-
-            var ins = _cpu.RunNextInstruction();
-
-            _ppu.RunToCycle(_cpu.Cycles);
-
+            var actualLog = GetCurrentLog();
             var expectedLog = _logs[logIndex++];
-            AssertLogs(addr, states, ins, expectedLog);
+            AssertLogs(previousLog, actualLog, expectedLog);
+            previousLog = expectedLog;
+
+            try
+            {
+                if (_cpu.PC == 0xD922) { }
+                _cpu.RunNextInstruction();
+                _ppu.RunToCycle(_cpu.Cycles);
+            }
+            catch (Exception)
+            {
+                _output.WriteLine($"Failed at: {_cpu.PC:X4}");
+                throw;
+            }
 
             if (_ppu.NmiRequested)
             {
@@ -57,8 +66,10 @@ public class NesEmulatorRomTests
         }
     }
 
-    private void AssertLogs(ushort addr, string states, Instructions.Instruction ins, string expectedLog)
+    private string GetCurrentLog()
     {
+        var addr = _cpu.PC;
+        var ins = _cpu.GetInstructionAt(addr);
         var bytes = ins.AddressMode.Bytes switch
         {
             0 => $"{ins.Opcode:X2}",
@@ -67,12 +78,22 @@ public class NesEmulatorRomTests
             _ => throw new NotImplementedException()
         };
 
+        var states = $"A:{_cpu.A:X2} X:{_cpu.X:X2} Y:{_cpu.Y:X2} P:{_cpu.P:X2} SP:{_cpu.SP:X2} PPU:{_ppu.Scanline,3},{_ppu.ScanlineCycle,3} CYC:{_cpu.Cycles}";
+
         var actualLog = $"{addr:X4}  {bytes,-9} {ins.Mnemonic} {states}";
-        expectedLog = expectedLog.Substring(0, 20) + expectedLog.Substring(48);
+
+        return actualLog;
+    }
+
+    private void AssertLogs(string previousLog, string actualLog, string expectedLog)
+    {
+        expectedLog = string.Concat(expectedLog.AsSpan(0, 20), expectedLog.AsSpan(48));
         if (actualLog != expectedLog)
         {
-            _output.WriteLine($"Expected: {expectedLog}");
-            _output.WriteLine($"Actual:   {actualLog}");
+            _output.WriteLine($"Previous State: {previousLog.AsSpan(48)}");
+            _output.WriteLine($"Instruction:    {previousLog.AsSpan(0, 48)}");
+            _output.WriteLine($"Expected State: {expectedLog[20..]}");
+            _output.WriteLine($"Actual State:   {actualLog[20..]}");
         }
 
         Assert.Equal(expectedLog, actualLog);

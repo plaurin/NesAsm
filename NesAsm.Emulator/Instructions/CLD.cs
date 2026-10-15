@@ -9,5 +9,10 @@ public record CLD : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetD(false);
+    public override int Execute()
+    {
+        Cpu.SetD(false);
+
+        return Cycles;
+    }
 }

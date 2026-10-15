@@ -9,12 +9,14 @@ public record RTS : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var lo = Cpu.PopStack();
         var hi = Cpu.PopStack();
         var address = (ushort)(hi * 256 + lo);
 
         Cpu.SetPC((ushort)(address + 1));
+
+        return Cycles;
     }
 }

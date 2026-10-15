@@ -132,7 +132,7 @@ public class CPU
 
     public void PushFlagsOnStack()
     {
-        var value = P;
+        var value = (byte)(P | 0x10); // B flag alsways 1 when pushed on stack
 
         PushStack(value);
     }
@@ -372,9 +372,9 @@ public class CPU
         var opcode = _memory.Peek(_pc);
 
         var instruction = _instructionSet[opcode];
-        instruction.Execute();
+        var spentCycles = instruction.Execute();
 
-        _cycles += instruction.Cycles;
+        _cycles += spentCycles;
         _pc = (ushort)(_pc + instruction.Bytes);
 
         return instruction;

@@ -9,5 +9,10 @@ public record TAX : Instruction
     {
     }
 
-    public override void Execute() => Cpu.SetX_NZ(Cpu.A);
+    public override int Execute()
+    {
+        Cpu.SetX_NZ(Cpu.A);
+
+        return Cycles;
+    }
 }

@@ -9,10 +9,12 @@ public record CPX : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         var value = AddressMode.GetValue();
         Cpu.SetC(Cpu.X >= value);
         Cpu.FlagNZ((byte)(Cpu.X - value));
+
+        return Cycles;
     }
 }

@@ -9,9 +9,10 @@ public record STX : Instruction
     {
     }
 
-    public override void Execute()
+    public override int Execute()
     {
         AddressMode.SetValue(Cpu.X);
-        //_cycles += cycles + addressing.ExtraCycle;
+
+        return Cycles;
     }
 }
