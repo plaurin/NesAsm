@@ -6,8 +6,15 @@
         Width="768" Height="743"
         x:Class="NesAsm.UI.MainWindow"
         Title="NesAsm.UI">
-    <StackPanel>
-        <Label Name="FrameCounter" />
-        <Image Name="Image" Width="768" Height="720" RenderOptions.BitmapInterpolationMode="None" />
-    </StackPanel>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Name="RecentRomsMenuItem" Header="_Recent ROMs" />
+            </MenuItem>
+        </Menu>
+        <StackPanel>
+            <Label Name="FrameCounter" />
+            <Image Name="Image" Width="768" Height="720" RenderOptions.BitmapInterpolationMode="None" />
+        </StackPanel>
+    </DockPanel>
 </Window>

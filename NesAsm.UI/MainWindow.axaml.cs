@@ -11,6 +11,7 @@ using NesAsm.Example.JumpMan;
 using NesAsm.Example.PPUExamples;
 using SkiaSharp;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -20,6 +21,8 @@ using System.Threading.Tasks;
 namespace NesAsm.UI;
 public partial class MainWindow : Window
 {
+    private readonly List<string> _recentRoms = new();
+
     private readonly SKBitmap _bitmap;
     private byte[] _screen;
     private WriteableBitmap writeableBitmap;
@@ -51,6 +54,8 @@ public partial class MainWindow : Window
 
         _bitmap = new SKBitmap(256, 240);
         InitRenderTarget(PPU.GetScreen());
+
+        InitMenu();
         //_screen = PPU.GetScreen();
 
         //writeableBitmap = new WriteableBitmap(
@@ -77,10 +82,31 @@ public partial class MainWindow : Window
         //RunGame("Vertical Scrolling");
         //RunGame("Boxing Game");
         //RunGame("FPS Game");
-        RunGame("ROM Game");
+        RunGame(_recentRoms.First());
+
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
+    }
+
+    private void InitMenu()
+    {
+        const string projectFolder = "NesAsm.UI";
+        var cur = Directory.GetCurrentDirectory();
+        var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
+        var argFilePath = Path.Combine(cur[..ind], "args");
+
+        if (!File.Exists(argFilePath))
+            throw new FileNotFoundException($"Argument file not found: {argFilePath}");
+
+        _recentRoms.AddRange(File.ReadAllLines(argFilePath));
+        foreach (var path in _recentRoms.Where(p => !string.IsNullOrWhiteSpace(p)))
+        {
+            var menuItem = new MenuItem { Header = Path.GetFileName(path) };
+            menuItem.Click += (s, e) => RunGame(path);
+
+            RecentRomsMenuItem.Items.Add(menuItem);
+        }
     }
 
     private void InitRenderTarget(byte[] target)
@@ -116,23 +142,13 @@ public partial class MainWindow : Window
             case "FPS Game":
                 Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: FPSGame.Reset, nmi: FPSGame.Nmi)).ConfigureAwait(false);
                 break;
-            case "ROM Game":
-                const string projectFolder = "NesAsm.UI";
-                var cur = Directory.GetCurrentDirectory();
-                var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
-                var argFilePath = Path.Combine(cur[..ind], "args");
-
-                if (!File.Exists(argFilePath))
-                    throw new FileNotFoundException($"Argument file not found: {argFilePath}");
-
-                var romPath = File.ReadAllLines(argFilePath).First();
+            default:
+                var romPath = gameName;
                 var runner = new NesRunner(new Cart(romPath));
                 InitRenderTarget(runner.GetScreen());
 
                 Task.Run(() => runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
                 break;
-            default:
-                throw new InvalidOperationException($"Game {gameName} is not implemented yet.");
         }
     }
 

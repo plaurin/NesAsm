@@ -91,6 +91,8 @@ public class PPUInstance
                 _ppuStatus &= 0x3F;
                 _addrLatch = false;
                 return result;
+            case PPUDATA:
+                break;
         }
         return 0;
     }
