@@ -52,6 +52,9 @@ public partial class MainWindow : Window
         topLevel!.KeyDown += OnKeyDown;
         topLevel!.KeyUp += OnKeyUp;
 
+        MainMenu.KeyDown += OnKeyDown;
+        MainMenu.IsVisible = false;
+
         _bitmap = new SKBitmap(256, 240);
         InitRenderTarget(PPU.GetScreen());
 
@@ -154,6 +157,7 @@ public partial class MainWindow : Window
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.PhysicalKey == PhysicalKey.Escape) ToggleMenu();
         if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
         if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, true);
         if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.SetState(2, true);
@@ -174,6 +178,19 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.X) InputManager.SetState(5, false);
         if (e.PhysicalKey == PhysicalKey.A) InputManager.SetState(6, false);
         if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, false);
+    }
+
+
+    private void ToggleMenu()
+    {
+        if (MainMenu.IsVisible)
+        {
+            MainMenu.IsVisible = false;
+        }
+        else
+        {
+            MainMenu.IsVisible = true;
+        }
     }
 
     //public override void Render(DrawingContext context)

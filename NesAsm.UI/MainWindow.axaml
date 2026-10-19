@@ -7,7 +7,7 @@
         x:Class="NesAsm.UI.MainWindow"
         Title="NesAsm.UI">
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
+        <Menu Name="MainMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Name="RecentRomsMenuItem" Header="_Recent ROMs" />
             </MenuItem>
