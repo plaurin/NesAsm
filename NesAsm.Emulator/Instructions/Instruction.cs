@@ -5,9 +5,10 @@ namespace NesAsm.Emulator.Instructions;
 
 public abstract record Instruction
 {
-    protected Instruction(CPU cpu, byte opcode, string mnemonic, AddressMode addressMode, int cycles, int? bytesOverride = null)
+    protected Instruction(CPU cpu, byte opcode, string mnemonic, AddressMode addressMode, int cycles, int? bytesOverride = null, bool isOfficialOpCode = true)
     {
         Bytes = bytesOverride ?? 1 + addressMode.Bytes;
+        IsOfficialOpCode = isOfficialOpCode;
         Cpu = cpu;
         Opcode = opcode;
         Mnemonic = mnemonic;
@@ -16,6 +17,7 @@ public abstract record Instruction
     }
 
     public int Bytes { get; }
+    public bool IsOfficialOpCode { get; }
     public CPU Cpu { get; }
     public byte Opcode { get; }
     public string Mnemonic { get; }

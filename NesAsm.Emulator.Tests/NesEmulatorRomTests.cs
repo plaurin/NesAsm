@@ -12,12 +12,17 @@ public class NesEmulatorRomTests
 
     public NesEmulatorRomTests(ITestOutputHelper output)
     {
+        const string projectFolder = "NesAsm.Emulator.Tests";
+        var cur = Directory.GetCurrentDirectory();
+        var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
+        var argFilePath = Path.Combine(cur[..ind], "args");
+
         _output = output;
 
-        var log = @"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Emulator.Tests\rom\nestest.log";
+        var log = Path.Combine(cur[..ind], @"rom\nestest.log");
         _logs = File.ReadAllLines(log);
 
-        var path = @"C:\Users\pasca\Dev\GitHub\NesAsm\NesAsm.Emulator.Tests\rom\nestest.nes";
+        var path = Path.Combine(cur[..ind], @"rom\nestest.nes");
 
         var cart = new Cart(path);
         _memory = new NesMemory(cart);
@@ -30,7 +35,7 @@ public class NesEmulatorRomTests
     }
 
     [Fact]
-    public void Test()
+    public void NesTestOfficialOpCodes()
     {
         _cpu.SetPC(0xC000);
         _ppu.RunToCycle(_cpu.Cycles);
@@ -38,7 +43,7 @@ public class NesEmulatorRomTests
         int logIndex = 0;
         var previousLog = GetCurrentLog();
 
-        while (_ppu.Frame <= 11250)
+        while (_cpu.PC != 0xC6BD)
         {
             var actualLog = GetCurrentLog();
             var expectedLog = _logs[logIndex++];
@@ -47,7 +52,7 @@ public class NesEmulatorRomTests
 
             try
             {
-                if (_cpu.PC == 0xD922) { }
+                if (_cpu.PC == 0xCFFE) { }
                 _cpu.RunNextInstruction();
                 _ppu.RunToCycle(_cpu.Cycles);
             }
@@ -78,9 +83,11 @@ public class NesEmulatorRomTests
             _ => throw new NotImplementedException()
         };
 
+        var star = ins.IsOfficialOpCode ? " " : "*";
+
         var states = $"A:{_cpu.A:X2} X:{_cpu.X:X2} Y:{_cpu.Y:X2} P:{_cpu.P:X2} SP:{_cpu.SP:X2} PPU:{_ppu.Scanline,3},{_ppu.ScanlineCycle,3} CYC:{_cpu.Cycles}";
 
-        var actualLog = $"{addr:X4}  {bytes,-9} {ins.Mnemonic} {states}";
+        var actualLog = $"{addr:X4}  {bytes,-9}{star}{ins.Mnemonic} {states}";
 
         return actualLog;
     }
@@ -90,10 +97,10 @@ public class NesEmulatorRomTests
         expectedLog = string.Concat(expectedLog.AsSpan(0, 20), expectedLog.AsSpan(48));
         if (actualLog != expectedLog)
         {
-            _output.WriteLine($"Previous State: {previousLog.AsSpan(48)}");
+            _output.WriteLine($"Previous State:      {previousLog.AsSpan(48)}");
             _output.WriteLine($"Instruction:    {previousLog.AsSpan(0, 48)}");
-            _output.WriteLine($"Expected State: {expectedLog[20..]}");
-            _output.WriteLine($"Actual State:   {actualLog[20..]}");
+            _output.WriteLine($"Expected State: {expectedLog.AsSpan(0, 5)}{expectedLog[20..]}");
+            _output.WriteLine($"Actual State:   {actualLog.AsSpan(0, 5)}{actualLog[20..]}");
         }
 
         Assert.Equal(expectedLog, actualLog);

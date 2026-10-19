@@ -8,8 +8,9 @@ public class Indirect(CPU cpu) : AddressMode
     public override void SetValue(byte value) => throw new NotImplementedException();
     public override ushort GetAddress()
     {
-        var lo = cpu.Memory.Read(cpu.PeekByteArgument());
-        var hi = cpu.Memory.Read((byte)(cpu.PeekByteArgument() + 1));
+        var arg = cpu.PeekWordArgument();
+        var lo = cpu.Memory.Read(arg);
+        var hi = (arg & 0x00FF) == 0x00FF ? cpu.Memory.Read((ushort)(arg & 0xFF00)) : cpu.Memory.Read((ushort)(arg + 1));
         var address = (ushort)(hi * 256 + lo);
         return address;
     }

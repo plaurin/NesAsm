@@ -15,8 +15,8 @@ public record BNE : Instruction
 
         if (!Cpu.Zero)
         {
-            Cpu.SetPC(AddressMode.GetAddress());
             extraCycle = 1 + AddressMode.GetExtraCycle(Cpu.PC);
+            Cpu.SetPC(AddressMode.GetAddress());
         }
 
         return Cycles + extraCycle;

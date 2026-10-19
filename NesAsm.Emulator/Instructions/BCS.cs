@@ -15,8 +15,8 @@ public record BCS : Instruction
 
         if (Cpu.Carry)
         {
-            Cpu.SetPC(AddressMode.GetAddress());
             extraCycle = 1 + AddressMode.GetExtraCycle(Cpu.PC);
+            Cpu.SetPC(AddressMode.GetAddress());
         }
 
         return Cycles + extraCycle;

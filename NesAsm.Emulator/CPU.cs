@@ -165,6 +165,7 @@ public class CPU
         var indirect = new  Indirect(this);
         var indirectX = new IndirectX(this);
         var indirectY = new IndirectY(this);
+        var implied = new Implied();
 
         void Init(Instruction instruction)
         {
@@ -204,7 +205,7 @@ public class CPU
         Init(new LDY(this, 0xA4, zeroPage, 3));
         Init(new LDY(this, 0xB4, zeroPageX, 4));
         Init(new LDY(this, 0xAC, absolute, 4));
-        Init(new LDY(this, 0xBC, absoluteY, 4));
+        Init(new LDY(this, 0xBC, absoluteX, 4));
 
         Init(new STY(this, 0x84, zeroPage, 3));
         Init(new STY(this, 0x94, zeroPageX, 4));
@@ -361,8 +362,39 @@ public class CPU
         Init(new SED(this)); // Implied
         Init(new CLV(this)); // Implied
 
-        // Other
-        Init(new NOP(this)); // Implied
+        // NOP
+        Init(new NOP(this, 0xEA, implied, 2));
+
+        // Unofficial NOPs
+        Init(new NOP(this, 0x04, zeroPage, 3, isOfficialOpCode: false));
+        Init(new NOP(this, 0x44, zeroPage, 3, isOfficialOpCode: false));
+        Init(new NOP(this, 0x64, zeroPage, 3, isOfficialOpCode: false));
+
+        Init(new NOP(this, 0x0C, absolute, 4, isOfficialOpCode: false));
+
+        Init(new NOP(this, 0x14, indirectX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x34, indirectX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x54, indirectX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x74, indirectX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0xD4, indirectX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0xF4, indirectX, 4, isOfficialOpCode: false));
+
+        Init(new NOP(this, 0x80, immediate, 2, isOfficialOpCode: false));
+
+        Init(new NOP(this, 0x1A, implied, 2, isOfficialOpCode: false));
+        Init(new NOP(this, 0x3A, implied, 2, isOfficialOpCode: false));
+        Init(new NOP(this, 0x5A, implied, 2, isOfficialOpCode: false));
+        Init(new NOP(this, 0x7A, implied, 2, isOfficialOpCode: false));
+        Init(new NOP(this, 0xDA, implied, 2, isOfficialOpCode: false));
+        Init(new NOP(this, 0xFA, implied, 2, isOfficialOpCode: false));
+
+        Init(new NOP(this, 0x1C, absoluteX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x3C, absoluteX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x5C, absoluteX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0x7C, absoluteX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0xDC, absoluteX, 4, isOfficialOpCode: false));
+        Init(new NOP(this, 0xFC, absoluteX, 4, isOfficialOpCode: false));
+
     }
 
     // ----- Execution -----

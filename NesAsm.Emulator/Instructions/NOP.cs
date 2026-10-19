@@ -4,14 +4,14 @@ namespace NesAsm.Emulator.Instructions;
 
 public record NOP : Instruction
 {
-    public NOP(CPU cpu)
-        : base(cpu, 0xEA, "NOP", new Implied(), 2)
+    public NOP(CPU cpu, byte opcode, AddressMode addressMode, int cycles, bool isOfficialOpCode = true)
+        : base(cpu, opcode, "NOP", addressMode, cycles, isOfficialOpCode: isOfficialOpCode)
     {
     }
 
     public override int Execute()
     {
-        return Cycles;
+        return Cycles + AddressMode.GetExtraCycle(Cpu.PC);
     }
 }
 

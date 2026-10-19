@@ -47,6 +47,8 @@ public class NesMemory
     {
         if (baseAddress >= 0x6000 && baseAddress <= 0xFFFF)
             return Cart.ReadByteArgument(baseAddress);
+        else if (baseAddress >= 0x0 && baseAddress < 0x800)
+            return _ram[baseAddress + 1];
 
         return 0; // should throw
     }
