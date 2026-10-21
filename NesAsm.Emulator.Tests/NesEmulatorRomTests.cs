@@ -4,25 +4,57 @@ namespace NesAsm.Emulator.Tests;
 
 public class NesEmulatorRomTests
 {
-    private readonly NesMemory _memory;
-    private readonly PPUInstance _ppu;
-    private readonly CPU _cpu;
-    private readonly string[] _logs;
+    private NesMemory _memory;
+    private PPUInstance _ppu;
+    private CPU _cpu;
     private readonly ITestOutputHelper _output;
 
     public NesEmulatorRomTests(ITestOutputHelper output)
     {
+        _output = output;
+    }
+
+    [Fact]
+    public void NesTestOfficialOpCodes()
+    {
+        InitCart(@"nestest.nes", 0xC000);
+
+        var logFile = Path.Combine(GetRomFolder(), @"nestest.log");
+        var logs = File.ReadAllLines(logFile);
+
+        int logIndex = 0;
+        var previousLog = GetCurrentLog();
+
+        void BeforeNextInstruction()
+        {
+            var actualLog = GetCurrentLog();
+            var expectedLog = logs[logIndex++];
+            AssertLogs(previousLog, actualLog, expectedLog);
+            previousLog = expectedLog;
+
+            if (_cpu.PC == 0xCFFE) { }
+        }
+
+        RunProgram(0xC6BD, BeforeNextInstruction);
+    }
+
+    [Fact]
+    public void PaletteRamTest()
+    {
+        InitCart("palette_ram.nes");
+    }
+
+    private static string GetRomFolder()
+    {
         const string projectFolder = "NesAsm.Emulator.Tests";
         var cur = Directory.GetCurrentDirectory();
         var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
-        var argFilePath = Path.Combine(cur[..ind], "args");
+        return Path.Combine(cur[..ind], "rom");
+    }
 
-        _output = output;
-
-        var log = Path.Combine(cur[..ind], @"rom\nestest.log");
-        _logs = File.ReadAllLines(log);
-
-        var path = Path.Combine(cur[..ind], @"rom\nestest.nes");
+    private void InitCart(string romFile, ushort? startAddress = null)
+    {
+        var path = Path.Combine(GetRomFolder(), romFile);
 
         var cart = new Cart(path);
         _memory = new NesMemory(cart);
@@ -32,43 +64,11 @@ public class NesEmulatorRomTests
         _memory.SetCPU(_cpu);
 
         _cpu.Init();
-    }
 
-    [Fact]
-    public void NesTestOfficialOpCodes()
-    {
-        _cpu.SetPC(0xC000);
+        if (startAddress.HasValue)
+            _cpu.SetPC(startAddress.Value);
+
         _ppu.RunToCycle(_cpu.Cycles);
-
-        int logIndex = 0;
-        var previousLog = GetCurrentLog();
-
-        while (_cpu.PC != 0xC6BD)
-        {
-            var actualLog = GetCurrentLog();
-            var expectedLog = _logs[logIndex++];
-            AssertLogs(previousLog, actualLog, expectedLog);
-            previousLog = expectedLog;
-
-            try
-            {
-                if (_cpu.PC == 0xCFFE) { }
-                _cpu.RunNextInstruction();
-                _ppu.RunToCycle(_cpu.Cycles);
-            }
-            catch (Exception)
-            {
-                _output.WriteLine($"Failed at: {_cpu.PC:X4}");
-                throw;
-            }
-
-            if (_ppu.NmiRequested)
-            {
-                _ppu.NmiRequested = false;
-
-                _cpu.RunNmi();
-            }
-        }
     }
 
     private string GetCurrentLog()
@@ -104,5 +104,31 @@ public class NesEmulatorRomTests
         }
 
         Assert.Equal(expectedLog, actualLog);
+    }
+
+    private void RunProgram(ushort endAddress, Action? beforeNextInstruction = null)
+    {
+        while (_cpu.PC != endAddress)
+        {
+            beforeNextInstruction?.Invoke();
+
+            try
+            {
+                _cpu.RunNextInstruction();
+                _ppu.RunToCycle(_cpu.Cycles);
+            }
+            catch (Exception)
+            {
+                _output.WriteLine($"Failed at: {_cpu.PC:X4}");
+                throw;
+            }
+
+            if (_ppu.NmiRequested)
+            {
+                _ppu.NmiRequested = false;
+
+                _cpu.RunNmi();
+            }
+        }
     }
 }

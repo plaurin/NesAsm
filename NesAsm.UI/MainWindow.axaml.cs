@@ -56,7 +56,6 @@ public partial class MainWindow : Window
         MainMenu.IsVisible = false;
 
         _bitmap = new SKBitmap(256, 240);
-        InitRenderTarget(PPU.GetScreen());
 
         InitMenu();
         //_screen = PPU.GetScreen();
@@ -82,6 +81,7 @@ public partial class MainWindow : Window
 
         var cancellationToken = _cancellationTokenSource.Token;
 
+        //RunGame("Jump Man");
         //RunGame("Vertical Scrolling");
         //RunGame("Boxing Game");
         //RunGame("FPS Game");
@@ -123,31 +123,43 @@ public partial class MainWindow : Window
             AlphaFormat.Opaque);
 
         Image.Source = writeableBitmap;
+
+        _frameNumber = 0;
     }
 
     private void RunGame(string gameName)
     {
+        MainMenu.IsVisible = false;
+
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource = new();
         var cancellationToken = _cancellationTokenSource.Token;
 
+        void RunCSharpGame(string title, Action<CancellationToken?> reset, Action? nmi)
+        {
+            Title = title;
+            InitRenderTarget(PPU.GetScreen());
+            Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset, nmi), cancellationToken).ConfigureAwait(false);
+        }
+
         switch (gameName)
         {
             case "Jump Man":
-                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: JumpManGame.Reset, nmi: JumpManGame.Nmi), cancellationToken).ConfigureAwait(false);
+                RunCSharpGame("Jump Man", JumpManGame.Reset, JumpManGame.Nmi);
                 break;
             case "Vertical Scrolling":
-                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: VerticalScrolling.Reset, nmi: VerticalScrolling.Nmi), cancellationToken).ConfigureAwait(false);
+                RunCSharpGame("Vertical Scrolling", VerticalScrolling.Reset, VerticalScrolling.Nmi);
                 break;
             case "Boxing Game":
-                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: BoxingRPGGame.Reset, nmi: BoxingRPGGame.Nmi)).ConfigureAwait(false);
+                RunCSharpGame("Boxing Game", BoxingRPGGame.Reset, BoxingRPGGame.Nmi);
                 break;
             case "FPS Game":
-                Task.Run(() => NesApiCSharp.RunGame(cancellationToken, draw: Draw, reset: FPSGame.Reset, nmi: FPSGame.Nmi)).ConfigureAwait(false);
+                RunCSharpGame("FPS Game", FPSGame.Reset, FPSGame.Nmi);
                 break;
             default:
                 var romPath = gameName;
                 var runner = new NesRunner(new Cart(romPath));
+                Title = Path.GetFileName(romPath);
                 InitRenderTarget(runner.GetScreen());
 
                 Task.Run(() => runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
@@ -179,7 +191,6 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.A) InputManager.SetState(6, false);
         if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, false);
     }
-
 
     private void ToggleMenu()
     {

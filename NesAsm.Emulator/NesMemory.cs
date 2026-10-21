@@ -33,8 +33,10 @@ public class NesMemory
     {
         if (address < 0x800)
             return _ram[address];
-        else if (address == 0x4016) // Input
+        else if (address == 0x4016) // Input player 1
             return InputManager.ReadBuffer();
+        else if (address == 0x4017) // Input player 2
+            return InputManager.ReadBufferPlayer2();
         else if (address >= 0x6000 && address <= 0xFFFF)
             return Cart.ReadMemory(address);
         else if (address >= 0x2000 && address <= 0x3FFF)
@@ -69,10 +71,14 @@ public class NesMemory
             _ppu.WriteRegister(address, value);
         else if (address == 0x4014) // OAMDMA
             _ppu.WriteOAMDMA(value);
-        else if (address >= 0x4000 && address <= 0x4013 || address == 0x4015 || address == 0x4017) { } //APU
-        else if (address == 0x4016) // Input
+        else if (address >= 0x4000 && address <= 0x4013 || address == 0x4015) { } //APU
+        else if (address == 0x4016) // Input player 1
         {
             if ((value & 1) != 0) InputManager.TransfertStateToBuffer();
+        }
+        else if (address == 0x4017) // Input player 2
+        {
+            //if ((value & 1) != 0) InputManager.TransfertStateToBuffer();
         }
         else
         {

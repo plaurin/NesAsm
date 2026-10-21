@@ -394,7 +394,6 @@ public class CPU
         Init(new NOP(this, 0x7C, absoluteX, 4, isOfficialOpCode: false));
         Init(new NOP(this, 0xDC, absoluteX, 4, isOfficialOpCode: false));
         Init(new NOP(this, 0xFC, absoluteX, 4, isOfficialOpCode: false));
-
     }
 
     // ----- Execution -----

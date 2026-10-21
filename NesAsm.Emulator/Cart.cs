@@ -4,6 +4,8 @@ namespace NesAsm.Emulator;
 public class Cart
 {
     private readonly byte[] _rom = [];
+    private readonly byte[] _prgRam = [];
+    private readonly byte[] _chrRam = [];
     private ushort _prgRomOffset = 0x8000;
 
     public byte NbPrgBanks { get; init; }
@@ -41,6 +43,9 @@ public class Cart
         _prgRomOffset = (ushort)(NbPrgBanks == 1 ? 0xC000 : 0x8000);
 
         NbChrBanks = _rom[5];
+
+        _prgRam = new byte[0x2000];
+        _chrRam = new byte[0x2000];
 
         var flag6 = _rom[6];
         var flag7 = _rom[6];
@@ -85,6 +90,15 @@ public class Cart
 
     internal byte ReadChrMemory(ushort address)
     {
-        return ChrRom[address];
+        if (NbChrBanks != 0)
+            return ChrRom[address];
+        else
+            return _chrRam[address];
+    }
+
+    internal void WriteChrMemory(ushort address, byte value)
+    {
+        if (NbChrBanks == 0)
+            _chrRam[address] = value;
     }
 }

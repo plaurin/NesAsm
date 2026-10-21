@@ -129,4 +129,9 @@ public static class InputManager
         _buffer >>= 1;
         return value;
     }
+
+    public static byte ReadBufferPlayer2()
+    {
+        return 0; // TODO
+    }
 }

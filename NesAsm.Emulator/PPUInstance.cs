@@ -66,6 +66,7 @@ public class PPUInstance
 
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
 
+    public bool VBlankStart { get; set; }
     public bool NmiRequested { get; set; }
 
     public byte BackgroundColorIndex => _vram[0x3F00];
@@ -78,21 +79,29 @@ public class PPUInstance
     public int Scanline => _scanline;
     public int ScanlineCycle => _scanlineCycle;
 
-    public ReadOnlySpan<byte> Palette => _vram[0x3F00..0x3F20];
+    public ReadOnlySpan<byte> Palette => _vram.AsSpan()[0x3F00..0x3F20];
+
+    private byte _ppuDataBuffer = 0x0;
 
     public byte ReadRegister(ushort address)
     {
+        byte result = 0x0;
+
         switch (address)
         {
             case PPUCTRL:
                 return _ppuCtrl;
             case PPUSTATUS:
-                var result = _ppuStatus;
+                result = _ppuStatus;
                 _ppuStatus &= 0x3F;
                 _addrLatch = false;
                 return result;
             case PPUDATA:
-                break;
+                result = _ppuDataBuffer;
+                _ppuDataBuffer = _vram[_ppuAddr];
+                if (_ppuAddr >= 0x3F00) result = _ppuDataBuffer;
+                _ppuAddr += ((_ppuCtrl & 0x04) != 0) ? (ushort)32 : (ushort)1;
+                return result;
         }
         return 0;
     }
@@ -148,7 +157,7 @@ public class PPUInstance
 
     public byte GetVram(ushort address)
     {
-        if (address >= 0x3F00 && address < 0x3F20) { }
+        if (address >= 0x3F00 && address < 0x3F20) { } // Debug
 
         if (address >= 0x0 && address <= 0x1FFF)
             return _memory.Cart.ReadChrMemory(address);
@@ -160,9 +169,12 @@ public class PPUInstance
 
     public void WriteVRAM(ushort address, byte value)
     {
-        if (address >= 0x3F00 && address < 0x3F20) { }
+        if (address >= 0x3F00 && address < 0x3F20) { } // Debug
+
         if (address >= 0x2000 && address <= 0x3FFF)
             _vram[address] = value;
+        else if (address <= 0x1FFF)
+            _memory.Cart.WriteChrMemory(address, value);
         else
             throw new InvalidOperationException($"{address:X4} out of range");
     }
@@ -182,7 +194,6 @@ public class PPUInstance
                 if (_scanlineCycle >= CyclesPerScanlines)
                 {
                     _scanlineCycle = 0;
-                    // Todo Render line
 
                     _scanline++;
                     if (_scanline == TotalScanlines)
@@ -194,6 +205,7 @@ public class PPUInstance
 
                 if (_scanline == 241 && _scanlineCycle == 0)
                 {
+                    VBlankStart = true;
                     _ppuStatus |= 0x80;
                     if ((_ppuCtrl & 0x80) != 0)
                     {

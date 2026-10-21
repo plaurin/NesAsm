@@ -24,22 +24,28 @@ public class NesRunner
         {
             _cpu.Init();
 
-            while (_ppu.Frame <= 1250)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                if (_cpu.PC == 0x8094) { }
+                if (_cpu.PC == 0xE412) { }
 
                 var ins = _cpu.RunNextInstruction();
 
                 _ppu.RunToCycle(_cpu.Cycles);
 
-                if (_ppu.NmiRequested)
+                if (_ppu.VBlankStart)
                 {
-                    _ppu.NmiRequested = false;
+                    _ppu.VBlankStart = false;
 
                     DrawScreen();
                     draw.Invoke();
 
                     InputManager.FrameUpdate();
+                }
+
+                if (_ppu.NmiRequested)
+                {
+                    _ppu.NmiRequested = false;
+
                     _cpu.RunNmi();
                 }
             }
