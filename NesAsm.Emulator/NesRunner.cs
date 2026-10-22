@@ -198,7 +198,7 @@ public class NesRunner
         byte GetSpritePaletteIndex(int sprite) => (byte)(_ppu.Oam[sprite * 4 + 2] & 0x03);
         bool IsSpriteFlippedHorizontally(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x40) != 0;
         bool IsSpriteFlippedVertically(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x80) != 0;
-        byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => 0;
+        byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => _ppu.Palette[0x10 + paletteIndex * 0x04 + colorIndex];
 
         var patternIndex = GetSpriteTileIndex(spriteIndex);
 
