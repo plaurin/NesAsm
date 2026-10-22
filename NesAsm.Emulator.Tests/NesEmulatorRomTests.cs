@@ -17,6 +17,7 @@ public class NesEmulatorRomTests
     [Fact]
     public void NesTestOfficialOpCodes()
     {
+        // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
         InitCart(@"nestest.nes", 0xC000);
 
         var logFile = Path.Combine(GetRomFolder(), @"nestest.log");
@@ -41,7 +42,34 @@ public class NesEmulatorRomTests
     [Fact]
     public void PaletteRamTest()
     {
+        // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
         InitCart("palette_ram.nes");
+
+        void BeforeNextInstruction()
+        {
+            if (_cpu.PC == 0xE0E2) { }
+        }
+
+        RunProgram(0xE412, BeforeNextInstruction);
+
+        Assert.Equal(1, _memory.Peek(0xF0));
+    }
+
+    [Fact]
+    public void SpriteRamTest()
+    {
+        // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
+        InitCart("sprite_ram.nes");
+
+        void BeforeNextInstruction()
+        {
+            var ins = _cpu.GetInstructionAt(_cpu.PC);
+            if (_cpu.PC == 0xE045) { }
+        }
+
+        RunProgram(0xE467, BeforeNextInstruction);
+
+        Assert.Equal(1, _memory.Peek(0xF0));
     }
 
     private static string GetRomFolder()

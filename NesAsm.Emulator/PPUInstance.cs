@@ -39,27 +39,6 @@ public class PPUInstance
     public PPUInstance(NesMemory memory)
     {
         _memory = memory;
-
-        var a = 0x3F00;
-        _vram[a++] = 0x21;
-        _vram[a++] = 0x29;
-        _vram[a++] = 0x1A;
-        _vram[a++] = 0x0F;
-
-        _vram[a++] = 0x0F;
-        _vram[a++] = 0x36;
-        _vram[a++] = 0x17;
-        _vram[a++] = 0x0F;
-
-        _vram[a++] = 0x0F;
-        _vram[a++] = 0x30;
-        _vram[a++] = 0x21;
-        _vram[a++] = 0x0F;
-
-        _vram[a++] = 0x0F;
-        _vram[a++] = 0x27;
-        _vram[a++] = 0x17;
-        _vram[a++] = 0x0F;
     }
 
     public int Frame => _frame;
@@ -99,9 +78,11 @@ public class PPUInstance
                 _ppuStatus &= 0x3F;
                 _addrLatch = false;
                 return result;
+            case OAMDATA:
+                return _oam[_oamAddr];
             case PPUDATA:
                 result = _ppuDataBuffer;
-                _ppuDataBuffer = _vram[_ppuAddr];
+                _ppuDataBuffer = GetVram(_ppuAddr);
                 if (_ppuAddr >= 0x3F00) result = _ppuDataBuffer;
                 _ppuAddr += ((_ppuCtrl & 0x04) != 0) ? (ushort)32 : (ushort)1;
                 return result;
@@ -128,7 +109,7 @@ public class PPUInstance
                 break;
             case OAMDATA:
                 _oamData = value;
-                _oam[_oamData++] = value;
+                _oam[_oamAddr++] = value;
                 break;
             case PPUSCROLL:
                 if (!_scrollLatch) _ppuScrollX = value;
@@ -151,11 +132,11 @@ public class PPUInstance
 
     public void WriteOAMDMA(byte value)
     {
-        var basAddress = value << 8;
+        var baseAddress = value << 8;
         for (int i = 0; i < 256; i++)
         {
-            var t = _memory.Read((ushort)(basAddress + i));
-            _oam[_oamData++] = t;
+            var t = _memory.Read((ushort)(baseAddress + i));
+            _oam[_oamAddr++] = t;
         }
     }
 
@@ -165,20 +146,32 @@ public class PPUInstance
 
         if (address >= 0x0 && address <= 0x1FFF)
             return _memory.Cart.ReadChrMemory(address);
-        else if (address >= 0x2000 && address <= 0x3FFF)
+        else if (address >= 0x2000 && address <= 0x3EFF)
             return _vram[address];
+        else if (address >= 0x3F00 && address <= 0x3FFF)
+        {
+            int mirroredAddress = address & 0x1F;
+            if ((mirroredAddress & 0x03) == 0x00) mirroredAddress = 0x00;
+            return _vram[0x3F00 | mirroredAddress];
+        }
         else
             throw new InvalidOperationException($"{address:X4} out of range");
     }
 
     public void WriteVRAM(ushort address, byte value)
     {
-        if (address >= 0x3F00 && address < 0x3F20) { } // Debug
+        if (address == 0x3F10 && address < 0x3F20) { } // Debug
 
-        if (address >= 0x2000 && address <= 0x3FFF)
-            _vram[address] = value;
-        else if (address <= 0x1FFF)
+        if (address <= 0x1FFF)
             _memory.Cart.WriteChrMemory(address, value);
+        else if (address >= 0x2000 && address <= 0x3EFF)
+            _vram[address] = value;
+        else if (address >= 0x3F00 && address <= 0x3FFF)
+        {
+            int mirroredAddress = address & 0x1F;
+            if ((mirroredAddress & 0x03) == 0x00) mirroredAddress = 0x00;
+            _vram[0x3F00 | mirroredAddress] = value;
+        }
         else
             throw new InvalidOperationException($"{address:X4} out of range");
     }
