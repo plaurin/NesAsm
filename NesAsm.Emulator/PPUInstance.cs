@@ -79,6 +79,9 @@ public class PPUInstance
     public int Scanline => _scanline;
     public int ScanlineCycle => _scanlineCycle;
 
+    private int? _sprite0Scanline = null;
+    private int? _sprite0ScanlineCycle = null;
+
     public ReadOnlySpan<byte> Palette => _vram.AsSpan()[0x3F00..0x3F20];
 
     private byte _ppuDataBuffer = 0x0;
@@ -103,6 +106,7 @@ public class PPUInstance
                 _ppuAddr += ((_ppuCtrl & 0x04) != 0) ? (ushort)32 : (ushort)1;
                 return result;
         }
+
         return 0;
     }
 
@@ -179,6 +183,12 @@ public class PPUInstance
             throw new InvalidOperationException($"{address:X4} out of range");
     }
 
+    public void SetSprite0HitAt(int scanline, int x)
+    {
+        _sprite0Scanline = scanline;
+        _sprite0ScanlineCycle = x * 3;
+    }
+
     public void RunToCycle(long cpuCycles)
     {
         for (long i = _lastCpuCycle; i < cpuCycles; i++)
@@ -211,6 +221,11 @@ public class PPUInstance
                     {
                         NmiRequested = true;
                     }
+                }
+
+                if (_sprite0Scanline.HasValue && _sprite0ScanlineCycle.HasValue &&_scanline == _sprite0Scanline.Value && _scanlineCycle >= _sprite0ScanlineCycle.Value)
+                {
+                    _ppuStatus |= 0x40;
                 }
             }
 

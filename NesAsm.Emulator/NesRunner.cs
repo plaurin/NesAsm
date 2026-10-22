@@ -7,6 +7,7 @@ public class NesRunner
     private CPU _cpu;
 
     private readonly byte[] _screen = new byte[256 * 240];
+    private readonly byte[] _pixelMask = new byte[256 * 240];
     public NesRunner(Cart cart)
     {
         _memory = new NesMemory(cart);
@@ -39,6 +40,8 @@ public class NesRunner
                     DrawScreen();
                     draw.Invoke();
 
+                    SetNextFrameSprite0Hit();
+
                     InputManager.FrameUpdate();
                 }
 
@@ -60,6 +63,20 @@ public class NesRunner
 
     private const byte SpriteYOffset = 1; // The PPU adds 1 to the sprite Y position, so we need to subtract it when setting the sprite Y position.
 
+    private void SetNextFrameSprite0Hit()
+    {
+        if ((_ppu.PpuMask & 0x18) == 0x18)
+        {
+            for (int y = 0; y < 240; y++)
+                for (int x = 0; x < 256; x++)
+                    if ((_pixelMask[x + y * 256] & 0x03) == 0x03)
+                    {
+                        // first hit
+                        _ppu.SetSprite0HitAt(y, x);
+                    }
+        }
+    }
+
     public void DrawScreen(byte startScanline = 0, byte endScanline = 239)
     {
         bool setbackgroundcolor = true;
@@ -69,7 +86,10 @@ public class NesRunner
         if (setbackgroundcolor)
             for (int y = startScanline; y <= endScanline; y++)
                 for (int x = 0; x < 256; x++)
+                {
                     _screen[x + y * 256] = _ppu.BackgroundColorIndex;
+                    _pixelMask[x + y * 256] = 0;
+                }
 
         byte GetSpriteY(int sprite) => _ppu.Oam[sprite * 4 + 0];
         byte GetSpriteX(int sprite) => _ppu.Oam[sprite * 4 + 3];
@@ -83,7 +103,7 @@ public class NesRunner
                     {
                         var screenIndex = (GetSpriteX(index) + x) + (GetSpriteY(index) + y + SpriteYOffset) * 256;
                         if (screenIndex < _screen.Length)
-                            _screen[screenIndex] = DrawSpritePixel(index, x, y, _screen[screenIndex]);
+                            _screen[screenIndex] = DrawSpritePixel(index, x, y, screenIndex);
                     }
         }
 
@@ -97,7 +117,7 @@ public class NesRunner
                 for (int x = 0; x < 256; x++)
                 {
                     var screenIndex = x + y * 256;
-                    _screen[screenIndex] = DrawBackgroundPixel(x, y, _screen[screenIndex]);
+                    _screen[screenIndex] = DrawBackgroundPixel(x, y, screenIndex);
                 }
 
         if (drawSprites)
@@ -112,8 +132,10 @@ public class NesRunner
     private byte ScrollY => _ppu.ScrollY;
     private bool VerticalMirroring = true; // Default mirroring mode, can be changed by the game.
 
-    private byte DrawBackgroundPixel(int x, int y, byte colorIndexIfTransparent)
+    private byte DrawBackgroundPixel(int x, int y, int screenIndex)
     {
+        var colorIndexIfTransparent = _screen[screenIndex];
+
         (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
         (int patternX, int patternY) GetPatternTablePosition(int screenX, int screenY) => (screenX % 8, screenY % 8);
         (int attributeX, int attributeY) GetAttributeTablePosition(int nametableX, int nametableY) => (nametableX / 4, nametableY / 4);
@@ -147,9 +169,15 @@ public class NesRunner
             return colorIndexIfTransparent;
         }
 
+        // Sprite 0 hit detection
+        if (colorIndex != 0)
+        {
+            _pixelMask[screenIndex] |= 0x01;
+        }
+
         var (attributeX, attributeY) = GetAttributeTablePosition(nametableX, nametableY);
         var attributeValue = GetAttributeTable(nametableIndex, attributeX, attributeY);
-        if (attributeValue != 0) { }
+        if (attributeValue != 0) { } // Debug
         var bitIndex = (nametableX % 2) * 0x04 + (nametableY % 2) * 0x10 + 1;
         var bitIndex2 = (0x03 << ((nametableX % 2) * 2 + (nametableY % 2) * 4));
         var bitIndex3 = (nametableX % 2) * 2 + (nametableY % 2) * 4;
@@ -161,8 +189,10 @@ public class NesRunner
         return GetBackgroundPaletteColor(paletteIndex, colorIndex);
     }
 
-    private byte DrawSpritePixel(int spriteIndex, int x, int y, byte colorIndexIfTransparent)
+    private byte DrawSpritePixel(int spriteIndex, int x, int y, int screenIndex)
     {
+        var colorIndexIfTransparent = _screen[screenIndex];
+
         // TODO Move up callstack
         byte GetSpriteTileIndex(int sprite) => _ppu.Oam[sprite * 4 + 1];
         byte GetSpritePaletteIndex(int sprite) => (byte)(_ppu.Oam[sprite * 4 + 2] & 0x03);
@@ -179,6 +209,12 @@ public class NesRunner
         if (colorIndex == 0)
         {
             return colorIndexIfTransparent;
+        }
+
+        // Sprite 0 Hit detection
+        if (spriteIndex == 0 && colorIndex != 0)
+        {
+            _pixelMask[screenIndex] |= 0x02;
         }
 
         var paletteIndex = GetSpritePaletteIndex(spriteIndex);
