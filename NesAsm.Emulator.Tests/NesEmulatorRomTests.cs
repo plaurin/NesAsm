@@ -1,3 +1,4 @@
+using NesAsm.Emulator.Instructions;
 using Xunit.Abstractions;
 
 namespace NesAsm.Emulator.Tests;
@@ -26,7 +27,7 @@ public class NesEmulatorRomTests
         int logIndex = 0;
         var previousLog = GetCurrentLog();
 
-        void BeforeNextInstruction()
+        void BeforeNextInstruction(Instruction ins)
         {
             var actualLog = GetCurrentLog();
             var expectedLog = logs[logIndex++];
@@ -45,7 +46,7 @@ public class NesEmulatorRomTests
         // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
         InitCart("palette_ram.nes");
 
-        void BeforeNextInstruction()
+        void BeforeNextInstruction(Instruction ins)
         {
             if (_cpu.PC == 0xE0E2) { }
         }
@@ -61,13 +62,28 @@ public class NesEmulatorRomTests
         // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
         InitCart("sprite_ram.nes");
 
-        void BeforeNextInstruction()
+        void BeforeNextInstruction(Instruction ins)
         {
-            var ins = _cpu.GetInstructionAt(_cpu.PC);
             if (_cpu.PC == 0xE045) { }
         }
 
         RunProgram(0xE467, BeforeNextInstruction);
+
+        Assert.Equal(1, _memory.Peek(0xF0));
+    }
+
+    [Fact]
+    public void VramAccessTest()
+    {
+        // https://github.com/christopherpow/nes-test-roms/blob/master/blargg_ppu_tests_2005.09.15b/readme.txt
+        InitCart("vram_access.nes");
+
+        void BeforeNextInstruction(Instruction ins)
+        {
+            if (_cpu.PC == 0xE045) { }
+        }
+
+        RunProgram(0xE48D, BeforeNextInstruction);
 
         Assert.Equal(1, _memory.Peek(0xF0));
     }
@@ -134,11 +150,12 @@ public class NesEmulatorRomTests
         Assert.Equal(expectedLog, actualLog);
     }
 
-    private void RunProgram(ushort endAddress, Action? beforeNextInstruction = null)
+    private void RunProgram(ushort endAddress, Action<Instruction>? beforeNextInstruction = null)
     {
         while (_cpu.PC != endAddress)
         {
-            beforeNextInstruction?.Invoke();
+            var ins = _cpu.GetInstructionAt(_cpu.PC);
+            beforeNextInstruction?.Invoke(ins);
 
             try
             {

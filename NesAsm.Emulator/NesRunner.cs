@@ -27,7 +27,7 @@ public class NesRunner
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                if (_cpu.PC == 0xE412) { }
+                if (_cpu.PC == 0x8624) { }
 
                 var ins = _cpu.RunNextInstruction();
 
@@ -97,13 +97,18 @@ public class NesRunner
 
         void drawSprite(int index)
         {
+            var spriteX = GetSpriteX(index);
+            var spriteY = GetSpriteY(index) + SpriteYOffset;
             for (int y = 0; y < 8; y++)
-                if (GetSpriteY(index) + y + SpriteYOffset >= startScanline && GetSpriteY(index) + y + SpriteYOffset <= endScanline)
+                if (spriteY + y >= startScanline && spriteY + y <= endScanline)
                     for (int x = 0; x < 8; x++)
                     {
-                        var screenIndex = (GetSpriteX(index) + x) + (GetSpriteY(index) + y + SpriteYOffset) * 256;
-                        if (screenIndex < _screen.Length)
-                            _screen[screenIndex] = DrawSpritePixel(index, x, y, screenIndex);
+                        if (spriteX + x < 256)
+                        {
+                            var screenIndex = (spriteX + x) + (spriteY + y) * 256;
+                            if (screenIndex < _screen.Length)
+                                _screen[screenIndex] = DrawSpritePixel(index, x, y, screenIndex);
+                        }
                     }
         }
 
@@ -134,6 +139,8 @@ public class NesRunner
 
     private byte DrawBackgroundPixel(int x, int y, int screenIndex)
     {
+        if (y == 208) { } // Debug
+        
         var colorIndexIfTransparent = _screen[screenIndex];
 
         (int nametableX, int nametableY) GetNametablePosition(int screenX, int screenY) => (screenX / 8, screenY / 8);
@@ -159,7 +166,7 @@ public class NesRunner
 
         var patternIndex = GetPatternIndex(nametableIndex, nametableX, nametableY);
 
-        if (patternIndex != 0x24) { }
+        if (patternIndex != 0x24) { } // Debug
 
         var (patternX, patternY) = GetPatternTablePosition(x + ScrollX, y + ScrollY);
         var colorIndex = GetPatternTableColorIndex(BackgroundPatternTableIndex, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY);
@@ -179,8 +186,8 @@ public class NesRunner
         var attributeValue = GetAttributeTable(nametableIndex, attributeX, attributeY);
         if (attributeValue != 0) { } // Debug
         var bitIndex = (nametableX % 2) * 0x04 + (nametableY % 2) * 0x10 + 1;
-        var bitIndex2 = (0x03 << ((nametableX % 2) * 2 + (nametableY % 2) * 4));
-        var bitIndex3 = (nametableX % 2) * 2 + (nametableY % 2) * 4;
+        var bitIndex2 = (0x03 << ((nametableX / 2 % 2) * 2 + (nametableY / 2 % 2) * 4));
+        var bitIndex3 = (nametableX / 2 % 2) * 2 + (nametableY / 2 % 2) * 4;
         var bit0 = attributeValue & bitIndex;
         var bit1 = attributeValue & (bitIndex << 1);
         var r = attributeValue >> bitIndex3 & 0x03;

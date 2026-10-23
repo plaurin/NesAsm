@@ -169,7 +169,7 @@ public class PPUInstance
         else if (address >= 0x3F00 && address <= 0x3FFF)
         {
             int mirroredAddress = address & 0x1F;
-            if ((mirroredAddress & 0x03) == 0x00) mirroredAddress = 0x00;
+            if ((mirroredAddress & 0x03) == 0x00 && mirroredAddress >= 0x10) mirroredAddress -= 0x10;
             _vram[0x3F00 | mirroredAddress] = value;
         }
         else
