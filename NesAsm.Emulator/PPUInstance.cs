@@ -48,6 +48,50 @@ public class PPUInstance
         _memory = memory;
     }
 
+    public byte[] GetSaveState()
+    {
+        var buffer = new List<byte>();
+
+        buffer.AddRange(Tables);
+        buffer.AddRange(Oam);
+        //buffer.AddRange(Palettes);
+        buffer.Add(_ppuCtrl);
+        buffer.Add(_ppuMask);
+        buffer.Add(_ppuStatus);
+        buffer.Add(_oamAddr);
+        buffer.Add(_ppuScrollX);
+        buffer.Add(_ppuScrollY);
+        buffer.Add((byte)(_ppuAddr >> 8));
+        buffer.Add((byte)(_ppuAddr & 0xFF));
+        buffer.Add(_ppuData);
+        buffer.Add((byte)(_scanline >> 8));
+        buffer.Add((byte)(_scanline & 0xFF));
+        buffer.Add((byte)(_scanlineCycle >> 8));
+        buffer.Add((byte)(_scanlineCycle & 0xFF));
+        buffer.Add((byte)(_frame >> 8));
+        buffer.Add((byte)(_frame & 0xFF));
+
+        return buffer.ToArray();
+    }
+
+    public void RestoreState(ReadOnlySpan<byte> state)
+    {
+        state[0..0x1000].CopyTo(_vram.AsSpan(0x2000));
+        state[0x1000..0x1100].CopyTo(_oam.AsSpan());
+        _ppuCtrl = state[0x1100];
+        _ppuMask = state[0x1101];
+        _ppuStatus = state[0x1102];
+        _oamAddr = state[0x1103];
+        _ppuScrollX = state[0x1104];
+        _ppuScrollY = state[0x1105];
+        _ppuAddr = (ushort)(state[0x1106] << 8 | state[0x1107]);
+        _ppuData = state[0x1108];
+        _scanline = (ushort)(state[0x1109] << 8 | state[0x110a]);
+        _scanlineCycle = (ushort)(state[0x110b] << 8 | state[0x110c]);
+        _frame = (ushort)(state[0x110d] << 8 | state[0x110e]);
+
+    }
+
     public int Frame => _frame;
 
     public override string ToString() => $"F:{_frame} S:{_scanline} C:{_scanlineCycle}";
@@ -56,7 +100,8 @@ public class PPUInstance
     public bool NmiRequested { get; set; }
 
     public byte BackgroundColorIndex => _vram[0x3F00];
-    public byte[] Oam => _oam;
+    public ReadOnlySpan<byte> Oam => _oam;
+    public ReadOnlySpan<byte> Tables => _vram.AsSpan()[0x2000..0x3000];
     public byte PpuCtrl => _ppuCtrl;
     public byte PpuMask => _ppuMask;
     public byte ScrollX => _ppuScrollX;
@@ -70,7 +115,7 @@ public class PPUInstance
     private int? _sprite0Scanline = null;
     private int? _sprite0ScanlineCycle = null;
 
-    public ReadOnlySpan<byte> Palette => _vram.AsSpan()[0x3F00..0x3F20];
+    public ReadOnlySpan<byte> Palettes => _vram.AsSpan()[0x3F00..0x3F20];
 
     private byte _ppuDataBuffer = 0x0;
 

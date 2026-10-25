@@ -23,6 +23,24 @@ public class NesRunner
 
     public bool IsFastForward { get; set; }
 
+    public byte[] GetState()
+    {
+        var buffer = new List<byte>();
+
+        buffer.AddRange(_memory._ram);
+        buffer.AddRange(_cpu.GetSaveState());
+        buffer.AddRange(_ppu.GetSaveState());
+
+        return buffer.ToArray();
+    }
+
+    public void RestoreState(ReadOnlySpan<byte> state)
+    {
+        _memory._ram = state[0..0x800].ToArray();
+        _cpu.RestoreState(state[0x800..0x807]);
+        _ppu.RestoreState(state[0x807..]);
+    }
+
     public Task RunGame(CancellationToken cancellationToken, Action draw)
     {
         try
@@ -212,7 +230,7 @@ public class NesRunner
         byte GetSpritePaletteIndex(int sprite) => (byte)(_ppu.Oam[sprite * 4 + 2] & 0x03);
         bool IsSpriteFlippedHorizontally(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x40) != 0;
         bool IsSpriteFlippedVertically(int sprite) => (_ppu.Oam[sprite * 4 + 2] & 0x80) != 0;
-        byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => _ppu.Palette[0x10 + paletteIndex * 0x04 + colorIndex];
+        byte GetSpritePaletteColor(int paletteIndex, int colorIndex) => _ppu.Palettes[0x10 + paletteIndex * 0x04 + colorIndex];
 
         var patternIndex = GetSpriteTileIndex(spriteIndex);
 

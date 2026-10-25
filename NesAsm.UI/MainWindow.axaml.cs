@@ -173,6 +173,8 @@ public partial class MainWindow : Window
     {
         if (e.PhysicalKey == PhysicalKey.Escape) ToggleMenu();
         if (e.PhysicalKey == PhysicalKey.Tab) ToggleFastForward();
+        if (e.PhysicalKey == PhysicalKey.F5) SaveState();
+        if (e.PhysicalKey == PhysicalKey.F6) LoadState();
 
         if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
         if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, true);
@@ -198,6 +200,18 @@ public partial class MainWindow : Window
 
     private void ToggleMenu() => MainMenu.IsVisible = !MainMenu.IsVisible;
     private void ToggleFastForward() => _runner.IsFastForward = !_runner.IsFastForward;
+
+    private byte[] _state;
+
+    private void SaveState()
+    {
+        _state = _runner.GetState();
+    }
+
+    private void LoadState()
+    {
+        _runner.RestoreState(_state);
+    }
 
     bool _canDraw = false;
     bool _running = false;

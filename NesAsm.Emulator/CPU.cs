@@ -31,6 +31,32 @@ public class CPU
     public NesMemory Memory => _memory;
     public Cart Cart => _memory.Cart;
 
+    public byte[] GetSaveState()
+    {
+        var buffer = new List<byte>
+        {
+            _a,
+            _x,
+            _y,
+            P,
+            (byte)(_pc >> 8),
+            (byte)(_pc & 0xFF),
+            _sp
+        };
+
+        return buffer.ToArray();
+    }
+
+    public void RestoreState(ReadOnlySpan<byte> state)
+    {
+        _a = state[0];
+        _x = state[1];
+        _y = state[2];
+        SetP(state[3]);
+        _pc = (ushort)(state[4] << 8 | state[5]);
+        _sp = state[6];
+    }
+
     public byte A => _a;
     public byte X => _x;
     public byte Y => _y;
@@ -102,6 +128,16 @@ public class CPU
         FlagNZ(_y);
     }
 
+    private void SetP(byte value)
+    {
+        _negative = (value & 0x80) == 0x80;
+        _overflow = (value & 0x40) == 0x40;
+        _decimal = (value & 0x08) == 0x08;
+        _interrupt = (value & 0x04) == 0x04;
+        _zero = (value & 0x02) == 0x02;
+        _carry = (value & 0x01) == 0x01;
+    }
+
     public void SetSP(byte value) => _sp = value;
     public void SetPC(ushort address) => _pc = address;
 
@@ -140,13 +176,13 @@ public class CPU
     public void PullFlagsFromStack()
     {
         var value = PopStack();
-
-        _negative = (value & 0x80) == 0x80;
-        _overflow = (value & 0x40) == 0x40;
-        _decimal = (value & 0x08) == 0x08;
-        _interrupt = (value & 0x04) == 0x04;
-        _zero = (value & 0x02) == 0x02;
-        _carry = (value & 0x01) == 0x01;
+        SetP(value);
+        //_negative = (value & 0x80) == 0x80;
+        //_overflow = (value & 0x40) == 0x40;
+        //_decimal = (value & 0x08) == 0x08;
+        //_interrupt = (value & 0x04) == 0x04;
+        //_zero = (value & 0x02) == 0x02;
+        //_carry = (value & 0x01) == 0x01;
     }
 
     // ----- Instructions init -----
