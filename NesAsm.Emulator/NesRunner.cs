@@ -19,6 +19,10 @@ public class NesRunner
 
     public byte[] GetScreen() => _screen;
 
+    public int Frame => _ppu.Frame;
+
+    public bool IsFastForward { get; set; }
+
     public Task RunGame(CancellationToken cancellationToken, Action draw)
     {
         try
@@ -37,8 +41,11 @@ public class NesRunner
                 {
                     _ppu.VBlankStart = false;
 
-                    DrawScreen();
-                    draw.Invoke();
+                    if (!IsFastForward || _ppu.Frame % 10 == 0)
+                    {
+                        DrawScreen();
+                        draw.Invoke();
+                    }
 
                     SetNextFrameSprite0Hit();
 

@@ -40,6 +40,8 @@ public partial class MainWindow : Window
     private int _startFrame;
     private int _fps;
 
+    private NesRunner _runner;
+
     const double FrameSpan = 1000 / 60;
 
     private CancellationTokenSource _cancellationTokenSource = new();
@@ -158,11 +160,11 @@ public partial class MainWindow : Window
                 break;
             default:
                 var romPath = gameName;
-                var runner = new NesRunner(new Cart(romPath));
+                _runner = new NesRunner(new Cart(romPath));
                 Title = Path.GetFileName(romPath);
-                InitRenderTarget(runner.GetScreen());
+                InitRenderTarget(_runner.GetScreen());
 
-                Task.Run(() => runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
+                Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
                 break;
         }
     }
@@ -170,6 +172,8 @@ public partial class MainWindow : Window
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
         if (e.PhysicalKey == PhysicalKey.Escape) ToggleMenu();
+        if (e.PhysicalKey == PhysicalKey.Tab) ToggleFastForward();
+
         if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
         if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, true);
         if (e.PhysicalKey == PhysicalKey.ArrowUp) InputManager.SetState(2, true);
@@ -192,23 +196,8 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, false);
     }
 
-    private void ToggleMenu()
-    {
-        if (MainMenu.IsVisible)
-        {
-            MainMenu.IsVisible = false;
-        }
-        else
-        {
-            MainMenu.IsVisible = true;
-        }
-    }
-
-    //public override void Render(DrawingContext context)
-    //{
-    //    context.DrawEllipse(Brushes.Red, new Pen(Brushes.Red), new Rect(10, 10, 10, 10) );
-    //    context.DrawImage(writeableBitmap, new Rect(0, 0, writeableBitmap.PixelSize.Width, writeableBitmap.PixelSize.Height));
-    //}
+    private void ToggleMenu() => MainMenu.IsVisible = !MainMenu.IsVisible;
+    private void ToggleFastForward() => _runner.IsFastForward = !_runner.IsFastForward;
 
     bool _canDraw = false;
     bool _running = false;
@@ -258,37 +247,34 @@ public partial class MainWindow : Window
 
     private void DrawLoop()
     {
-        //if (_frameNumber % 10 == 0)
+        //PPU.Log($"Start to draw UI frame {_frameNumber}");
+        var pixelsPtr = _bitmap.GetPixels();
+        unsafe
         {
-            //PPU.Log($"Start to draw UI frame {_frameNumber}");
-            var pixelsPtr = _bitmap.GetPixels();
+            byte* ptr = (byte*)pixelsPtr.ToPointer();
+            for (int y = 0; y < 240; y++)
+                for (int x = 0; x < 256; x++)
+                {
+                    var i = x + y * 256;
+                    ptr[i * 4] = PPU.Colors[_screen[i]].b;
+                    ptr[i * 4 + 1] = PPU.Colors[_screen[i]].g;
+                    ptr[i * 4 + 2] = PPU.Colors[_screen[i]].r;
+                    ptr[i * 4 + 3] = 255;
+                }
+        }
+
+        using (var frameBuffer = writeableBitmap.Lock())
+        {
             unsafe
             {
-                byte* ptr = (byte*)pixelsPtr.ToPointer();
-                for (int y = 0; y < 240; y++)
-                    for (int x = 0; x < 256; x++)
-                    {
-                        var i = x + y * 256;
-                        ptr[i * 4] = PPU.Colors[_screen[i]].b;
-                        ptr[i * 4 + 1] = PPU.Colors[_screen[i]].g;
-                        ptr[i * 4 + 2] = PPU.Colors[_screen[i]].r;
-                        ptr[i * 4 + 3] = 255;
-                    }
+                void* dataStart = (void*)frameBuffer.Address;
+                Span<byte> buffer = new(dataStart, 256 * 240 * 4); // assume each pixel is 1 byte in size and my image has 4 channels
+                //_bitmap.Bytes.CopyTo(buffer);
+                _bitmap.GetPixelSpan().CopyTo(buffer);
             }
-
-            using (var frameBuffer = writeableBitmap.Lock())
-            {
-                unsafe
-                {
-                    void* dataStart = (void*)frameBuffer.Address;
-                    Span<byte> buffer = new(dataStart, 256 * 240 * 4); // assume each pixel is 1 byte in size and my image has 4 channels
-                    //_bitmap.Bytes.CopyTo(buffer);
-                    _bitmap.GetPixelSpan().CopyTo(buffer);
-                }
-            }
-
-            //PPU.Log($"End draw UI frame {_frameNumber}");
         }
+
+        //PPU.Log($"End draw UI frame {_frameNumber}");
 
         Image.InvalidateVisual();
         //Task.Delay(300).Wait();
