@@ -22,9 +22,16 @@ public class PPUInstance
     private byte _ppuMask;
     private byte _ppuStatus;
     private byte _oamAddr;
-    private byte _oamData;
     private byte _ppuScrollX;
     private byte _ppuScrollY;
+
+    private readonly (int NametableIndex, byte ScrollValue)[] _scrollXRecord = new (int, byte)[256];
+    private void UpdateScrollPosition()
+    {
+        var line = _scanline >= 240 ? 0 : _scanline + 1;
+        _scrollXRecord[line] = (_ppuCtrl & 0x03, _ppuScrollX);
+    }
+
     private ushort _ppuAddr;
     private byte _ppuData;
 
@@ -54,6 +61,8 @@ public class PPUInstance
     public byte PpuMask => _ppuMask;
     public byte ScrollX => _ppuScrollX;
     public byte ScrollY => _ppuScrollY;
+
+    public (int NametableIndex, byte ScrollValue)[] ScrollXRecord => _scrollXRecord;
 
     public int Scanline => _scanline;
     public int ScanlineCycle => _scanlineCycle;
@@ -97,6 +106,7 @@ public class PPUInstance
         {
             case PPUCTRL:
                 _ppuCtrl = value;
+                UpdateScrollPosition();
                 break;
             case PPUMASK:
                 _ppuMask = value;
@@ -108,17 +118,22 @@ public class PPUInstance
                 _oamAddr = value;
                 break;
             case OAMDATA:
-                _oamData = value;
                 _oam[_oamAddr++] = value;
                 break;
             case PPUSCROLL:
-                if (!_scrollLatch) _ppuScrollX = value;
+                if (value != 0) { } // Debug
+                if (!_scrollLatch)
+                {
+                    _ppuScrollX = value;
+                    UpdateScrollPosition();
+                }
                 else _ppuScrollY = value;
                 _scrollLatch = !_scrollLatch;
                 break;
             case PPUADDR:
                 _ppuAddr = _addrLatch ? (ushort)((_ppuAddr & 0xFF00) | value) : (ushort)((_ppuAddr & 0x00FF) | (ushort)(value << 8));
                 _addrLatch = !_addrLatch;
+                //UpdateScrollPosition();
                 break;
             case PPUDATA:
                 _ppuData = value;
@@ -197,8 +212,13 @@ public class PPUInstance
                 if (_scanlineCycle >= CyclesPerScanlines)
                 {
                     _scanlineCycle = 0;
-
                     _scanline++;
+
+                    if (_scanline < 240)
+                        _scrollXRecord[_scanline + 1] = _scrollXRecord[_scanline];
+                    else if (_scanline == 240)
+                        _scrollXRecord[0] = _scrollXRecord[_scanline];
+
                     if (_scanline == TotalScanlines)
                     {
                         _frame++;

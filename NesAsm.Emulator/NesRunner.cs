@@ -139,7 +139,7 @@ public class NesRunner
 
     private byte DrawBackgroundPixel(int x, int y, int screenIndex)
     {
-        if (y == 208) { } // Debug
+        if (x == 24 && y == 16) { } // Debug
         
         var colorIndexIfTransparent = _screen[screenIndex];
 
@@ -150,8 +150,8 @@ public class NesRunner
         byte GetAttributeTable(int tableIndex, int x, int y) => _ppu.GetVram((ushort)(0x23C0 + tableIndex * 0x400 + y * 8 + x));
         byte GetBackgroundPaletteColor(int paletteIndex, int colorIndex) => _ppu.GetVram((ushort)(0x3F00 + paletteIndex * 4 + colorIndex));
 
-        var nametableIndex = _ppu.PpuCtrl & 0x03;
-        var (nametableX, nametableY) = GetNametablePosition(x + ScrollX, y + ScrollY);
+        var nametableIndex = _ppu.ScrollXRecord[y].NametableIndex;
+        var (nametableX, nametableY) = GetNametablePosition(x + _ppu.ScrollXRecord[y].ScrollValue, y + ScrollY);
         if (nametableX > 31)
         {
             if (VerticalMirroring) nametableIndex = (byte)((nametableIndex + 1) % 2);
@@ -168,7 +168,7 @@ public class NesRunner
 
         if (patternIndex != 0x24) { } // Debug
 
-        var (patternX, patternY) = GetPatternTablePosition(x + ScrollX, y + ScrollY);
+        var (patternX, patternY) = GetPatternTablePosition(x + _ppu.ScrollXRecord[y].ScrollValue, y + ScrollY);
         var colorIndex = GetPatternTableColorIndex(BackgroundPatternTableIndex, (patternIndex % 16) * 8 + patternX, (patternIndex / 16) * 8 + patternY);
 
         if (colorIndex == 0)
