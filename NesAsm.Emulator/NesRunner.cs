@@ -22,6 +22,11 @@ public class NesRunner
     public int Frame => _ppu.Frame;
 
     public bool IsFastForward { get; set; }
+    
+    public bool IsReverse { get; set; }
+
+    private byte[][] _states = new byte[1000][];
+    private int _saveIndex;
 
     public byte[] GetState()
     {
@@ -51,6 +56,19 @@ public class NesRunner
             {
                 if (_cpu.PC == 0x8624) { }
 
+                if (IsReverse)
+                {
+                    _saveIndex--;
+                    if (_saveIndex < 0) _saveIndex = 999;
+                    var state = _states[_saveIndex];
+                    RestoreState(state);
+
+                    DrawScreen();
+                    draw.Invoke();
+
+                    continue;
+                }
+
                 var ins = _cpu.RunNextInstruction();
 
                 _ppu.RunToCycle(_cpu.Cycles);
@@ -58,6 +76,9 @@ public class NesRunner
                 if (_ppu.VBlankStart)
                 {
                     _ppu.VBlankStart = false;
+
+                    _states[_saveIndex++] = GetState();
+                    if (_saveIndex >= 1000) _saveIndex = 0;
 
                     if (!IsFastForward || _ppu.Frame % 10 == 0)
                     {
