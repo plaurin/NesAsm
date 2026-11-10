@@ -28,6 +28,11 @@ public class NesRunner
     private byte[][] _states = new byte[1000][];
     private int _saveIndex;
 
+    private readonly (byte State, byte FrameCount)[] _inputStates = new (byte, byte)[1000];
+    private int _inputStateIndex;
+    private byte _lastInputState;
+    private int _sameInputStateFrameCount;
+
     public byte[] GetState()
     {
         var buffer = new List<byte>();
@@ -44,6 +49,15 @@ public class NesRunner
         _memory._ram = state[0..0x800].ToArray();
         _cpu.RestoreState(state[0x800..0x807]);
         _ppu.RestoreState(state[0x807..]);
+    }
+
+    private bool _isReplaying;
+    public void Replay()
+    {
+        _isReplaying = true;
+        _inputStateIndex = 0;
+        _sameInputStateFrameCount = 0;
+        RestoreState(_states[0]);
     }
 
     public Task RunGame(CancellationToken cancellationToken, Action draw)
@@ -88,7 +102,7 @@ public class NesRunner
 
                     SetNextFrameSprite0Hit();
 
-                    InputManager.FrameUpdate();
+                    UpdateInput();
                 }
 
                 if (_ppu.NmiRequested)
@@ -105,6 +119,39 @@ public class NesRunner
         }
 
         return Task.CompletedTask;
+    }
+
+    private void UpdateInput()
+    {
+        if (_isReplaying)
+        {
+            if(_sameInputStateFrameCount > _inputStates[_inputStateIndex].FrameCount)
+            {
+                _inputStateIndex++;
+                _sameInputStateFrameCount = 0;
+            }
+
+            InputManager.SetState(_inputStates[_inputStateIndex].State);
+            _sameInputStateFrameCount++;
+        }
+        else
+        {
+            InputManager.UpdateState();
+            var inputState = InputManager.State;
+
+            if (inputState == _lastInputState && _sameInputStateFrameCount < 256)
+            {
+                _sameInputStateFrameCount++;
+            }
+            else
+            {
+                _inputStates[_inputStateIndex++] = (_lastInputState, (byte)_sameInputStateFrameCount);
+                _sameInputStateFrameCount = 0;
+                _lastInputState = inputState;
+            }
+
+            if (_inputStateIndex == 1000) throw new NotSupportedException("Busted 1000 inputState, should reset maybe the buffer");
+        }
     }
 
     private const byte SpriteYOffset = 1; // The PPU adds 1 to the sprite Y position, so we need to subtract it when setting the sprite Y position.

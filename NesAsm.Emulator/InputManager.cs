@@ -111,7 +111,14 @@ public static class InputManager
     private static byte _buffer;
     public static void TransfertStateToBuffer()
     {
-        _buffer = (byte)(
+        _buffer = State;
+    }
+
+    public static byte State { get; private set; }
+
+    public static void UpdateState()
+    {
+        State = (byte)(
             IsPress[4] ? 0x01 : 0 // B
             | (IsPress[5] ? 0x02 : 0) // A
             | (IsPress[6] ? 0x04 : 0) // Select
@@ -121,6 +128,11 @@ public static class InputManager
             | (IsPress[0] ? 0x40 : 0) // Left
             | (IsPress[1] ? 0x80 : 0) // Right
             );
+    }
+
+    public static void SetState(byte state)
+    {
+        State = state;
     }
 
     public static byte ReadBuffer()
