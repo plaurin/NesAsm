@@ -119,8 +119,8 @@ public static class InputManager
     public static void UpdateState()
     {
         State = (byte)(
-            IsPress[4] ? 0x01 : 0 // B
-            | (IsPress[5] ? 0x02 : 0) // A
+            (IsPress[5] ? 0x01 : 0) // A
+            | (IsPress[4] ? 0x02 : 0) // B
             | (IsPress[6] ? 0x04 : 0) // Select
             | (IsPress[7] ? 0x08 : 0) // Start
             | (IsPress[2] ? 0x10 : 0) // Up

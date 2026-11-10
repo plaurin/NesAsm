@@ -1,6 +1,6 @@
 [X] Record Gamepad Input (1byte nb frame, 1byte state)
 [X] Replay Movies using gamepad input recording
-[ ] Gamepad overlay
+[X] Gamepad overlay
 [ ] Resume from save using gamepad input recording, ask to hold previous buttons
 [ ] Fix Rewind (Scrolling)
 [ ] Fix Sprite 0 Scrolling glitch

@@ -207,6 +207,13 @@ public partial class MainWindow : Window
     private void StartRecording() => _runner.StartRecording();
     private void PlayRecording() => _runner.PlayRecording();
 
+    private string GetInputStateString()
+    {
+        var state = InputManager.State;
+
+        return $"{((state & 0x80) == 0x80 ? "R" : "-")}{((state & 0x40) == 0x40 ? "L" : "-")}{((state & 0x20) == 0x20 ? "D" : "-")}{((state & 0x10) == 0x10 ? "U" : "-")}{((state & 0x08) == 0x08 ? "St" : "--")}{((state & 0x04) == 0x04 ? "Se" : "--")}{((state & 0x02) == 0x02 ? "B" : "-")}{((state & 0x01) == 0x01 ? "A" : "-")}";
+    }
+
     private byte[] _state;
 
     private void SaveState()
@@ -309,11 +316,12 @@ public partial class MainWindow : Window
         _lastWatch = _watch.Elapsed;
 
         _frameNumber++;
-        if (_frameNumber % 60 == 0)
-        {
-            var state = _runner.IsRecording ? "Recording" : _runner.IsReplaying ? "Replaying" : "";
-            FrameCounter.Content = $"FPS: {_fps:N0} {state}";
-        }
+
+        var inputState = GetInputStateString();
+        var recordingState = _runner.IsRecording ? "Recording" : _runner.IsReplaying ? "Replaying" : "";
+        var title = $"FPS: {_fps:N0} {inputState} {recordingState}";
+        if (FrameCounter.Content != title)
+            FrameCounter.Content = title;
 
         if (DateTimeOffset.Now.Second != _startTime.Second)
         {
