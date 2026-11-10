@@ -112,6 +112,16 @@ public partial class MainWindow : Window
 
             RecentRomsMenuItem.Items.Add(menuItem);
         }
+
+        // Mapper 0
+        var mapper0Roms = Path.Combine(cur[..ind], "mapper0_nrom.txt");
+        foreach (var path in File.ReadAllLines(mapper0Roms))
+        {
+            var menuItem = new MenuItem { Header = Path.GetFileName(path) };
+            menuItem.Click += (s, e) => RunGame(path);
+
+            Mapper0RomsMenuItem.Items.Add(menuItem);
+        }
     }
 
     private void InitRenderTarget(byte[] target)

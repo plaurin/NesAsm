@@ -10,6 +10,7 @@
         <Menu Name="MainMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Name="RecentRomsMenuItem" Header="_Recent ROMs" />
+                <MenuItem Name="Mapper0RomsMenuItem" Header="_Mapper 0" />
             </MenuItem>
         </Menu>
         <StackPanel>
