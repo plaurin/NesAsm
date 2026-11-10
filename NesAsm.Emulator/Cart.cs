@@ -48,13 +48,13 @@ public class Cart
         _chrRam = new byte[0x2000];
 
         var flag6 = _rom[6];
-        var flag7 = _rom[6];
+        var flag7 = _rom[7];
 
         IsVerticalMirroring = (flag6 & 0x01) != 0;
         HasBattery = (flag6 & 0x02) != 0;
         HasTrainer = (flag6 & 0x04) != 0;
         IsFourScreen = (flag6 & 0x08) != 0;
-        MapperId = (flag7 & 0xF0) | ((flag6 & 0xF0) >> 4);
+        MapperId = (flag7 & 0xF0) | (flag6  >> 4);
 
         Console.WriteLine($"Mirroring: {(IsVerticalMirroring ? "Vertical" : "Horizontal")}");
         Console.WriteLine($"Battery Backed: {(HasBattery ? "Yes" : "No")}");
@@ -70,7 +70,12 @@ public class Cart
         Console.WriteLine($"Reset: ${ResetAddress:X4}");
         Console.WriteLine($"IRQ: ${IrqAddress:X4}");
 
-        IsValid = true;
+        if (MapperId != 0)
+        {
+            IsValid = false;
+        }
+        else
+            IsValid = true;
     }
 
     public byte ReadMemory(ushort address)
