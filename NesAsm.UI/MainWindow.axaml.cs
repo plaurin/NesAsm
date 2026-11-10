@@ -176,7 +176,8 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.F5) SaveState();
         if (e.PhysicalKey == PhysicalKey.F6) LoadState();
         if (e.PhysicalKey == PhysicalKey.Backspace) ToggleReverse();
-        if (e.PhysicalKey == PhysicalKey.R) Replay();
+        if (e.PhysicalKey == PhysicalKey.R) StartRecording();
+        if (e.PhysicalKey == PhysicalKey.P) PlayRecording();
 
         if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
         if (e.PhysicalKey == PhysicalKey.ArrowRight) InputManager.SetState(1, true);
@@ -203,7 +204,8 @@ public partial class MainWindow : Window
     private void ToggleMenu() => MainMenu.IsVisible = !MainMenu.IsVisible;
     private void ToggleFastForward() => _runner.IsFastForward = !_runner.IsFastForward;
     private void ToggleReverse() => _runner.IsReverse = !_runner.IsReverse;
-    private void Replay() => _runner.Replay();
+    private void StartRecording() => _runner.StartRecording();
+    private void PlayRecording() => _runner.PlayRecording();
 
     private byte[] _state;
 
@@ -309,7 +311,8 @@ public partial class MainWindow : Window
         _frameNumber++;
         if (_frameNumber % 60 == 0)
         {
-            FrameCounter.Content = $"FPS: {_fps:N0}";
+            var state = _runner.IsRecording ? "Recording" : _runner.IsReplaying ? "Replaying" : "";
+            FrameCounter.Content = $"FPS: {_fps:N0} {state}";
         }
 
         if (DateTimeOffset.Now.Second != _startTime.Second)

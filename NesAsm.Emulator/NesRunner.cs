@@ -51,13 +51,28 @@ public class NesRunner
         _ppu.RestoreState(state[0x807..]);
     }
 
-    private bool _isReplaying;
-    public void Replay()
+    public bool IsRecording { get; private set; }
+    public bool IsReplaying { get; private set; }
+    private byte[] _recordingStateState;
+    public void StartRecording()
     {
-        _isReplaying = true;
+        IsRecording = true;
+        IsReplaying = false;
+
+        _recordingStateState = GetState();
         _inputStateIndex = 0;
         _sameInputStateFrameCount = 0;
-        RestoreState(_states[0]);
+        _lastInputState = InputManager.State;
+    }
+
+    public void PlayRecording()
+    {
+        IsRecording = false;
+        IsReplaying = true;
+
+        RestoreState(_recordingStateState);
+        _inputStateIndex = 0;
+        _sameInputStateFrameCount = 0;
     }
 
     public Task RunGame(CancellationToken cancellationToken, Action draw)
@@ -123,7 +138,7 @@ public class NesRunner
 
     private void UpdateInput()
     {
-        if (_isReplaying)
+        if (IsReplaying)
         {
             if(_sameInputStateFrameCount > _inputStates[_inputStateIndex].FrameCount)
             {
@@ -137,8 +152,11 @@ public class NesRunner
         else
         {
             InputManager.UpdateState();
-            var inputState = InputManager.State;
+        }
 
+        if (IsRecording)
+        {
+            var inputState = InputManager.State;
             if (inputState == _lastInputState && _sameInputStateFrameCount < 256)
             {
                 _sameInputStateFrameCount++;
