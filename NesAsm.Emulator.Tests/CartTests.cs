@@ -76,6 +76,21 @@ public class CartTests
         });
     }
 
+    // https://forums.nesdev.org/viewtopic.php?p=310787#p310787
+    [Theory]
+    [MemberData(nameof(Mapper0Roms))]
+    public async Task FindMapper0CartInDB(string romFile, string folder)
+    {
+        var cart = new Cart(Path.Combine(folder, romFile));
+
+        var prgCrc = System.IO.Hashing.Crc32.HashToUInt32(cart.PrgRom);
+
+        var database = File.ReadLines(Path.Combine(GetRomFolder(), "nes20db.xml"));
+        var result = database.Where(line => line.Contains(prgCrc.ToString("X")) && line.Contains("<prgrom")).ToList();
+
+        Assert.NotEmpty(result);
+    }
+
     [Fact]
     public void ScanMappers()
     {
