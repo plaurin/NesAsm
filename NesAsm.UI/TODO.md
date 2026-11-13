@@ -5,6 +5,7 @@
 [ ] Resume from save using gamepad input recording, ask to hold previous buttons
 [ ] Fix Rewind (Scrolling)
 [ ] Fix Sprite 0 Scrolling glitch
+[ ] Implement Vertical Scrolling
 [ ] Save File Visualizer (using ROM CHR)
 [ ] Save History (previous save info, git-like history)
 [ ] Auto Save on exit, resume on startup

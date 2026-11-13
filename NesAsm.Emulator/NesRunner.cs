@@ -46,9 +46,13 @@ public class NesRunner
 
     public void RestoreState(ReadOnlySpan<byte> state)
     {
-        _memory._ram = state[0..0x800].ToArray();
-        _cpu.RestoreState(state[0x800..0x807]);
-        _ppu.RestoreState(state[0x807..]);
+        var toRestore = state.ToArray();
+        SetVBlankAction(() =>
+        {
+            _memory._ram = toRestore[0..0x800].ToArray();
+            _cpu.RestoreState(toRestore[0x800..0x807]);
+            _ppu.RestoreState(toRestore[0x807..]);
+        });
     }
 
     public bool IsRecording { get; private set; }
@@ -56,24 +60,33 @@ public class NesRunner
     private byte[] _recordingStateState;
     public void StartRecording()
     {
-        IsRecording = true;
-        IsReplaying = false;
+        SetVBlankAction(() =>
+        {
+            IsRecording = true;
+            IsReplaying = false;
 
-        _recordingStateState = GetState();
-        _inputStateIndex = 0;
-        _sameInputStateFrameCount = 0;
-        _lastInputState = InputManager.State;
+            _recordingStateState = GetState();
+            _inputStateIndex = 0;
+            _sameInputStateFrameCount = 0;
+            _lastInputState = InputManager.State;
+        });
     }
 
     public void PlayRecording()
     {
-        IsRecording = false;
-        IsReplaying = true;
+        SetVBlankAction(() =>
+        {
+            IsRecording = false;
+            IsReplaying = true;
 
-        RestoreState(_recordingStateState);
-        _inputStateIndex = 0;
-        _sameInputStateFrameCount = 0;
+            RestoreState(_recordingStateState);
+            _inputStateIndex = 0;
+            _sameInputStateFrameCount = 0;
+        });
     }
+
+    private Action? _vblankAction;
+    private void SetVBlankAction(Action action) => _vblankAction = action;
 
     public Task RunGame(CancellationToken cancellationToken, Action draw)
     {
@@ -105,6 +118,12 @@ public class NesRunner
                 if (_ppu.VBlankStart)
                 {
                     _ppu.VBlankStart = false;
+
+                    if (_vblankAction != null)
+                    {
+                        _vblankAction.Invoke();
+                        _vblankAction = null;
+                    }
 
                     _states[_saveIndex++] = GetState();
                     if (_saveIndex >= 1000) _saveIndex = 0;

@@ -216,6 +216,9 @@ public partial class MainWindow : Window
     private void ToggleReverse() => _runner.IsReverse = !_runner.IsReverse;
     private void StartRecording() => _runner.StartRecording();
     private void PlayRecording() => _runner.PlayRecording();
+    private byte[] _state;
+    private void SaveState() => _state = _runner.GetState();
+    private void LoadState() => _runner.RestoreState(_state);
 
     private string GetInputStateString()
     {
@@ -224,17 +227,6 @@ public partial class MainWindow : Window
         return $"{((state & 0x80) == 0x80 ? "R" : "-")}{((state & 0x40) == 0x40 ? "L" : "-")}{((state & 0x20) == 0x20 ? "D" : "-")}{((state & 0x10) == 0x10 ? "U" : "-")}{((state & 0x08) == 0x08 ? "St" : "--")}{((state & 0x04) == 0x04 ? "Se" : "--")}{((state & 0x02) == 0x02 ? "B" : "-")}{((state & 0x01) == 0x01 ? "A" : "-")}";
     }
 
-    private byte[] _state;
-
-    private void SaveState()
-    {
-        _state = _runner.GetState();
-    }
-
-    private void LoadState()
-    {
-        _runner.RestoreState(_state);
-    }
 
     bool _canDraw = false;
     bool _running = false;

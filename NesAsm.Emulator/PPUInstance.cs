@@ -89,7 +89,6 @@ public class PPUInstance
         _scanline = (ushort)(state[0x1109] << 8 | state[0x110a]);
         _scanlineCycle = (ushort)(state[0x110b] << 8 | state[0x110c]);
         _frame = (ushort)(state[0x110d] << 8 | state[0x110e]);
-
     }
 
     public int Frame => _frame;
