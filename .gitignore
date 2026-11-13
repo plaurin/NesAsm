@@ -369,6 +369,5 @@ FodyWeavers.xsd
 *NOTES.md
 /NesAsm.Recompiler/args
 /NesAsm.Recompiler/output/
-/NesAsm.UI/args
 /NesAsm.Emulator.Tests/rom
-/NesAsm.UI/mapper0_nrom.txt
+/NesAsm.UI/GameData/

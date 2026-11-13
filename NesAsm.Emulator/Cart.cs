@@ -8,6 +8,7 @@ public class Cart
     private readonly byte[] _chrRam = [];
     private ushort _prgRomOffset = 0x8000;
 
+    public string RomPath { get; init; }
     public byte NbPrgBanks { get; init; }
     public byte NbChrBanks { get; init; }
     public ReadOnlySpan<byte> PrgRom => _rom.AsSpan(start: 16, length: PrgSize);
@@ -29,6 +30,7 @@ public class Cart
 
     public Cart(string romPath)
     {
+        RomPath = romPath;
         _rom = File.ReadAllBytes(romPath);
 
         if (!(_rom[0] == 0x4E && _rom[1] == 0x45 && _rom[2] == 0x53 && _rom[3] == 0x1A))

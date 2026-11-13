@@ -24,23 +24,22 @@ public partial class MainWindow : Window
     private readonly List<string> _recentRoms = new();
 
     private readonly SKBitmap _bitmap;
-    private byte[] _screen;
-    private WriteableBitmap writeableBitmap;
+    private byte[]? _screen;
+    private WriteableBitmap? writeableBitmap;
     private readonly DispatcherTimer _timer = new();
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
 
     private int _frameNumber;
     private bool _isRendering;
-    private SKColor[] _colorPalette;
-
+    private readonly SKColor[] _colorPalette;
     private DateTimeOffset _startTime;
     private DateTimeOffset _nextFrameTime;
-    private Stopwatch _watch;
+    private readonly Stopwatch _watch;
     private TimeSpan _lastWatch;
     private int _startFrame;
     private int _fps;
 
-    private NesRunner _runner;
+    private NesRunner? _runner;
 
     const double FrameSpan = 1000 / 60;
 
@@ -87,11 +86,20 @@ public partial class MainWindow : Window
         //RunGame("Vertical Scrolling");
         //RunGame("Boxing Game");
         //RunGame("FPS Game");
-        RunGame(_recentRoms.First());
+        //RunGame(_recentRoms.First());
+        RunGame("Resume ROM");
 
         //Task.Run(() => NesApiCSharp.RunOnce(draw: Draw, gameEntryPoint: PPUExemple.Run)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: GameLoopExemple.Reset, nmi: GameLoopExemple.Nmi)).ConfigureAwait(false);
         //Task.Run(() => NesApiCSharp.RunGame(draw: Draw, reset: ImageLoading.Reset, nmi: ImageLoading.Nmi)).ConfigureAwait(false);
+    }
+
+    private string GameDataFolder()
+    {
+        const string projectFolder = "NesAsm.UI";
+        var cur = Directory.GetCurrentDirectory();
+        var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
+        return Path.Combine(cur[..ind], "GameData");
     }
 
     private void InitMenu()
@@ -99,7 +107,7 @@ public partial class MainWindow : Window
         const string projectFolder = "NesAsm.UI";
         var cur = Directory.GetCurrentDirectory();
         var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
-        var argFilePath = Path.Combine(cur[..ind], "args");
+        var argFilePath = Path.Combine(GameDataFolder(), "args");
 
         if (!File.Exists(argFilePath))
             throw new FileNotFoundException($"Argument file not found: {argFilePath}");
@@ -114,7 +122,7 @@ public partial class MainWindow : Window
         }
 
         // Mapper 0
-        var mapper0Roms = Path.Combine(cur[..ind], "mapper0_nrom.txt");
+        var mapper0Roms = Path.Combine(GameDataFolder(), "mapper0_nrom.txt");
         foreach (var path in File.ReadAllLines(mapper0Roms))
         {
             var menuItem = new MenuItem { Header = Path.GetFileName(path) };
@@ -168,6 +176,20 @@ public partial class MainWindow : Window
             case "FPS Game":
                 RunCSharpGame("FPS Game", FPSGame.Reset, FPSGame.Nmi);
                 break;
+            case "Resume ROM":
+                var lastRomFile = Path.Combine(GameDataFolder(), "RomPath.txt");
+                if (!File.Exists(lastRomFile))
+                {
+                    MainMenu.IsEnabled = true;
+                    return;
+                }
+
+                var romPath2 = File.ReadAllText(lastRomFile);
+                _runner = new NesRunner(new Cart(romPath2));
+                InitRenderTarget(_runner.GetScreen());
+                //_runner.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
+                Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
+                break;
             default:
                 var romPath = gameName;
                 _runner = new NesRunner(new Cart(romPath));
@@ -185,6 +207,7 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.Tab) ToggleFastForward();
         if (e.PhysicalKey == PhysicalKey.F5) SaveState();
         if (e.PhysicalKey == PhysicalKey.F6) LoadState();
+        if (e.PhysicalKey == PhysicalKey.F7) LoadStateFromDisk();
         if (e.PhysicalKey == PhysicalKey.Backspace) ToggleReverse();
         if (e.PhysicalKey == PhysicalKey.R) StartRecording();
         if (e.PhysicalKey == PhysicalKey.P) PlayRecording();
@@ -215,16 +238,25 @@ public partial class MainWindow : Window
     {
         MainMenu.IsEnabled = !MainMenu.IsEnabled;
         MainMenu.Close();
-        _runner.IsPaused = MainMenu.IsEnabled;
+        if (_runner != null) _runner.IsPaused = MainMenu.IsEnabled;
     }
 
-    private void ToggleFastForward() => _runner.IsFastForward = !_runner.IsFastForward;
-    private void ToggleReverse() => _runner.IsReverse = !_runner.IsReverse;
-    private void StartRecording() => _runner.StartRecording();
-    private void PlayRecording() => _runner.PlayRecording();
-    private byte[] _state;
-    private void SaveState() => _state = _runner.GetState();
-    private void LoadState() => _runner.RestoreState(_state);
+    private void ToggleFastForward() 
+    {
+        if (_runner != null) _runner.IsFastForward = !_runner.IsFastForward;
+    }
+
+    private void ToggleReverse()
+    {
+        if (_runner != null) _runner.IsReverse = !_runner.IsReverse;
+    }
+
+    private void StartRecording() => _runner?.StartRecording();
+    private void PlayRecording() => _runner?.PlayRecording();
+    private byte[]? _state;
+    private void SaveState() => _state = _runner?.GetState();
+    private void LoadState() => _runner?.RestoreState(_state);
+    private void LoadStateFromDisk() => _runner?.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
 
     private string GetInputStateString()
     {
@@ -233,6 +265,21 @@ public partial class MainWindow : Window
         return $"{((state & 0x80) == 0x80 ? "R" : "-")}{((state & 0x40) == 0x40 ? "L" : "-")}{((state & 0x20) == 0x20 ? "D" : "-")}{((state & 0x10) == 0x10 ? "U" : "-")}{((state & 0x08) == 0x08 ? "St" : "--")}{((state & 0x04) == 0x04 ? "Se" : "--")}{((state & 0x02) == 0x02 ? "B" : "-")}{((state & 0x01) == 0x01 ? "A" : "-")}";
     }
 
+    public void Exit()
+    {
+        _cancellationTokenSource.Cancel();
+
+        if (_runner != null)
+        {
+            var romPath = _runner.RomPath;
+            File.WriteAllText(Path.Combine(GameDataFolder(), "RomPath.txt"), romPath);
+
+            var state = _runner.GetState();
+            File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
+        }
+
+        Close();
+    }
 
     bool _canDraw = false;
     bool _running = false;
@@ -282,6 +329,8 @@ public partial class MainWindow : Window
 
     private void DrawLoop()
     {
+        if (_screen == null || writeableBitmap == null || _runner == null) return;
+
         //PPU.Log($"Start to draw UI frame {_frameNumber}");
         var pixelsPtr = _bitmap.GetPixels();
         unsafe
@@ -328,7 +377,7 @@ public partial class MainWindow : Window
         var inputState = GetInputStateString();
         var recordingState = _runner.IsRecording ? "Recording" : _runner.IsReplaying ? "Replaying" : "";
         var title = $"FPS: {_fps:N0} {inputState} {recordingState}";
-        if (FrameCounter.Content != title)
+        if (FrameCounter.Content == null || (string)FrameCounter.Content != title)
             FrameCounter.Content = title;
 
         if (DateTimeOffset.Now.Second != _startTime.Second)

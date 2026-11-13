@@ -52,9 +52,10 @@ public class PPUInstance
     {
         var buffer = new List<byte>();
 
-        buffer.AddRange(Tables);
-        buffer.AddRange(Oam);
-        //buffer.AddRange(Palettes);
+        buffer.AddRange(_vram.AsSpan()[0x2000..0x3000]);
+        buffer.AddRange(_oam);
+        buffer.AddRange(Palettes);
+
         buffer.Add(_ppuCtrl);
         buffer.Add(_ppuMask);
         buffer.Add(_ppuStatus);
@@ -78,17 +79,20 @@ public class PPUInstance
     {
         state[0..0x1000].CopyTo(_vram.AsSpan(0x2000));
         state[0x1000..0x1100].CopyTo(_oam.AsSpan());
-        _ppuCtrl = state[0x1100];
-        _ppuMask = state[0x1101];
-        _ppuStatus = state[0x1102];
-        _oamAddr = state[0x1103];
-        _ppuScrollX = state[0x1104];
-        _ppuScrollY = state[0x1105];
-        _ppuAddr = (ushort)(state[0x1106] << 8 | state[0x1107]);
-        _ppuData = state[0x1108];
-        _scanline = (ushort)(state[0x1109] << 8 | state[0x110a]);
-        _scanlineCycle = (ushort)(state[0x110b] << 8 | state[0x110c]);
-        _frame = (ushort)(state[0x110d] << 8 | state[0x110e]);
+        state[0x1100..0x1120].CopyTo(_vram.AsSpan(0x3F00));
+
+        var index = 0x1120;
+        _ppuCtrl = state[index++];
+        _ppuMask = state[index++];
+        _ppuStatus = state[index++];
+        _oamAddr = state[index++];
+        _ppuScrollX = state[index++];
+        _ppuScrollY = state[index++];
+        _ppuAddr = (ushort)(state[index++] << 8 | state[index++]);
+        _ppuData = state[index++];
+        _scanline = (ushort)(state[index++] << 8 | state[index++]);
+        _scanlineCycle = (ushort)(state[index++] << 8 | state[index++]);
+        _frame = (ushort)(state[index++] << 8 | state[index++]);
     }
 
     public int Frame => _frame;
@@ -100,7 +104,6 @@ public class PPUInstance
 
     public byte BackgroundColorIndex => _vram[0x3F00];
     public ReadOnlySpan<byte> Oam => _oam;
-    public ReadOnlySpan<byte> Tables => _vram.AsSpan()[0x2000..0x3000];
     public byte PpuCtrl => _ppuCtrl;
     public byte PpuMask => _ppuMask;
     public byte ScrollX => _ppuScrollX;

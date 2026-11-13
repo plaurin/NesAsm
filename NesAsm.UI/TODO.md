@@ -2,6 +2,7 @@
 [X] Replay Movies using gamepad input recording
 [X] Gamepad overlay
 [X] Pause when Escape / menu enable
+[ ] Pause overlay
 [ ] Resume from save using gamepad input recording, ask to hold previous buttons
 [ ] Fix Rewind (Scrolling)
 [ ] Fix Sprite 0 Scrolling glitch

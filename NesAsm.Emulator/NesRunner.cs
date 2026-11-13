@@ -2,14 +2,16 @@
 
 public class NesRunner
 {
-    private PPUInstance _ppu;
-    private NesMemory _memory;
-    private CPU _cpu;
+    private readonly Cart _cart;
+    private readonly NesMemory _memory;
+    private readonly PPUInstance _ppu;
+    private readonly CPU _cpu;
 
     private readonly byte[] _screen = new byte[256 * 240];
     private readonly byte[] _pixelMask = new byte[256 * 240];
     public NesRunner(Cart cart)
     {
+        _cart = cart;
         _memory = new NesMemory(cart);
         _ppu = new PPUInstance(_memory);
         _memory.SetPPU(_ppu);
@@ -20,6 +22,8 @@ public class NesRunner
     public byte[] GetScreen() => _screen;
 
     public int Frame => _ppu.Frame;
+
+    public string RomPath => _cart.RomPath;
 
     public bool IsPaused { get; set; }
     public bool IsFastForward { get; set; }
@@ -57,7 +61,7 @@ public class NesRunner
 
     public bool IsRecording { get; private set; }
     public bool IsReplaying { get; private set; }
-    private byte[] _recordingStateState;
+    private byte[]? _recordingStateState;
     public void StartRecording()
     {
         SetVBlankAction(() =>
@@ -92,7 +96,15 @@ public class NesRunner
     {
         try
         {
-            _cpu.Init();
+            if (_vblankAction != null)
+            {
+                _vblankAction.Invoke();
+                _vblankAction = null;
+            }
+            else
+            {
+                _cpu.Init();
+            }
 
             while (!cancellationToken.IsCancellationRequested)
             {
