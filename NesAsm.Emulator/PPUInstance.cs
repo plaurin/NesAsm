@@ -1,4 +1,6 @@
-﻿namespace NesAsm.Emulator;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace NesAsm.Emulator;
 
 public class PPUInstance
 {
@@ -72,6 +74,18 @@ public class PPUInstance
         buffer.Add((byte)(_frame >> 8));
         buffer.Add((byte)(_frame & 0xFF));
 
+        buffer.Add((byte)(_addrLatch ? 1 : 0));
+        buffer.Add((byte)(_scrollLatch ? 1 : 0));
+        buffer.AddRange(BitConverter.GetBytes(_lastCpuCycle));
+        buffer.Add((byte)(VBlankStart ? 1 : 0));
+        buffer.Add((byte)(NmiRequested ? 1 : 0));
+        //_scrollXRecord
+        buffer.Add((byte)((_sprite0Scanline ?? 0) >> 8));
+        buffer.Add((byte)((_sprite0Scanline ?? 0) & 0xFF));
+        buffer.Add((byte)((_sprite0ScanlineCycle ?? 0) >> 8));
+        buffer.Add((byte)((_sprite0ScanlineCycle ?? 0) & 0xFF));
+        buffer.Add(_ppuDataBuffer);
+
         return buffer.ToArray();
     }
 
@@ -93,6 +107,16 @@ public class PPUInstance
         _scanline = (ushort)(state[index++] << 8 | state[index++]);
         _scanlineCycle = (ushort)(state[index++] << 8 | state[index++]);
         _frame = (ushort)(state[index++] << 8 | state[index++]);
+
+        _addrLatch = state[index++] != 0;
+        _scrollLatch = state[index++] != 0;
+        _lastCpuCycle = BitConverter.ToInt64(state.Slice(index, 8)); index += 8;
+        VBlankStart = state[index++] != 0;
+        NmiRequested = state[index++] != 0;
+        //_scrollXRecord
+        _sprite0Scanline = (ushort)(state[index++] << 8 | state[index++]);
+        _sprite0ScanlineCycle = (ushort)(state[index++] << 8 | state[index++]);
+        _ppuDataBuffer = state[index++];
     }
 
     public int Frame => _frame;
@@ -114,8 +138,8 @@ public class PPUInstance
     public int Scanline => _scanline;
     public int ScanlineCycle => _scanlineCycle;
 
-    private int? _sprite0Scanline = null;
-    private int? _sprite0ScanlineCycle = null;
+    private ushort? _sprite0Scanline = null;
+    private ushort? _sprite0ScanlineCycle = null;
 
     public ReadOnlySpan<byte> Palettes => _vram.AsSpan()[0x3F00..0x3F20];
 
@@ -238,10 +262,10 @@ public class PPUInstance
             throw new InvalidOperationException($"{address:X4} out of range");
     }
 
-    public void SetSprite0HitAt(int scanline, int x)
+    public void SetSprite0HitAt(ushort scanline, ushort x)
     {
         _sprite0Scanline = scanline;
-        _sprite0ScanlineCycle = x * 3;
+        _sprite0ScanlineCycle = (ushort)(x * 3);
     }
 
     public void RunToCycle(long cpuCycles)

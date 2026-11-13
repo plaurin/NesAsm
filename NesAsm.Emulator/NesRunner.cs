@@ -211,8 +211,8 @@ public class NesRunner
     {
         if ((_ppu.PpuMask & 0x18) == 0x18)
         {
-            for (int y = 0; y < 240; y++)
-                for (int x = 0; x < 256; x++)
+            for (ushort y = 0; y < 240; y++)
+                for (ushort x = 0; x < 256; x++)
                     if ((_pixelMask[x + y * 256] & 0x03) == 0x03)
                     {
                         // first hit

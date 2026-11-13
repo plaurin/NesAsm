@@ -187,7 +187,7 @@ public partial class MainWindow : Window
                 var romPath2 = File.ReadAllText(lastRomFile);
                 _runner = new NesRunner(new Cart(romPath2));
                 InitRenderTarget(_runner.GetScreen());
-                //_runner.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
+                _runner.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
                 Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
                 break;
             default:
