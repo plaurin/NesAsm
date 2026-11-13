@@ -1,11 +1,10 @@
 [X] Record Gamepad Input (1byte nb frame, 1byte state)
 [X] Replay Movies using gamepad input recording
 [X] Gamepad overlay
-[ ] Pause when Escape / menu open
+[X] Pause when Escape / menu enable
 [ ] Resume from save using gamepad input recording, ask to hold previous buttons
 [ ] Fix Rewind (Scrolling)
 [ ] Fix Sprite 0 Scrolling glitch
-[ ] Implement Vertical Scrolling
 [ ] Save File Visualizer (using ROM CHR)
 [ ] Save History (previous save info, git-like history)
 [ ] Auto Save on exit, resume on startup
@@ -16,5 +15,7 @@
 [ ] Rom Hack DB + live apply
 [ ] Cheat Code DB + Apply
 [ ] Retro Achievement integration
+[ ] Implement Vertical Scrolling
+[ ] Implement Player 2
 [ ] Implement Audio
 [ ] Speed running features (e.g. timer, split, etc.)

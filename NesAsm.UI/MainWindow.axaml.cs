@@ -55,7 +55,7 @@ public partial class MainWindow : Window
         topLevel!.KeyUp += OnKeyUp;
 
         MainMenu.KeyDown += OnKeyDown;
-        MainMenu.IsVisible = false;
+        MainMenu.IsEnabled = false;
 
         _bitmap = new SKBitmap(256, 240);
 
@@ -141,7 +141,7 @@ public partial class MainWindow : Window
 
     private void RunGame(string gameName)
     {
-        MainMenu.IsVisible = false;
+        MainMenu.IsEnabled = false;
 
         _cancellationTokenSource.Cancel();
         _cancellationTokenSource = new();
@@ -211,7 +211,13 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.S) InputManager.SetState(7, false);
     }
 
-    private void ToggleMenu() => MainMenu.IsVisible = !MainMenu.IsVisible;
+    private void ToggleMenu()
+    {
+        MainMenu.IsEnabled = !MainMenu.IsEnabled;
+        MainMenu.Close();
+        _runner.IsPaused = MainMenu.IsEnabled;
+    }
+
     private void ToggleFastForward() => _runner.IsFastForward = !_runner.IsFastForward;
     private void ToggleReverse() => _runner.IsReverse = !_runner.IsReverse;
     private void StartRecording() => _runner.StartRecording();

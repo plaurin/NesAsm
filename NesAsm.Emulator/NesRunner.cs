@@ -21,8 +21,8 @@ public class NesRunner
 
     public int Frame => _ppu.Frame;
 
+    public bool IsPaused { get; set; }
     public bool IsFastForward { get; set; }
-    
     public bool IsReverse { get; set; }
 
     private byte[][] _states = new byte[1000][];
@@ -96,6 +96,8 @@ public class NesRunner
 
             while (!cancellationToken.IsCancellationRequested)
             {
+                if (IsPaused) continue;
+
                 if (_cpu.PC == 0x8624) { }
 
                 if (IsReverse)
