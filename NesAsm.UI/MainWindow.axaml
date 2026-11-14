@@ -3,13 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="256" d:DesignHeight="340"
-        Width="768" Height="743"
+        SizeToContent="WidthAndHeight" CanResize="False"
         x:Class="NesAsm.UI.MainWindow"
         Title="NesAsm.UI">
     <DockPanel>
         <Menu Name="MainMenu" DockPanel.Dock="Top">
             <MenuItem Header="_File">
                 <MenuItem Name="RecentRomsMenuItem" Header="_Recent ROMs" />
+                <MenuItem Name="CustomRomsMenuItem" Header="_Custom ROMs" />
                 <MenuItem Name="Mapper0RomsMenuItem" Header="_Mapper 0" />
             </MenuItem>
         </Menu>

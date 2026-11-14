@@ -104,32 +104,43 @@ public partial class MainWindow : Window
 
     private void InitMenu()
     {
-        const string projectFolder = "NesAsm.UI";
-        var cur = Directory.GetCurrentDirectory();
-        var ind = cur.IndexOf(projectFolder) + projectFolder.Length;
-        var argFilePath = Path.Combine(GameDataFolder(), "args");
-
-        if (!File.Exists(argFilePath))
-            throw new FileNotFoundException($"Argument file not found: {argFilePath}");
-
-        _recentRoms.AddRange(File.ReadAllLines(argFilePath));
-        foreach (var path in _recentRoms.Where(p => !string.IsNullOrWhiteSpace(p)))
+        // Recent ROMs
+        var recentFilePath = Path.Combine(GameDataFolder(), "RecentRoms.txt");
+        if (File.Exists(recentFilePath))
         {
-            var menuItem = new MenuItem { Header = Path.GetFileName(path) };
-            menuItem.Click += (s, e) => RunGame(path);
+            _recentRoms.AddRange(File.ReadAllLines(recentFilePath));
+        }
 
-            RecentRomsMenuItem.Items.Add(menuItem);
+        foreach (var path in _recentRoms)
+        {
+            AddRomInMenu(path, RecentRomsMenuItem);
+        }
+
+        // Custom ROMs
+        var argFilePath = Path.Combine(GameDataFolder(), "args");
+        if (File.Exists(argFilePath))
+        {
+            var customRoms = File.ReadAllLines(argFilePath).Where(p => !string.IsNullOrWhiteSpace(p)).ToList();
+            foreach (var path in customRoms)
+            {
+                AddRomInMenu(path, CustomRomsMenuItem);
+            }
         }
 
         // Mapper 0
         var mapper0Roms = Path.Combine(GameDataFolder(), "mapper0_nrom.txt");
         foreach (var path in File.ReadAllLines(mapper0Roms))
         {
-            var menuItem = new MenuItem { Header = Path.GetFileName(path) };
-            menuItem.Click += (s, e) => RunGame(path);
-
-            Mapper0RomsMenuItem.Items.Add(menuItem);
+            AddRomInMenu(path, Mapper0RomsMenuItem);
         }
+    }
+
+    private void AddRomInMenu(string romPath, MenuItem menu)
+    {
+        var menuItem = new MenuItem { Header = Path.GetFileName(romPath) };
+        menuItem.Click += (s, e) => RunGame(romPath);
+
+        menu.Items.Add(menuItem);
     }
 
     private void InitRenderTarget(byte[] target)
@@ -186,6 +197,7 @@ public partial class MainWindow : Window
 
                 var romPath2 = File.ReadAllText(lastRomFile);
                 _runner = new NesRunner(new Cart(romPath2));
+                Title = Path.GetFileName(romPath2);
                 InitRenderTarget(_runner.GetScreen());
                 _runner.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
                 Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
@@ -195,6 +207,12 @@ public partial class MainWindow : Window
                 _runner = new NesRunner(new Cart(romPath));
                 Title = Path.GetFileName(romPath);
                 InitRenderTarget(_runner.GetScreen());
+
+                if (!_recentRoms.Remove(romPath))
+                {
+                    AddRomInMenu(romPath, RecentRomsMenuItem);
+                }
+                _recentRoms.Insert(0, romPath);
 
                 Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
                 break;
@@ -276,6 +294,8 @@ public partial class MainWindow : Window
 
             var state = _runner.GetState();
             File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
+
+            File.WriteAllLines(Path.Combine(GameDataFolder(), "RecentRoms.txt"), _recentRoms);
         }
 
         Close();
