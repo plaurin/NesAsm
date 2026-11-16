@@ -293,6 +293,7 @@ public partial class MainWindow : Window
         MainMenu.IsEnabled = !MainMenu.IsEnabled;
         MainMenu.Close();
         if (_runner != null) _runner.IsPaused = MainMenu.IsEnabled;
+        PauseOverlay.IsVisible = MainMenu.IsEnabled;
     }
 
     private void ToggleFastForward() 

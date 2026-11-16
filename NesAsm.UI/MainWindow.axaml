@@ -19,7 +19,12 @@
         </Menu>
         <StackPanel>
             <Label Name="FrameCounter" />
-            <Image Name="Image" Width="768" Height="720" RenderOptions.BitmapInterpolationMode="None" />
+            <Grid>
+                <Image Name="Image" Width="768" Height="720" RenderOptions.BitmapInterpolationMode="None" />
+                <Border Name="PauseOverlay" Background="#80888888" IsVisible="False">
+                    <TextBlock Text="Pause" FontSize="48" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </Grid>
         </StackPanel>
     </DockPanel>
 </Window>

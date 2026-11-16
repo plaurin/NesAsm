@@ -3,7 +3,8 @@
 [X] Gamepad overlay
 [X] Pause when Escape / menu enable
 [X] Auto Save on exit, resume on startup
-[ ] Pause overlay
+[X] Cheat Code DB + Apply
+[X] Pause overlay
 [ ] Attract Mode for Recent Games on startup
 [ ] Resume from save using gamepad input recording, ask to hold previous buttons
 [ ] Fix Rewind (Scrolling)
@@ -16,7 +17,6 @@
 [ ] Add support for MMC5 mappers
 [ ] Official BD + Scan files
 [ ] Rom Hack DB + live apply
-[ ] Cheat Code DB + Apply
 [ ] Retro Achievement integration
 [ ] Implement Vertical Scrolling
 [ ] Implement Player 2
