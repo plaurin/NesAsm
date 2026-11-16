@@ -238,11 +238,14 @@ public partial class MainWindow : Window
                 if (s is MenuItem menuItem)
                 {
                     _database.ToggleCheat(menuItem.Header?.ToString() ?? "Unknown", menuItem.IsChecked);
+                    _runner.RefreshCheats(_database.GetActiveCheatsInfo());
                 }
             };
 
             CheatsMenuItem.Items.Add(menuItem);
         }
+
+        _runner.RefreshCheats(_database.GetActiveCheatsInfo());
 
         // Resume from Save State
         if (saveState != null)

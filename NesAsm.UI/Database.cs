@@ -61,21 +61,19 @@ public class Database
         return _currentGameCheats.Select(c => (c.Description, c.IsActive));
     }
 
+    public IEnumerable<(ushort Address, byte Value, byte? Compare)> GetActiveCheatsInfo()
+    {
+        return _currentGameCheats
+            .Where(c => c.IsActive)
+            .Select(c => c.Info);
+    }
+
     public void ToggleCheat(string cheatName, bool isActive)
     {
         var cheat = _currentGameCheats.FirstOrDefault(c => c.Description == cheatName);
         if (cheat != null)
         {
             cheat.IsActive = isActive;
-
-            if (!string.IsNullOrWhiteSpace(cheat.GenieCode))
-            {
-                var cheatInfo = cheat.DecodeGameGenieCode();
-            }
-            else
-            {
-
-            }
         }
     }
 
@@ -105,6 +103,29 @@ public class Database
     private record Cheat(string Description, string? GenieCode, string? Address, string? Value)
     {
         public bool IsActive { get; set; }
+
+        public (ushort Address, byte Value, byte? Compare) Info
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(GenieCode))
+                {
+                    return DecodeGameGenieCode();
+                }
+                else
+                {
+                    ushort address = 0;
+                    byte value = 0;
+                    byte? compare = null;
+                    if (!string.IsNullOrWhiteSpace(Address) && !string.IsNullOrWhiteSpace(Value))
+                    {
+                        address = Convert.ToUInt16(Address, 16);
+                        value = Convert.ToByte(Value, 16);
+                    }
+                    return (address, value, compare);
+                }
+            }
+        }
 
         public (ushort Address, byte Value, byte? Compare) DecodeGameGenieCode()
         {

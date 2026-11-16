@@ -89,6 +89,8 @@ public class NesRunner
         });
     }
 
+    public void RefreshCheats(IEnumerable<(ushort Address, byte Value, byte? Compare)> activeCheatsInfo) => _memory.RefreshCheats(activeCheatsInfo);
+
     private Action? _vblankAction;
     private void SetVBlankAction(Action action) => _vblankAction = action;
 

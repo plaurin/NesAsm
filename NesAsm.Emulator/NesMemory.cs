@@ -20,6 +20,13 @@ public class NesMemory
     public void SetCPU(CPU cpu) => _cpu = cpu;
     public void SetPPU(PPUInstance ppu) => _ppu = ppu;
 
+    private readonly List<(ushort Address, byte Value, byte? Compare)> _activeCheatsInfo = [];
+    public void RefreshCheats(IEnumerable<(ushort Address, byte Value, byte? Compare)> activeCheatsInfo)
+    {
+        _activeCheatsInfo.Clear();
+        _activeCheatsInfo.AddRange(activeCheatsInfo);
+    }
+
     public byte Read(ushort address)
     {
         var value = Peek(address);
@@ -31,18 +38,33 @@ public class NesMemory
 
     public byte Peek(ushort address)
     {
+        byte result = 0;
         if (address < 0x800)
-            return _ram[address];
+            result = _ram[address];
         else if (address == 0x4016) // Input player 1
-            return InputManager.ReadBuffer();
+            result = InputManager.ReadBuffer();
         else if (address == 0x4017) // Input player 2
-            return InputManager.ReadBufferPlayer2();
+            result = InputManager.ReadBufferPlayer2();
         else if (address >= 0x6000 && address <= 0xFFFF)
-            return Cart.ReadMemory(address);
+            result = Cart.ReadMemory(address);
         else if (address >= 0x2000 && address <= 0x3FFF)
-            return _ppu.ReadRegister(address);
+            result = _ppu.ReadRegister(address);
+        else
+        { }
 
-        return 0;
+        for (int i = 0; i < _activeCheatsInfo.Count; i++)
+        {
+            var (Address, Value, Compare) = _activeCheatsInfo[i];
+            if (Address == address)
+            {
+                if (!Compare.HasValue || result == Compare.Value)
+                {
+                    return Value;
+                }
+            }
+        }
+
+        return result;
     }
 
     public byte PeekByteArgument(ushort baseAddress)
