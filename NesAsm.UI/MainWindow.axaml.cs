@@ -27,6 +27,7 @@ public partial class MainWindow : Window
     private byte[]? _screen;
     private WriteableBitmap? writeableBitmap;
     private readonly DispatcherTimer _timer = new();
+    private readonly DispatcherTimer _savedStateTimer = new();
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
 
     private int _frameNumber;
@@ -81,6 +82,9 @@ public partial class MainWindow : Window
         _timer.Interval = TimeSpan.FromMilliseconds(1);
         _timer.Tick += Timer_Tick;
         _timer.Start();
+
+        _savedStateTimer.Interval = TimeSpan.FromSeconds(2);
+        _savedStateTimer.Tick += SavedStateTimer_Tick;
 
         var cancellationToken = _cancellationTokenSource.Token;
 
@@ -309,7 +313,20 @@ public partial class MainWindow : Window
     private void StartRecording() => _runner?.StartRecording();
     private void PlayRecording() => _runner?.PlayRecording();
     private byte[]? _state;
-    private void SaveState() => _state = _runner?.GetState();
+    private void SaveState()
+    {
+        _state = _runner?.GetState();
+
+        SavedStateOverlay.IsVisible = true;
+        _savedStateTimer.Start();
+    }
+
+    private void SavedStateTimer_Tick(object? sender, EventArgs e)
+    {
+        SavedStateOverlay.IsVisible = false;
+        _savedStateTimer.Stop();
+    }
+
     private void LoadState() => _runner?.RestoreState(_state);
     private void LoadStateFromDisk() => _runner?.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
 

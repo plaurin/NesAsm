@@ -24,6 +24,9 @@
                 <Border Name="PauseOverlay" Background="#80888888" IsVisible="False">
                     <TextBlock Text="Pause" FontSize="48" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
+                <Canvas Width="768" Height="720">
+                    <TextBlock Name="SavedStateOverlay" Canvas.Left="20" Canvas.Top="20" Text="Saved state" FontSize="18" Foreground="White" IsVisible="False" />
+                </Canvas>
             </Grid>
         </StackPanel>
     </DockPanel>
