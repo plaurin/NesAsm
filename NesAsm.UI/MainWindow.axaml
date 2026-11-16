@@ -13,6 +13,9 @@
                 <MenuItem Name="CustomRomsMenuItem" Header="_Custom ROMs" />
                 <MenuItem Name="Mapper0RomsMenuItem" Header="_Mapper 0" />
             </MenuItem>
+            <MenuItem Header="_Database">
+                <MenuItem Name="CheatsMenuItem" Header="_Cheats" />
+            </MenuItem>
         </Menu>
         <StackPanel>
             <Label Name="FrameCounter" />

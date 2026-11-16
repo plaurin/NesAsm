@@ -122,6 +122,8 @@ public class NesRunner
                     DrawScreen();
                     draw.Invoke();
 
+                    SetNextFrameSprite0Hit();
+
                     continue;
                 }
 

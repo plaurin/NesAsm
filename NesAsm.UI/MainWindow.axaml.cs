@@ -22,7 +22,7 @@ namespace NesAsm.UI;
 public partial class MainWindow : Window
 {
     private readonly List<string> _recentRoms = new();
-
+    private readonly Database _database;
     private readonly SKBitmap _bitmap;
     private byte[]? _screen;
     private WriteableBitmap? writeableBitmap;
@@ -55,6 +55,8 @@ public partial class MainWindow : Window
 
         MainMenu.KeyDown += OnKeyDown;
         MainMenu.IsEnabled = false;
+
+        _database = new Database(GameDataFolder());
 
         _bitmap = new SKBitmap(256, 240);
 
@@ -196,27 +198,58 @@ public partial class MainWindow : Window
                 }
 
                 var romPath2 = File.ReadAllText(lastRomFile);
-                _runner = new NesRunner(new Cart(romPath2));
-                Title = Path.GetFileName(romPath2);
-                InitRenderTarget(_runner.GetScreen());
-                _runner.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
-                Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
+                var saveState = File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin"));
+
+                ChangeGame(romPath2, saveState, cancellationToken);
                 break;
             default:
-                var romPath = gameName;
-                _runner = new NesRunner(new Cart(romPath));
-                Title = Path.GetFileName(romPath);
-                InitRenderTarget(_runner.GetScreen());
-
-                if (!_recentRoms.Remove(romPath))
-                {
-                    AddRomInMenu(romPath, RecentRomsMenuItem);
-                }
-                _recentRoms.Insert(0, romPath);
-
-                Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw)).ConfigureAwait(false);
+                ChangeGame(gameName, saveState: null, cancellationToken);
                 break;
         }
+    }
+
+    private void ChangeGame(string romPath, byte[]? saveState, CancellationToken cancellationToken)
+    {
+        _runner = new NesRunner(new Cart(romPath));
+        Title = Path.GetFileName(romPath);
+
+        // Recent Roms
+        if (!_recentRoms.Remove(romPath))
+        {
+            AddRomInMenu(romPath, RecentRomsMenuItem);
+        }
+        _recentRoms.Insert(0, romPath);
+
+        // Cheats
+        _database.ChangeCurrentGame(Path.GetFileNameWithoutExtension(romPath));
+        CheatsMenuItem.Items.Clear();
+        foreach (var cheat in _database.GetCheats())
+        {
+            var menuItem = new MenuItem
+            { 
+                Header = cheat.Description,
+                IsChecked = cheat.IsActive,
+                ToggleType = MenuItemToggleType.CheckBox,
+                StaysOpenOnClick = true
+            };
+
+            menuItem.Click += (s, e) =>
+            {
+                if (s is MenuItem menuItem)
+                {
+                    _database.ToggleCheat(menuItem.Header?.ToString() ?? "Unknown", menuItem.IsChecked);
+                }
+            };
+
+            CheatsMenuItem.Items.Add(menuItem);
+        }
+
+        // Resume from Save State
+        if (saveState != null)
+            _runner.RestoreState(saveState);
+
+        InitRenderTarget(_runner.GetScreen());
+        Task.Run(() => _runner.RunGame(cancellationToken, draw: Draw), cancellationToken).ConfigureAwait(false);
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
@@ -296,6 +329,8 @@ public partial class MainWindow : Window
             File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
 
             File.WriteAllLines(Path.Combine(GameDataFolder(), "RecentRoms.txt"), _recentRoms);
+
+            _database.PersistActiveCheats();
         }
 
         Close();
