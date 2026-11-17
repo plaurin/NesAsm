@@ -316,9 +316,13 @@ public partial class MainWindow : Window
     private void SaveState()
     {
         _state = _runner?.GetState();
+        if (_state != null)
+        {
+            _database.SaveState(_state, _runner!.Frame);
 
-        SavedStateOverlay.IsVisible = true;
-        _savedStateTimer.Start();
+            SavedStateOverlay.IsVisible = true;
+            _savedStateTimer.Start();
+        }
     }
 
     private void SavedStateTimer_Tick(object? sender, EventArgs e)
@@ -348,6 +352,7 @@ public partial class MainWindow : Window
 
             var state = _runner.GetState();
             File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
+            _database.SaveLastStateOnExit(state, _runner.Frame);
 
             File.WriteAllLines(Path.Combine(GameDataFolder(), "RecentRoms.txt"), _recentRoms);
 

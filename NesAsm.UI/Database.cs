@@ -10,12 +10,17 @@ public class Database
 {
     private readonly string _gameDataFolder;
     private string? _currentGameName;
+    private readonly List<SaveStateInfo> _currentGameSaves = [];
+    private byte[] _currentSaveStateTimestamp = new byte[8];
     private readonly List<Cheat> _currentGameCheats = [];
 
     public Database(string gameDataFolder)
     {
         _gameDataFolder = gameDataFolder;
     }
+
+    private string SavedStatesFolder => Path.Combine(_gameDataFolder, "SavedStates");
+    private string CheatsFolder => Path.Combine(_gameDataFolder, "Cheats");
 
     public void ChangeCurrentGame(string gameName)
     {
@@ -26,6 +31,74 @@ public class Database
 
         LoadCheatsForCurrentGame();
         LoadActiveCheats();
+        LoadSaveStates();
+    }
+
+    private void LoadSaveStates()
+    {
+        _currentGameSaves.Clear();
+        _currentGameSaves.AddRange(Directory.GetFiles(SavedStatesFolder, $"{_currentGameName}*.sst").Select(f => new SaveStateInfo(f)));
+    }
+
+    private record SaveStateInfo(string FilePath)
+    {
+        public int? Index
+        {
+            get
+            {
+                var filePart = Path.GetFileNameWithoutExtension(FilePath).Split('_');
+                if (filePart.Length == 2 && int.TryParse(filePart[1], out var index))
+                    return index;
+
+                return null;
+            }
+        }
+    }
+
+    public void SaveState(byte[] state, int frame)
+    {
+        var nextIndex = _currentGameSaves.Max(s => s.Index) + 1;
+        SaveState(state, frame, $"{nextIndex:D3}");
+    }
+
+    public void SaveLastStateOnExit(byte[] state, int frame) => SaveState(state, frame);
+
+    private void SaveState(byte[] state, int frame, string? suffix = null)
+    {
+        if (_currentGameName == null) return;
+        Directory.CreateDirectory(SavedStatesFolder);
+
+        // Name game_N3.sst or  game.sst (last)
+        var saveName = string.IsNullOrWhiteSpace(suffix) ? _currentGameName : $"{_currentGameName}_{suffix}";
+        var gameStateFilePath = Path.Combine(SavedStatesFolder, $"{saveName}.sst");
+
+        var now = DateTime.Now;
+        var saveTimestamp = new byte[] { (byte)(now.Year / 256), (byte)(now.Year % 256), (byte)now.Month, (byte)now.Day, (byte)now.Hour, (byte)now.Minute, (byte)now.Second, (byte)now.Microsecond };
+
+        var thumpnail = new byte[0]; // TODO
+
+        var saveData =
+        // Header (4 bytes)
+            "STT1"u8.ToArray()
+        // Previous Save State Timestamp (8 bytes)
+            .Concat(_currentSaveStateTimestamp)
+        // Current Save State Timestamp (8 bytes)
+            .Concat(saveTimestamp)
+        // Game Time (3 bytes, HMS) Frame / 60
+            .Concat(new byte[] { (byte)(frame / 216000), (byte)((frame / 3600) % 60), (byte)((frame / 60) % 60) })
+        // State length (2 bytes)
+            .Concat(new byte[] { (byte)(state.Length / 256), (byte)(state.Length % 256) })
+        // State (variable length)
+            .Concat(state)
+        // Thumbnail length (2 bytes)
+            .Concat(new byte[] { (byte)(thumpnail.Length / 256), (byte)(thumpnail.Length % 256) })
+        // Thumbnail (variable length) TODO
+            .Concat(thumpnail)
+            .ToArray();
+
+        File.WriteAllBytes(gameStateFilePath, saveData);
+        _currentGameSaves.Add(new SaveStateInfo(gameStateFilePath));
+        _currentSaveStateTimestamp = saveTimestamp;
     }
 
     public void PersistActiveCheats()
@@ -33,9 +106,8 @@ public class Database
         if (_currentGameName == null) return;
 
         var activeCheats = _currentGameCheats.Where(c => c.IsActive).Select(c => c.Description);
-        var cheatsFolder = Path.Combine(_gameDataFolder, "Cheats");
-        Directory.CreateDirectory(cheatsFolder);
-        var gameCheatsFilePath = Path.Combine(cheatsFolder, _currentGameName + ".cht");
+        Directory.CreateDirectory(CheatsFolder);
+        var gameCheatsFilePath = Path.Combine(CheatsFolder, _currentGameName + ".cht");
 
         File.WriteAllLines(gameCheatsFilePath, activeCheats);
     }
@@ -44,8 +116,7 @@ public class Database
     {
         if (_currentGameName == null) return;
 
-        var cheatsFolder = Path.Combine(_gameDataFolder, "Cheats");
-        var gameCheatsFilePath = Path.Combine(cheatsFolder, _currentGameName + ".cht");
+        var gameCheatsFilePath = Path.Combine(CheatsFolder, _currentGameName + ".cht");
         if (File.Exists(gameCheatsFilePath))
         {
             var activeCheatDescriptions = new HashSet<string>(File.ReadAllLines(gameCheatsFilePath));
