@@ -202,17 +202,16 @@ public partial class MainWindow : Window
                 }
 
                 var romPath2 = File.ReadAllText(lastRomFile);
-                var saveState = File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin"));
 
-                ChangeGame(romPath2, saveState, cancellationToken);
+                ChangeGame(romPath2, cancellationToken);
                 break;
             default:
-                ChangeGame(gameName, saveState: null, cancellationToken);
+                ChangeGame(gameName, cancellationToken);
                 break;
         }
     }
 
-    private void ChangeGame(string romPath, byte[]? saveState, CancellationToken cancellationToken)
+    private void ChangeGame(string romPath, CancellationToken cancellationToken)
     {
         _runner = new NesRunner(new Cart(romPath));
         Title = Path.GetFileName(romPath);
@@ -252,6 +251,7 @@ public partial class MainWindow : Window
         _runner.RefreshCheats(_database.GetActiveCheatsInfo());
 
         // Resume from Save State
+        var saveState = _database.GetLastSaveState();
         if (saveState != null)
             _runner.RestoreState(saveState);
 
@@ -318,7 +318,7 @@ public partial class MainWindow : Window
         _state = _runner?.GetState();
         if (_state != null)
         {
-            _database.SaveState(_state, _runner!.Frame);
+            _database.SaveGameState(_state, _runner!.Frame);
 
             SavedStateOverlay.IsVisible = true;
             _savedStateTimer.Start();
