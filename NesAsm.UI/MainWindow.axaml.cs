@@ -266,7 +266,7 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.F5) SaveState();
         if (e.PhysicalKey == PhysicalKey.F6) LoadState();
         if (e.PhysicalKey == PhysicalKey.Backspace) ToggleReverse();
-        if (e.PhysicalKey == PhysicalKey.R) StartRecording();
+        if (e.PhysicalKey == PhysicalKey.R) ToggleRecording();
         if (e.PhysicalKey == PhysicalKey.P) PlayRecording();
 
         if (e.PhysicalKey == PhysicalKey.ArrowLeft) InputManager.SetState(0, true);
@@ -315,15 +315,47 @@ public partial class MainWindow : Window
         if (_runner != null) _runner.IsReverse = !_runner.IsReverse;
     }
 
-    private void StartRecording() => _runner?.StartRecording();
-    private void PlayRecording() => _runner?.PlayRecording();
-    private byte[]? _state;
+    private void ToggleRecording()
+    {
+        if (_runner == null) return;
+        if (_runner.IsRecording)
+            StopRecording();
+        else 
+            StartRecording();
+    }
+
+    private void StartRecording()
+    {
+        var state = _runner?.GetState();
+        if (state != null)
+        {
+            _runner?.StartRecording();
+            _database.StartRecording(state, _runner!.Frame);
+        }
+    }
+
+    private void StopRecording()
+    {
+        var startFrameIndex = _database.GetRecordingFrameIndex();
+        if (startFrameIndex != null)
+        {
+            var inputs = _runner!.StopRecording();
+            _database.StopRecording(inputs.ToArray(), _runner!.Frame);
+        }
+    }
+
+    private void PlayRecording()
+    {
+        var recording = _database.Recordings.First();
+        _runner?.PlayRecording(recording.State.ToArray(), recording.Inputs, recording.EndFrameIndex);
+    }
+
     private void SaveState()
     {
-        _state = _runner?.GetState();
-        if (_state != null)
+        var state = _runner?.GetState();
+        if (state != null)
         {
-            _database.SaveGameState(_state, _runner!.Frame);
+            _database.SaveGameState(state, _runner!.Frame);
 
             SavedStateOverlay.IsVisible = true;
             _savedStateTimer.Start();
@@ -342,10 +374,10 @@ public partial class MainWindow : Window
         LoadOverlay.IsVisible = true;
 
         //SaveStateView.SavePreview = "toto";
-        SaveStateView.Execute(_runner!.RomPath, 4);
-        SaveStateView2.Execute(_runner!.RomPath, 4);
-        SaveStateView3.Execute(_runner!.RomPath, 4);
-        SaveStateView4.Execute(_runner!.RomPath, 4);
+        SaveStateView.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(0).State.ToArray(), frameSkip: 2);
+        SaveStateView2.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(1).State.ToArray(), frameSkip: 2);
+        SaveStateView3.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(2).State.ToArray(), frameSkip: 2);
+        SaveStateView4.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(3).State.ToArray(), frameSkip: 2);
         //SaveStateView5.Execute(_runner!.RomPath, 4);
         //SaveStateView6.Execute(_runner!.RomPath, 4);
         //SaveStateView7.Execute(_runner!.RomPath, 4);

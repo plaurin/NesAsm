@@ -30,11 +30,11 @@ public class NesRunner
     public int FastForwardFrameSkip { get; set; } = 0;
     public int FrameSkip { get; set; } = 0;
 
-    private byte[][] _states = new byte[1000][];
+    private readonly byte[][] _states = new byte[1000][];
     private int _saveIndex;
 
-    private readonly (byte State, byte FrameCount)[] _inputStates = new (byte, byte)[1000];
-    private int _inputStateIndex;
+    private readonly List<(byte, byte)> _inputRecords = [];
+    private readonly List<byte> _recordingInputs = [];
     private byte _lastInputState;
     private int _sameInputStateFrameCount;
 
@@ -62,32 +62,42 @@ public class NesRunner
 
     public bool IsRecording { get; private set; }
     public bool IsReplaying { get; private set; }
-    private byte[]? _recordingStateState;
+    //private byte[]? _recordingStateState;
     public void StartRecording()
     {
         SetVBlankAction(() =>
         {
             IsRecording = true;
-            IsReplaying = false;
+            _recordingInputs.Clear();
 
-            _recordingStateState = GetState();
-            _inputStateIndex = 0;
+            _inputRecords.Add((_lastInputState, (byte)_sameInputStateFrameCount));
             _sameInputStateFrameCount = 0;
             _lastInputState = InputManager.State;
         });
     }
 
-    public void PlayRecording()
+    public byte[] StopRecording()
     {
-        SetVBlankAction(() =>
-        {
-            IsRecording = false;
-            IsReplaying = true;
+        IsRecording = false;
 
-            RestoreState(_recordingStateState);
-            _inputStateIndex = 0;
-            _sameInputStateFrameCount = 0;
-        });
+        return _recordingInputs.ToArray();
+    }
+
+    private byte[] _replayInput;
+    private int _replayIndex;
+    private int _replayFrameIndex;
+    private int _replayEndFrameIndex;
+
+    public void PlayRecording(byte[] state, byte[] inputs, int endFrameIndex)
+    {
+        IsReplaying = true;
+
+        _replayInput = inputs;
+        _replayEndFrameIndex = endFrameIndex;
+        _replayIndex = 0;
+        _replayFrameIndex = 0;
+
+        RestoreState(state);
     }
 
     public void RefreshCheats(IEnumerable<(ushort Address, byte Value, byte? Compare)> activeCheatsInfo) => _memory.RefreshCheats(activeCheatsInfo);
@@ -180,21 +190,35 @@ public class NesRunner
     {
         if (IsReplaying)
         {
-            if(_sameInputStateFrameCount > _inputStates[_inputStateIndex].FrameCount)
+            if (_replayFrameIndex > _replayInput[_replayIndex + 1])
             {
-                _inputStateIndex++;
-                _sameInputStateFrameCount = 0;
+                _replayIndex += 2;
+                _replayFrameIndex = 0;
+
             }
 
-            InputManager.SetState(_inputStates[_inputStateIndex].State);
-            _sameInputStateFrameCount++;
+            if (_replayIndex >= _replayInput.Length || _replayEndFrameIndex == Frame)
+                IsReplaying = false;
+            else
+            {
+                InputManager.SetState(_replayInput[_replayIndex]);
+                _replayFrameIndex++;
+            }
+            //if (_sameInputStateFrameCount > _inputStates[_inputStateIndex].FrameCount)
+            //{
+            //    _inputStateIndex++;
+            //    _sameInputStateFrameCount = 0;
+            //}
+
+            //InputManager.SetState(_inputStates[_inputStateIndex].State);
+            //_sameInputStateFrameCount++;
         }
         else
         {
             InputManager.UpdateState();
         }
 
-        if (IsRecording)
+        if (!IsReplaying)
         {
             var inputState = InputManager.State;
             if (inputState == _lastInputState && _sameInputStateFrameCount < 256)
@@ -203,12 +227,16 @@ public class NesRunner
             }
             else
             {
-                _inputStates[_inputStateIndex++] = (_lastInputState, (byte)_sameInputStateFrameCount);
+                //_inputStates[_inputStateIndex++] = (_lastInputState, (byte)_sameInputStateFrameCount);
+                _inputRecords.Add((_lastInputState, (byte)_sameInputStateFrameCount));
+                if (IsRecording) 
+                { 
+                    _recordingInputs.Add(_lastInputState);
+                    _recordingInputs.Add((byte)_sameInputStateFrameCount);
+                }
                 _sameInputStateFrameCount = 0;
                 _lastInputState = inputState;
             }
-
-            if (_inputStateIndex == 1000) throw new NotSupportedException("Busted 1000 inputState, should reset maybe the buffer");
         }
     }
 

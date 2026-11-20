@@ -49,7 +49,6 @@ public class SaveState
 
     public byte[] GenerateSaveData()
     {
-
         var saveData =
         // Header (4 bytes)
             "STT1"u8.ToArray()
