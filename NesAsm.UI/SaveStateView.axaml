@@ -1,0 +1,15 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="NesAsm.UI.SaveStateView"
+             x:Name="root">
+
+    <StackPanel>
+        <Border BorderThickness="2"
+                BorderBrush="Black"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+            <Image Name="SavePreview" Width="128" Height="120" />
+        </Border>
+    </StackPanel>
+    
+</UserControl>

@@ -25,7 +25,7 @@ public partial class MainWindow : Window
     private readonly Database _database;
     private readonly SKBitmap _bitmap;
     private byte[]? _screen;
-    private WriteableBitmap? writeableBitmap;
+    private WriteableBitmap? _writeableBitmap;
     private readonly DispatcherTimer _timer = new();
     private readonly DispatcherTimer _savedStateTimer = new();
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
@@ -153,13 +153,13 @@ public partial class MainWindow : Window
     {
         _screen = target;
 
-        writeableBitmap = new WriteableBitmap(
+        _writeableBitmap = new WriteableBitmap(
             new PixelSize(_bitmap.Width, _bitmap.Height),
             new Vector(96, 96),
             PixelFormat.Bgra8888,
             AlphaFormat.Opaque);
 
-        Image.Source = writeableBitmap;
+        Image.Source = _writeableBitmap;
 
         _frameNumber = 0;
     }
@@ -265,7 +265,6 @@ public partial class MainWindow : Window
         if (e.PhysicalKey == PhysicalKey.Tab) ToggleFastForward();
         if (e.PhysicalKey == PhysicalKey.F5) SaveState();
         if (e.PhysicalKey == PhysicalKey.F6) LoadState();
-        if (e.PhysicalKey == PhysicalKey.F7) LoadStateFromDisk();
         if (e.PhysicalKey == PhysicalKey.Backspace) ToggleReverse();
         if (e.PhysicalKey == PhysicalKey.R) StartRecording();
         if (e.PhysicalKey == PhysicalKey.P) PlayRecording();
@@ -302,7 +301,13 @@ public partial class MainWindow : Window
 
     private void ToggleFastForward() 
     {
-        if (_runner != null) _runner.IsFastForward = !_runner.IsFastForward;
+        if (_runner != null)
+        {
+            if (_runner.FastForwardFrameSkip == 0)
+                _runner.FastForwardFrameSkip = 8;
+            else
+                _runner.FastForwardFrameSkip = 0;
+        }
     }
 
     private void ToggleReverse()
@@ -331,8 +336,29 @@ public partial class MainWindow : Window
         _savedStateTimer.Stop();
     }
 
-    private void LoadState() => _runner?.RestoreState(_state);
-    private void LoadStateFromDisk() => _runner?.RestoreState(File.ReadAllBytes(Path.Combine(GameDataFolder(), "State.bin")));
+    private void LoadState()
+    {
+        if (_runner != null) _runner.IsPaused = true;
+        LoadOverlay.IsVisible = true;
+
+        //SaveStateView.SavePreview = "toto";
+        SaveStateView.Execute(_runner!.RomPath, 4);
+        SaveStateView2.Execute(_runner!.RomPath, 4);
+        SaveStateView3.Execute(_runner!.RomPath, 4);
+        SaveStateView4.Execute(_runner!.RomPath, 4);
+        //SaveStateView5.Execute(_runner!.RomPath, 4);
+        //SaveStateView6.Execute(_runner!.RomPath, 4);
+        //SaveStateView7.Execute(_runner!.RomPath, 4);
+        //SaveStateView8.Execute(_runner!.RomPath, 4);
+        //SaveStateView9.Execute(_runner!.RomPath, 4);
+        //SaveStateView10.Execute(_runner!.RomPath, 4);
+        //SaveStateView11.Execute(_runner!.RomPath, 4);
+        //SaveStateView12.Execute(_runner!.RomPath, 4);
+        //SaveStateView13.Execute(_runner!.RomPath, 4);
+        //SaveStateView14.Execute(_runner!.RomPath, 4);
+        //SaveStateView15.Execute(_runner!.RomPath, 4);
+        //SaveStateView16.Execute(_runner!.RomPath, 4);
+    }
 
     private string GetInputStateString()
     {
@@ -410,7 +436,7 @@ public partial class MainWindow : Window
 
     private void DrawLoop()
     {
-        if (_screen == null || writeableBitmap == null || _runner == null) return;
+        if (_screen == null || _writeableBitmap == null || _runner == null) return;
 
         //PPU.Log($"Start to draw UI frame {_frameNumber}");
         var pixelsPtr = _bitmap.GetPixels();
@@ -428,7 +454,7 @@ public partial class MainWindow : Window
                 }
         }
 
-        using (var frameBuffer = writeableBitmap.Lock())
+        using (var frameBuffer = _writeableBitmap.Lock())
         {
             unsafe
             {

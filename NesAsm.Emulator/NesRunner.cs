@@ -26,8 +26,9 @@ public class NesRunner
     public string RomPath => _cart.RomPath;
 
     public bool IsPaused { get; set; }
-    public bool IsFastForward { get; set; }
     public bool IsReverse { get; set; }
+    public int FastForwardFrameSkip { get; set; } = 0;
+    public int FrameSkip { get; set; } = 0;
 
     private byte[][] _states = new byte[1000][];
     private int _saveIndex;
@@ -146,10 +147,12 @@ public class NesRunner
                     _states[_saveIndex++] = GetState();
                     if (_saveIndex >= 1000) _saveIndex = 0;
 
-                    if (!IsFastForward || _ppu.Frame % 10 == 0)
+                    if (_ppu.Frame % (FastForwardFrameSkip + 1) == 0)
                     {
                         DrawScreen();
-                        draw.Invoke();
+
+                        if (_ppu.Frame % (FrameSkip + 1) == 0)
+                            draw.Invoke();
                     }
 
                     SetNextFrameSprite0Hit();

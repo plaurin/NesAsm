@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:NesAsm.UI"
         mc:Ignorable="d" d:DesignWidth="256" d:DesignHeight="340"
         SizeToContent="WidthAndHeight" CanResize="False"
         x:Class="NesAsm.UI.MainWindow"
@@ -27,6 +28,36 @@
                 <Canvas Width="768" Height="720">
                     <TextBlock Name="SavedStateOverlay" Canvas.Left="20" Canvas.Top="20" Text="Saved state" FontSize="18" Foreground="White" IsVisible="False" />
                 </Canvas>
+                <Border Name="LoadOverlay" Background="#C0888888" IsVisible="False">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Load" FontSize="48" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                        <TextBlock Text="Save State" FontSize="12" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Top" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <local:SaveStateView Name="SaveStateView" />
+                            <local:SaveStateView Name="SaveStateView2" />
+                            <local:SaveStateView Name="SaveStateView3" />
+                            <local:SaveStateView Name="SaveStateView4" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <local:SaveStateView Name="SaveStateView5" />
+                            <local:SaveStateView Name="SaveStateView6" />
+                            <local:SaveStateView Name="SaveStateView7" />
+                            <local:SaveStateView Name="SaveStateView8" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <local:SaveStateView Name="SaveStateView9" />
+                            <local:SaveStateView Name="SaveStateView10" />
+                            <local:SaveStateView Name="SaveStateView11" />
+                            <local:SaveStateView Name="SaveStateView12" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <local:SaveStateView Name="SaveStateView13" />
+                            <local:SaveStateView Name="SaveStateView14" />
+                            <local:SaveStateView Name="SaveStateView15" />
+                            <local:SaveStateView Name="SaveStateView16" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
             </Grid>
         </StackPanel>
     </DockPanel>

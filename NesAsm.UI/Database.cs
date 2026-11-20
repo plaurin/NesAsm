@@ -56,7 +56,7 @@ public class Database
 
     public void SaveGameState(byte[] state, int frame)
     {
-        var nextIndex = _currentGameSaves.Max(s => s.Index) ?? 0 + 1;
+        var nextIndex = (_currentGameSaves.Max(s => s.Index) ?? 0) + 1;
         SaveGameState(state, frame, $"{nextIndex:D3}");
     }
 
