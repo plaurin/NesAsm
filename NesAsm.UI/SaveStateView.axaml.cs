@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -28,15 +29,23 @@ public partial class SaveStateView : UserControl
         _bitmap = new SKBitmap(256, 240);
     }
 
-    public void Execute(string romPath, byte[]? saveState = null, int frameSkip = 0)
+    public void Execute(string romPath, SaveState? saveState = null, Recording? recording = null, int frameSkip = 0, float scale = 1.0f)
     {
+        SavePreview.Width = 256 * scale;
+        SavePreview.Height = 240 * scale;
+        if (scale > 1.0f)
+            RenderOptions.SetBitmapInterpolationMode(SavePreview, BitmapInterpolationMode.None);
+
         _runner = new NesRunner(new Cart(romPath))
         {
             FrameSkip = frameSkip
         };
 
         if (saveState != null)
-            _runner.RestoreState(saveState);
+            _runner.RestoreState(saveState.State);
+
+        if (recording != null)
+            _runner.PlayRecordingInLoop(recording.State, recording.Inputs);
 
         _frameSkip = frameSkip;
 

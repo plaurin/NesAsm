@@ -62,7 +62,6 @@ public class NesRunner
 
     public bool IsRecording { get; private set; }
     public bool IsReplaying { get; private set; }
-    //private byte[]? _recordingStateState;
     public void StartRecording()
     {
         SetVBlankAction(() =>
@@ -83,17 +82,24 @@ public class NesRunner
         return _recordingInputs.ToArray();
     }
 
-    private byte[] _replayInput;
+    private byte[]? _replayState;
+    private byte[]? _replayInput;
     private int _replayIndex;
     private int _replayFrameIndex;
-    private int _replayEndFrameIndex;
+    private bool _isEndlessReplay;
 
-    public void PlayRecording(byte[] state, byte[] inputs, int endFrameIndex)
+    public void PlayRecordingInLoop(ReadOnlySpan<byte> state, byte[] inputs)
+    {
+        _isEndlessReplay = true;
+        PlayRecording(state, inputs);
+    }
+
+    public void PlayRecording(ReadOnlySpan<byte> state, byte[] inputs)
     {
         IsReplaying = true;
 
+        _replayState = state.ToArray();
         _replayInput = inputs;
-        _replayEndFrameIndex = endFrameIndex;
         _replayIndex = 0;
         _replayFrameIndex = 0;
 
@@ -127,16 +133,7 @@ public class NesRunner
 
                 if (IsReverse)
                 {
-                    _saveIndex--;
-                    if (_saveIndex < 0) _saveIndex = 999;
-                    var state = _states[_saveIndex];
-                    RestoreState(state);
-
-                    DrawScreen();
-                    draw.Invoke();
-
-                    SetNextFrameSprite0Hit();
-
+                    ProcessReverse(draw);
                     continue;
                 }
 
@@ -146,24 +143,11 @@ public class NesRunner
 
                 if (_ppu.VBlankStart)
                 {
-                    _ppu.VBlankStart = false;
+                    ProcessVBlank();
 
-                    if (_vblankAction != null)
-                    {
-                        _vblankAction.Invoke();
-                        _vblankAction = null;
-                    }
+                    SaveFrameState();
 
-                    _states[_saveIndex++] = GetState();
-                    if (_saveIndex >= 1000) _saveIndex = 0;
-
-                    if (_ppu.Frame % (FastForwardFrameSkip + 1) == 0)
-                    {
-                        DrawScreen();
-
-                        if (_ppu.Frame % (FrameSkip + 1) == 0)
-                            draw.Invoke();
-                    }
+                    UpdateScreen(draw);
 
                     SetNextFrameSprite0Hit();
 
@@ -186,19 +170,66 @@ public class NesRunner
         return Task.CompletedTask;
     }
 
+    public void ProcessReverse(Action draw)
+    {
+        _saveIndex--;
+        if (_saveIndex < 0) _saveIndex = 999;
+        var state = _states[_saveIndex];
+        RestoreState(state);
+
+        UpdateScreen(draw);
+
+        SetNextFrameSprite0Hit();
+    }
+
+    public void ProcessVBlank()
+    {
+        _ppu.VBlankStart = false;
+
+        if (_vblankAction != null)
+        {
+            _vblankAction.Invoke();
+            _vblankAction = null;
+        }
+    }
+
+    private void SaveFrameState()
+    {
+        if (!_isEndlessReplay)
+        {
+            _states[_saveIndex++] = GetState();
+            if (_saveIndex >= 1000) _saveIndex = 0;
+        }
+    }
+
+    private void UpdateScreen(Action draw)
+    {
+        if (_ppu.Frame % (FastForwardFrameSkip + 1) == 0)
+        {
+            DrawScreen();
+
+            if (_ppu.Frame % (FrameSkip + 1) == 0)
+                draw.Invoke();
+        }
+    }
+
     private void UpdateInput()
     {
-        if (IsReplaying)
+        if (IsReplaying && _replayInput != null)
         {
             if (_replayFrameIndex > _replayInput[_replayIndex + 1])
             {
                 _replayIndex += 2;
                 _replayFrameIndex = 0;
-
             }
 
-            if (_replayIndex >= _replayInput.Length || _replayEndFrameIndex == Frame)
-                IsReplaying = false;
+            if (_replayIndex >= _replayInput.Length)
+            {
+                if (_isEndlessReplay)
+                    PlayRecording(_replayState, _replayInput);
+                else
+                    IsReplaying = false;
+            }
             else
             {
                 InputManager.SetState(_replayInput[_replayIndex]);

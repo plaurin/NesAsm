@@ -347,7 +347,7 @@ public partial class MainWindow : Window
     private void PlayRecording()
     {
         var recording = _database.Recordings.First();
-        _runner?.PlayRecording(recording.State.ToArray(), recording.Inputs, recording.EndFrameIndex);
+        _runner?.PlayRecording(recording.State.ToArray(), recording.Inputs);
     }
 
     private void SaveState()
@@ -373,23 +373,15 @@ public partial class MainWindow : Window
         if (_runner != null) _runner.IsPaused = true;
         LoadOverlay.IsVisible = true;
 
-        //SaveStateView.SavePreview = "toto";
-        SaveStateView.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(0).State.ToArray(), frameSkip: 2);
-        SaveStateView2.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(1).State.ToArray(), frameSkip: 2);
-        SaveStateView3.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(2).State.ToArray(), frameSkip: 2);
-        SaveStateView4.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(3).State.ToArray(), frameSkip: 2);
-        //SaveStateView5.Execute(_runner!.RomPath, 4);
-        //SaveStateView6.Execute(_runner!.RomPath, 4);
-        //SaveStateView7.Execute(_runner!.RomPath, 4);
-        //SaveStateView8.Execute(_runner!.RomPath, 4);
-        //SaveStateView9.Execute(_runner!.RomPath, 4);
-        //SaveStateView10.Execute(_runner!.RomPath, 4);
-        //SaveStateView11.Execute(_runner!.RomPath, 4);
-        //SaveStateView12.Execute(_runner!.RomPath, 4);
-        //SaveStateView13.Execute(_runner!.RomPath, 4);
-        //SaveStateView14.Execute(_runner!.RomPath, 4);
-        //SaveStateView15.Execute(_runner!.RomPath, 4);
-        //SaveStateView16.Execute(_runner!.RomPath, 4);
+        //SaveStateView.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(0), frameSkip: 2);
+        //SaveStateView2.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(1), frameSkip: 2);
+        //SaveStateView3.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(2), frameSkip: 2);
+        //SaveStateView4.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(3), frameSkip: 2);
+        SaveStateView.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(0), frameSkip: 0, scale: 1);
+        SaveStateView2.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(1), frameSkip: 3, scale: 0.5f);
+        SaveStateView3.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(0), frameSkip: 3, scale: 0.25f);
+        SaveStateView4.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(1), frameSkip: 3, scale: 2);
+
     }
 
     private string GetInputStateString()

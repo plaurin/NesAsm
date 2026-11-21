@@ -8,8 +8,10 @@
                 BorderBrush="Black"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center">
-            <Image Name="SavePreview" Width="128" Height="120" />
+            <Image Name="SavePreview" />
         </Border>
+        <TextBlock HorizontalAlignment="Center" Name="Timestamp">📆 2026-11-20 22:19</TextBlock>
+        <TextBlock HorizontalAlignment="Center" Name="PlayTime">⏱43m25s</TextBlock>
     </StackPanel>
     
 </UserControl>
