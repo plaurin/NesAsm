@@ -32,6 +32,7 @@ public class NesRunner
 
     private readonly byte[][] _states = new byte[1000][];
     private int _saveIndex;
+    private int _saveTotal;
 
     private readonly List<(byte, byte)> _inputRecords = [];
     private readonly List<byte> _recordingInputs = [];
@@ -104,6 +105,38 @@ public class NesRunner
         _replayFrameIndex = 0;
 
         RestoreState(state);
+    }
+
+    public (byte[] State, byte[] Inputs) GetRecording(int nbFrames)
+    {
+        // State
+        nbFrames = Math.Min(nbFrames, _saveTotal);
+        var index = _saveIndex - nbFrames;
+        if (index < 0) index += 1000;
+
+        var state = _states[index];
+
+        // Inputs
+        var inputs = new List<byte>();
+        var cnt = Math.Min(_sameInputStateFrameCount, nbFrames);
+        inputs.Add((byte)cnt);
+        inputs.Add(_lastInputState);
+
+        nbFrames -= cnt;
+        index = _recordingInputs.Count - 1;
+        while (nbFrames > 0)
+        {
+            cnt = Math.Min(_recordingInputs[index], nbFrames);
+            inputs.Add((byte)cnt);
+            inputs.Add(_recordingInputs[index - 1]);
+
+            nbFrames -= cnt;
+            index -= 2;
+
+            if (index < 0) break;
+        }
+
+        return (state, inputs.Reverse<byte>().ToArray());
     }
 
     public void RefreshCheats(IEnumerable<(ushort Address, byte Value, byte? Compare)> activeCheatsInfo) => _memory.RefreshCheats(activeCheatsInfo);
@@ -199,6 +232,7 @@ public class NesRunner
         {
             _states[_saveIndex++] = GetState();
             if (_saveIndex >= 1000) _saveIndex = 0;
+            _saveTotal++;
         }
     }
 
@@ -260,7 +294,7 @@ public class NesRunner
             {
                 //_inputStates[_inputStateIndex++] = (_lastInputState, (byte)_sameInputStateFrameCount);
                 _inputRecords.Add((_lastInputState, (byte)_sameInputStateFrameCount));
-                if (IsRecording) 
+                //if (IsRecording) 
                 { 
                     _recordingInputs.Add(_lastInputState);
                     _recordingInputs.Add((byte)_sameInputStateFrameCount);

@@ -61,21 +61,21 @@ public class Database
         return null;
     }
 
-    public void SaveGameState(byte[] state, int frameIndex)
+    public void SaveGameState(byte[] state, int frameIndex, byte[] recordingState, byte[] recordingInputs)
     {
         var nextIndex = (_currentGameSaves.Max(s => s.Index) ?? 0) + 1;
-        SaveGameState(state, frameIndex, $"{nextIndex:D3}");
+        SaveGameState(state, frameIndex, recordingState, recordingInputs, index: nextIndex);
     }
 
-    public void SaveLastStateOnExit(byte[] state, int frameIndex) => SaveGameState(state, frameIndex, suffix: null);
+    public void SaveLastStateOnExit(byte[] state, int frameIndex, byte[] recordingState, byte[] recordingInputs) => SaveGameState(state, frameIndex, recordingState, recordingInputs, index: null);
 
-    private void SaveGameState(byte[] state, int frameIndex, string? suffix = null)
+    private void SaveGameState(byte[] state, int frameIndex, byte[] recordingState, byte[] recordingInputs, int? index = null)
     {
         if (_currentGameName == null) return;
         Directory.CreateDirectory(SavedStatesFolder);
 
         // Name game_N3.sst or  game.sst (last)
-        var saveName = string.IsNullOrWhiteSpace(suffix) ? _currentGameName : $"{_currentGameName}_{suffix}";
+        var saveName = index == null ? _currentGameName : $"{_currentGameName}_{index:D3}";
         var gameStateFilePath = Path.Combine(SavedStatesFolder, $"{saveName}.sst");
 
         var saveState = new SaveState(gameStateFilePath, _currentSaveStateTimestamp, DateTime.Now, frameIndex, state);
@@ -83,6 +83,11 @@ public class Database
         File.WriteAllBytes(gameStateFilePath, saveState.GenerateSaveData());
         _currentGameSaves.Add(saveState);
         _currentSaveStateTimestamp = saveState.Timestamp;
+
+        // Save File Recording
+        var saveRecordingFilePath = Path.Combine(SavedStatesFolder, $"{saveName}.rmv");
+        var recording = new Recording(saveRecordingFilePath, DateTime.Now, recordingState, 0, frameIndex, recordingInputs, index);
+        File.WriteAllBytes(saveRecordingFilePath, recording.GenerateRecordingData());
     }
 
     // Recordings
@@ -106,7 +111,7 @@ public class Database
         var nextIndex = _currentGameRecordings.Any() ? _currentGameRecordings.Max(s => s.Index) + 1 : 1;
         var recordingFilePath = Path.Combine(RecordingsFolder, $"{_currentGameName}_{nextIndex:D3}.rmv");
 
-        var recording = new Recording(recordingFilePath, nextIndex, DateTime.Now, _recordingState, _recordingFrameIndex.Value, endFrameIndex, inputs);
+        var recording = new Recording(recordingFilePath, DateTime.Now, _recordingState, _recordingFrameIndex.Value, endFrameIndex, inputs, nextIndex);
 
         File.WriteAllBytes(recordingFilePath, recording.GenerateRecordingData());
         _currentGameRecordings.Add(recording);
@@ -128,6 +133,17 @@ public class Database
 
             return _currentGameRecordings;
         }
+    }
+
+    public Recording? GetSaveStateRecording(SaveState saveState)
+    {
+        var recordingFilePath = Path.ChangeExtension(saveState.FilePath, "rmv");
+        if (File.Exists(recordingFilePath))
+        {
+            return new Recording(recordingFilePath, File.ReadAllBytes(recordingFilePath));
+        }
+
+        return null;
     }
 
     // Cheats

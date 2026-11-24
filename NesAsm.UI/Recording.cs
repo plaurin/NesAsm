@@ -20,7 +20,7 @@ public class Recording
         Inputs = saveData.Slice(0x18 + stateLength + 4, inputLength).ToArray();
     }
 
-    public Recording(string filePath, int index, DateTime timestamp, byte[] state, int startFrameIndex, int endFrameIndex, byte[] inputs)
+    public Recording(string filePath, DateTime timestamp, byte[] state, int startFrameIndex, int endFrameIndex, byte[] inputs, int? index = null)
     {
         FilePath = filePath;
         Index = index;
@@ -32,7 +32,7 @@ public class Recording
     }
 
     public string FilePath { get; }
-    public int Index { get; }
+    public int? Index { get; }
     public ReadOnlySpan<byte> State => _state;
     public DateTime Timestamp { get; }
     public int StartFrameIndex { get; }

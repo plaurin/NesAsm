@@ -355,7 +355,8 @@ public partial class MainWindow : Window
         var state = _runner?.GetState();
         if (state != null)
         {
-            _database.SaveGameState(state, _runner!.Frame);
+            var (recordingState, recordingInputs) = _runner!.GetRecording(60 * 5);
+            _database.SaveGameState(state, _runner!.Frame, recordingState, recordingInputs);
 
             SavedStateOverlay.IsVisible = true;
             _savedStateTimer.Start();
@@ -373,14 +374,11 @@ public partial class MainWindow : Window
         if (_runner != null) _runner.IsPaused = true;
         LoadOverlay.IsVisible = true;
 
-        //SaveStateView.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(0), frameSkip: 2);
-        //SaveStateView2.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(1), frameSkip: 2);
-        //SaveStateView3.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(2), frameSkip: 2);
-        //SaveStateView4.Execute(_runner!.RomPath, _database.SaveStates.ElementAt(3), frameSkip: 2);
-        SaveStateView.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(0), frameSkip: 0, scale: 1);
+        var rec = _database.GetSaveStateRecording(_database.SaveStates.Last());
+        SaveStateView.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(0), frameSkip: 0, scale: 1, isOneFrame: true);
         SaveStateView2.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(1), frameSkip: 3, scale: 0.5f);
-        SaveStateView3.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(0), frameSkip: 3, scale: 0.25f);
-        SaveStateView4.Execute(_runner!.RomPath, recording: _database.Recordings.ElementAt(1), frameSkip: 3, scale: 2);
+        SaveStateView3.Execute(_runner!.RomPath, saveState: _database.SaveStates.Last(), frameSkip: 3, scale: 0.25f, isOneFrame: true);
+        SaveStateView4.Execute(_runner!.RomPath, recording: rec, frameSkip: 3, scale: 2);
 
     }
 
@@ -401,8 +399,9 @@ public partial class MainWindow : Window
             File.WriteAllText(Path.Combine(GameDataFolder(), "RomPath.txt"), romPath);
 
             var state = _runner.GetState();
-            File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
-            _database.SaveLastStateOnExit(state, _runner.Frame);
+            //File.WriteAllBytes(Path.Combine(GameDataFolder(), "State.bin"), state);
+            var (recordingState, recordingInputs) = _runner!.GetRecording(60 * 5);
+            _database.SaveLastStateOnExit(state, _runner.Frame, recordingState, recordingInputs);
 
             File.WriteAllLines(Path.Combine(GameDataFolder(), "RecentRoms.txt"), _recentRoms);
 

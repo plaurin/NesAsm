@@ -17,6 +17,7 @@ public partial class SaveStateView : UserControl
 {
     private NesRunner? _runner;
     private int _frameSkip;
+    private bool _isOneFrame;
     private readonly SKBitmap _bitmap;
     private byte[]? _screen;
     private WriteableBitmap? _writeableBitmap;
@@ -29,7 +30,7 @@ public partial class SaveStateView : UserControl
         _bitmap = new SKBitmap(256, 240);
     }
 
-    public void Execute(string romPath, SaveState? saveState = null, Recording? recording = null, int frameSkip = 0, float scale = 1.0f)
+    public void Execute(string romPath, SaveState? saveState = null, Recording? recording = null, int frameSkip = 0, float scale = 1.0f, bool isOneFrame = false)
     {
         SavePreview.Width = 256 * scale;
         SavePreview.Height = 240 * scale;
@@ -48,6 +49,7 @@ public partial class SaveStateView : UserControl
             _runner.PlayRecordingInLoop(recording.State, recording.Inputs);
 
         _frameSkip = frameSkip;
+        _isOneFrame = isOneFrame;
 
         _screen = _runner.GetScreen();
 
@@ -77,6 +79,7 @@ public partial class SaveStateView : UserControl
     private readonly TimeSpan _frameDuration = TimeSpan.FromSeconds(1) / 60.0;
     private DateTimeOffset _nextFrameTime;
 
+    private int frameCount;
     void Draw()
     {
         while (!_canDraw)
@@ -93,6 +96,9 @@ public partial class SaveStateView : UserControl
 
         var frameTime = _watch.Elapsed - _lastWatch;
         if (frameTime.TotalMilliseconds < FrameSpan) Task.Delay((int)(FrameSpan - frameTime.TotalMilliseconds)).Wait();
+
+        frameCount++;
+        if (_isOneFrame && frameCount == 2) _runner!.IsPaused = true;
 
         while (_isRendering)
         {

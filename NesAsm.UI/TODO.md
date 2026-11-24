@@ -18,6 +18,8 @@
 [ ] Official BD + Scan files
 [ ] Rom Hack DB + live apply
 [ ] Retro Achievement integration
+[ ] Load Menu to Load Screen
+[ ] Cheat Menu to Cheat Screen
 [ ] Implement Vertical Scrolling
 [ ] Implement Player 2
 [ ] Implement Audio
