@@ -1,3 +1,5 @@
+using NesAsm.Emulator.Mappers;
+
 namespace NesAsm.Emulator.Tests;
 
 public class CartTests
@@ -18,7 +20,7 @@ public class CartTests
     [MemberData(nameof(Mapper0Roms))]
     public void TestLoadMapper0Cart(string romFile, string folder)
     {
-        var cart = new Cart(Path.Combine(folder, romFile));
+        var cart = Cart.Create(Path.Combine(folder, romFile));
 
         if (cart.MapperId == 0)
         {
@@ -30,7 +32,42 @@ public class CartTests
     [MemberData(nameof(Mapper0Roms))]
     public void TestRunMapper0Cart(string romFile, string folder)
     {
-        var cart = new Cart(Path.Combine(folder, romFile));
+        var cart = Cart.Create(Path.Combine(folder, romFile));
+
+        // Setup
+        var _memory = new NesMemory(cart);
+        var _ppu = new PPUInstance(_memory);
+        _memory.SetPPU(_ppu);
+        var _cpu = new CPU(_memory);
+        _memory.SetCPU(_cpu);
+
+        // Run
+        _cpu.Init();
+
+        // Loop
+        while (_ppu.Frame < 3000)
+        {
+            var ins = _cpu.RunNextInstruction();
+            _ppu.RunToCycle(_cpu.Cycles);
+
+            if (_ppu.VBlankStart)
+            {
+                _ppu.VBlankStart = false;
+            }
+
+            if (_ppu.NmiRequested)
+            {
+                _ppu.NmiRequested = false;
+                _cpu.RunNmi();
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Mapper0Roms))]
+    public void TestRunCartMapper0(string romFile, string folder)
+    {
+        var cart = new CartMapper0(Path.Combine(folder, romFile));
 
         // Setup
         var _memory = new NesMemory(cart);
@@ -65,7 +102,7 @@ public class CartTests
     [MemberData(nameof(Mapper0Roms))]
     public async Task TestRunnerMapper0Cart(string romFile, string folder)
     {
-        var cart = new Cart(Path.Combine(folder, romFile));
+        var cart = Cart.Create(Path.Combine(folder, romFile));
         var runner = new NesRunner(cart);
 
         var cts = new CancellationTokenSource();
@@ -81,7 +118,7 @@ public class CartTests
     [MemberData(nameof(Mapper0Roms))]
     public async Task FindMapper0CartInDB(string romFile, string folder)
     {
-        var cart = new Cart(Path.Combine(folder, romFile));
+        var cart = Cart.Create(Path.Combine(folder, romFile));
 
         var prgCrc = System.IO.Hashing.Crc32.HashToUInt32(cart.PrgRom);
 
@@ -109,7 +146,7 @@ public class CartTests
 
         foreach (var file in files)
         {
-            var cart = new Cart(file);
+            var cart = Cart.Create(file);
             switch (cart.MapperId)
             {
                 case 0:

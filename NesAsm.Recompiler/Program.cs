@@ -17,7 +17,7 @@ internal class Program
         Input.LoadSymbols(outputPath);
         var dynamicDispatchAddresses = Input.LoadDynamicDispatchs(outputPath);
 
-        var cart = new Cart(romPath);
+        var cart = Cart.Create(romPath);
 
         //IReadOnlyCollection<Subroutine>? subroutines = null;
 

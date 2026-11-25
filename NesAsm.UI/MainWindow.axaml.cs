@@ -213,7 +213,7 @@ public partial class MainWindow : Window
 
     private void ChangeGame(string romPath, CancellationToken cancellationToken)
     {
-        _runner = new NesRunner(new Cart(romPath));
+        _runner = new NesRunner(Cart.Create(romPath));
         Title = Path.GetFileName(romPath);
 
         // Recent Roms

@@ -37,7 +37,7 @@ public partial class SaveStateView : UserControl
         if (scale > 1.0f)
             RenderOptions.SetBitmapInterpolationMode(SavePreview, BitmapInterpolationMode.None);
 
-        _runner = new NesRunner(new Cart(romPath))
+        _runner = new NesRunner(Cart.Create(romPath))
         {
             FrameSkip = frameSkip
         };

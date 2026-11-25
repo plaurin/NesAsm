@@ -46,7 +46,7 @@ public class NesMemory
         else if (address == 0x4017) // Input player 2
             result = InputManager.ReadBufferPlayer2();
         else if (address >= 0x6000 && address <= 0xFFFF)
-            result = Cart.ReadMemory(address);
+            result = Cart.ReadPrgMemory(address);
         else if (address >= 0x2000 && address <= 0x3FFF)
             result = _ppu.ReadRegister(address);
         else

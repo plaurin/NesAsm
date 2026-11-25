@@ -1,18 +1,20 @@
-﻿
+﻿using NesAsm.Emulator.Mappers;
+
 namespace NesAsm.Emulator;
 
-public class Cart
+public abstract class Cart
 {
-    private readonly byte[] _rom = [];
-    private readonly byte[] _prgRam = [];
-    private readonly byte[] _chrRam = [];
-    private ushort _prgRomOffset = 0x8000;
+    protected readonly byte[] _rom = [];
+    protected readonly byte[] _prgRam = [];
+    protected readonly byte[] _chrRam = [];
 
     public string RomPath { get; init; }
     public byte NbPrgBanks { get; init; }
+    public ushort PrgRomOffset { get; init; }
     public byte NbChrBanks { get; init; }
     public ReadOnlySpan<byte> PrgRom => _rom.AsSpan(start: 16, length: PrgSize);
     public ReadOnlySpan<byte> ChrRom => _rom.AsSpan(start: 16 + PrgSize, length: ChrSize);
+    public Span<byte> ChrRam => _chrRam;
     public ushort NmiAddress { get; init; }
     public ushort ResetAddress { get; init; }
     public ushort IrqAddress { get; init; }
@@ -22,13 +24,22 @@ public class Cart
     public bool HasTrainer { get; init; }
     public bool IsFourScreen { get; init; }
     public int MapperId { get; init; }
-
     public bool IsValid { get; private set; }
 
     public int PrgSize => NbPrgBanks * 16 * 1024;
     public int ChrSize => NbChrBanks * 8 * 1024;
 
-    public Cart(string romPath)
+    public static Cart Create(string romPath)
+    {
+        var _rom = File.ReadAllBytes(romPath);
+        var flag7 = _rom[7];
+        var flag6 = _rom[6];
+        var MapperId = (flag7 & 0xF0) | (flag6 >> 4);
+
+        return new CartMapper0(romPath);
+    }
+
+    protected Cart(string romPath)
     {
         RomPath = romPath;
         _rom = File.ReadAllBytes(romPath);
@@ -42,7 +53,7 @@ public class Cart
         Console.WriteLine("NES ROM detected.");
 
         NbPrgBanks = _rom[4];
-        _prgRomOffset = (ushort)(NbPrgBanks == 1 ? 0xC000 : 0x8000);
+        PrgRomOffset = (ushort)(NbPrgBanks == 1 ? 0xC000 : 0x8000);
 
         NbChrBanks = _rom[5];
 
@@ -73,39 +84,18 @@ public class Cart
         Console.WriteLine($"IRQ: ${IrqAddress:X4}");
 
         if (MapperId != 0)
-        {
             IsValid = false;
-        }
         else
             IsValid = true;
     }
 
-    public byte ReadMemory(ushort address)
-    {
-        return PrgRom[address - _prgRomOffset];
-    }
+    public abstract byte ReadPrgMemory(ushort address);
 
-    public byte ReadByteArgument(ushort baseAddress)
-    {
-        return PrgRom[baseAddress + 1 - _prgRomOffset];
-    }
+    public abstract byte ReadByteArgument(ushort baseAddress);
 
-    public ushort ReadWordArgument(ushort baseAddress)
-    {
-        return (ushort)(PrgRom[baseAddress + 1 - _prgRomOffset] | (PrgRom[baseAddress + 2 - _prgRomOffset] << 8));
-    }
+    public abstract ushort ReadWordArgument(ushort baseAddress);
 
-    internal byte ReadChrMemory(ushort address)
-    {
-        if (NbChrBanks != 0)
-            return ChrRom[address];
-        else
-            return _chrRam[address];
-    }
+    public abstract byte ReadChrMemory(ushort address);
 
-    internal void WriteChrMemory(ushort address, byte value)
-    {
-        if (NbChrBanks == 0)
-            _chrRam[address] = value;
-    }
+    public abstract void WriteChrMemory(ushort address, byte value);
 }

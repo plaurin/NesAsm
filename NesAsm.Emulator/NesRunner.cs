@@ -124,7 +124,7 @@ public class NesRunner
 
         nbFrames -= cnt;
         index = _recordingInputs.Count - 1;
-        while (nbFrames > 0)
+        while (nbFrames > 0 && _recordingInputs.Count > 0)
         {
             cnt = Math.Min(_recordingInputs[index], nbFrames);
             inputs.Add((byte)cnt);

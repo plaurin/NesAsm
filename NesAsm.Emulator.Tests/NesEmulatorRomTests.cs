@@ -100,7 +100,7 @@ public class NesEmulatorRomTests
     {
         var path = Path.Combine(GetRomFolder(), romFile);
 
-        var cart = new Cart(path);
+        var cart = Cart.Create(path);
         _memory = new NesMemory(cart);
         _ppu = new PPUInstance(_memory);
         _memory.SetPPU(_ppu);
