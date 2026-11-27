@@ -139,6 +139,13 @@ public partial class MainWindow : Window
         {
             AddRomInMenu(path, Mapper0RomsMenuItem);
         }
+
+        // Mapper 1
+        var mapper1Roms = Path.Combine(GameDataFolder(), "mapper1_mmc1.txt");
+        foreach (var path in File.ReadAllLines(mapper1Roms))
+        {
+            AddRomInMenu(path, Mapper1RomsMenuItem);
+        }
     }
 
     private void AddRomInMenu(string romPath, MenuItem menu)

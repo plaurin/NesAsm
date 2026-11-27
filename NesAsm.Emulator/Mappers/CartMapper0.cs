@@ -7,9 +7,22 @@ public class CartMapper0 : Cart
     {
     }
 
+    public override byte[] GetMapperSaveState() => [];
+
+    public override void MapperRestoreState(ReadOnlySpan<byte> state) { }
+
+    public override void MapperReset()
+    {
+    }
+
     public override byte ReadPrgMemory(ushort address)
     {
         return PrgRom[address - PrgRomOffset];
+    }
+
+    public override void WritePrgMemory(ushort address, byte value)
+    {
+        throw new NotImplementedException();
     }
 
     public override byte ReadByteArgument(ushort baseAddress)

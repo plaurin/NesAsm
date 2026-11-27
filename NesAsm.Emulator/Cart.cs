@@ -18,8 +18,9 @@ public abstract class Cart
     public ushort NmiAddress { get; init; }
     public ushort ResetAddress { get; init; }
     public ushort IrqAddress { get; init; }
-    public bool IsVerticalMirroring { get; init; }
-    public bool IsHorizontalMirroring => !IsVerticalMirroring;
+    public MirroringMode Mirroring { get; protected set; }
+    public bool IsVerticalMirroring => Mirroring == MirroringMode.Vertical;
+    public bool IsHorizontalMirroring => Mirroring == MirroringMode.Horizontal;
     public bool HasBattery { get; init; }
     public bool HasTrainer { get; init; }
     public bool IsFourScreen { get; init; }
@@ -35,6 +36,14 @@ public abstract class Cart
         var flag7 = _rom[7];
         var flag6 = _rom[6];
         var MapperId = (flag7 & 0xF0) | (flag6 >> 4);
+
+        switch (MapperId)
+        {
+            case 0:
+                return new CartMapper0(romPath);
+            case 1:
+                return new CartMapper1(romPath);
+        }
 
         return new CartMapper0(romPath);
     }
@@ -63,7 +72,7 @@ public abstract class Cart
         var flag6 = _rom[6];
         var flag7 = _rom[7];
 
-        IsVerticalMirroring = (flag6 & 0x01) != 0;
+        Mirroring = (flag6 & 0x01) != 0 ? MirroringMode.Vertical : MirroringMode.Horizontal;
         HasBattery = (flag6 & 0x02) != 0;
         HasTrainer = (flag6 & 0x04) != 0;
         IsFourScreen = (flag6 & 0x08) != 0;
@@ -89,13 +98,54 @@ public abstract class Cart
             IsValid = true;
     }
 
+    public byte[] GetSaveState()
+    {
+        var buffer = new List<byte>();
+
+        buffer.AddRange(_prgRam);
+        buffer.AddRange(_chrRam);
+        buffer.AddRange(GetMapperSaveState());
+
+        return buffer.ToArray();
+    }
+
+    public abstract byte[] GetMapperSaveState();
+
+    public void RestoreState(ReadOnlySpan<byte> state)
+    {
+        state[0x0000..0x2000].CopyTo(_prgRam.AsSpan());
+        state[0x2000..0x4000].CopyTo(_chrRam.AsSpan());
+
+        MapperRestoreState(state[0x4000..]);
+    }
+
+    public abstract void MapperRestoreState(ReadOnlySpan<byte> state);
+
+    public abstract void MapperReset();
+
     public abstract byte ReadPrgMemory(ushort address);
 
-    public abstract byte ReadByteArgument(ushort baseAddress);
+    public abstract void WritePrgMemory(ushort address, byte value);
 
-    public abstract ushort ReadWordArgument(ushort baseAddress);
+    public virtual byte ReadByteArgument(ushort baseAddress)
+    {
+        return ReadPrgMemory((ushort)(baseAddress + 1));
+    }
+
+    public virtual ushort ReadWordArgument(ushort baseAddress)
+    {
+        return (ushort)(ReadPrgMemory((ushort)(baseAddress + 1)) | (ReadPrgMemory((ushort)(baseAddress + 2)) << 8));
+    }
 
     public abstract byte ReadChrMemory(ushort address);
 
     public abstract void WriteChrMemory(ushort address, byte value);
+}
+
+public enum MirroringMode
+{
+    SingleScreenA,
+    SingleScreenB,
+    Vertical,
+    Horizontal
 }

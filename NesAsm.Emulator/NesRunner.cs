@@ -46,6 +46,7 @@ public class NesRunner
         buffer.AddRange(_memory._ram);
         buffer.AddRange(_cpu.GetSaveState());
         buffer.AddRange(_ppu.GetSaveState());
+        buffer.AddRange(_cart.GetSaveState());
 
         return buffer.ToArray();
     }
@@ -57,7 +58,8 @@ public class NesRunner
         {
             _memory._ram = toRestore[0..0x800].ToArray();
             _cpu.RestoreState(toRestore[0x800..0x807]);
-            _ppu.RestoreState(toRestore[0x807..]);
+            _ppu.RestoreState(toRestore[0x807..0x1947]);
+            _cart.RestoreState(toRestore[0x1947..]);
         });
     }
 

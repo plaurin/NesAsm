@@ -102,6 +102,10 @@ public class NesMemory
         {
             //if ((value & 1) != 0) InputManager.TransfertStateToBuffer();
         }
+        else if (address >= 0x6000 && address <= 0xFFFF)
+        {
+            Cart.WritePrgMemory(address, value);
+        }
         else
         {
             throw new NotImplementedException();
